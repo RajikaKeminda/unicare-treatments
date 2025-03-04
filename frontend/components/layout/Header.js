@@ -36,12 +36,14 @@ const Header = () => {
             <FaRegCircleUser/>
           </div>
 
-          <div className="text-2xl relative">
-            <span><FaShoppingCart/></span>
-            <div className='bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center absolute -top-2 -right-3 text-xs'>
-              0
+          <Link href="/Shopping-cart">
+            <div className="text-2xl relative">
+              <span><FaShoppingCart /></span>
+              <div className="bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center absolute -top-2 -right-3 text-xs">
+                0 
+              </div>
             </div>
-          </div>
+          </Link>
 
           <Link href={"/login"}className='px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700 hidden sm:block'>
             Login

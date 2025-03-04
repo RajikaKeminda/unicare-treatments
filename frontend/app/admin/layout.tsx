@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
 import Logo from '@/public/logo-bg-removed2.png';
-import Image from 'next/image';
+import Image from 'next/image'; // Ensure this import is there
 import { BiSolidDashboard } from 'react-icons/bi';
 import { BsBox, BsFilePost, BsGrid } from 'react-icons/bs';
 import { FaBlog } from 'react-icons/fa';
@@ -54,7 +54,7 @@ export default function AdminAppLayout({
                     data-dropdown-toggle="dropdown-user"
                   >
                     <span className="sr-only">Open user menu</span>
-                    <img
+                    <Image
                       width={32}
                       height={32}
                       className="w-8 h-8 rounded-full"
