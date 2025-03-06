@@ -1,6 +1,6 @@
 "use client";
 
-import { FeatureCard } from "@/components/ui";
+import FeatureCard from "@/components/ui/cards/FeatureCard";
 import { useRouter } from 'next/navigation'
 
 

@@ -1,33 +1,26 @@
-import { Router } from 'express';
+import { Router } from "express";
+import {
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  createProduct,
+  deleteProduct,
+} from "../controllers/productController.ts";
+import { getAllUsers } from "../controllers/userController.ts";
 
-import Paths from './common/Paths';
-import UserRoutes from './UserRoutes';
+const router = Router();
 
+// api/users/
+router.route("/users").get(getAllUsers);
 
-/******************************************************************************
-                                Variables
-******************************************************************************/
+// api/products/
+router.route("/products").get(getAllProducts).post(createProduct);
 
-const apiRouter = Router();
+// api/products/:id
+router
+  .route("/products/:id")
+  .get(getProductById)
+  .put(updateProduct)
+  .delete(deleteProduct);
 
-
-// ** Add UserRouter ** //
-
-// Init router
-const userRouter = Router();
-
-// Get all users
-userRouter.get(Paths.Users.Get, UserRoutes.getAll);
-userRouter.post(Paths.Users.Add, UserRoutes.add);
-userRouter.put(Paths.Users.Update, UserRoutes.update);
-userRouter.delete(Paths.Users.Delete, UserRoutes.delete);
-
-// Add UserRouter
-apiRouter.use(Paths.Users.Base, userRouter);
-
-
-/******************************************************************************
-                                Export default
-******************************************************************************/
-
-export default apiRouter;
+export default router;

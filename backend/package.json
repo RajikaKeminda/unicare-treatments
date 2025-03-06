@@ -1,7 +1,9 @@
 {
   "name": "backend",
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "type": "module",
   "scripts": {
+<<<<<<< HEAD
     "build": "ts-node ./scripts/build.ts",
     "clean-install": "rm -rf ./node_modules && rm -r package-lock.json && npm i",
     "dev": "nodemon server.js",
@@ -11,11 +13,18 @@
     "test": "NODE_ENV=test ts-node ./spec",
     "test:hot": "nodemon --exec \"npm run test\" --watch ./src --watch ./spec --ext .ts",
     "type-check": "tsc --noEmit"
+=======
+    "dev": "nodemon",
+    "start": "nodemon",
+    "build": "tsc",
+    "serve": "node dist/server.js"
+>>>>>>> origin/main
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@eslint/js": "^9.20.0",
     "@stylistic/eslint-plugin-js": "^3.1.0",
     "@stylistic/eslint-plugin-ts": "^3.1.0",
@@ -59,34 +68,20 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.24.0"
+=======
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.11.0"
+>>>>>>> origin/main
   },
   "devDependencies": {
-    "@eslint/js": "^9.20.0",
-    "@stylistic/eslint-plugin-js": "^3.1.0",
-    "@stylistic/eslint-plugin-ts": "^3.1.0",
-    "@swc/core": "^1.10.16",
-    "@types/cookie-parser": "^1.4.8",
-    "@types/eslint__js": "^8.42.3",
+    "@tsconfig/node20": "^20.1.4",
     "@types/express": "^5.0.0",
-    "@types/find": "^0.2.4",
-    "@types/fs-extra": "^11.0.4",
-    "@types/jasmine": "^5.1.6",
-    "@types/jsonfile": "^6.1.4",
-    "@types/module-alias": "^2.0.4",
-    "@types/morgan": "^1.9.9",
-    "@types/node": "^22.13.4",
-    "@types/supertest": "^6.0.2",
-    "eslint": "^9.20.1",
-    "eslint-plugin-n": "^17.15.1",
-    "find": "^0.3.0",
-    "fs-extra": "^11.3.0",
-    "jasmine": "^5.6.0",
-    "jiti": "^2.4.2",
+    "@types/node": "^22.13.8",
     "nodemon": "^3.1.9",
-    "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.0"
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
   }
 }
