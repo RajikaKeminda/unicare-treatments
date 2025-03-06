@@ -1,11 +1,11 @@
 import Header from "@/components/layout/Header";
-import HomeMiddle from "@/components/layout/HomeMiddle";
+import ShoppingCart from "@/components/layout/Shopping-cart"
 
 export default function Home() {
   return (
     <>
-      <Header /> 
-      <HomeMiddle />
+      <Header />
+      <ShoppingCart/>
     </>
 
   );
