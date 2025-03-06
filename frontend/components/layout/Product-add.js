@@ -37,7 +37,7 @@ const AdminProductForm = () => {
 
   return (
     <div className="w-full mt-50 max-w-6xl mx-auto p-4 bg-gray-700 rounded-lg shadow-lg">
-      <h1 className="text-3xl font-semibold text-center mb-6">Add New Product</h1>
+      <h1 className="text-3xl font-semibold text-center mb-6 text-white">Add New Product</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Product Name and Price */}
         <div className="flex space-x-4">

@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import Logo from '@/public/logo-bg-removed2.png';
 import Image from 'next/image'; // Ensure this import is there
@@ -54,13 +54,13 @@ export default function AdminAppLayout({
                     data-dropdown-toggle="dropdown-user"
                   >
                     <span className="sr-only">Open user menu</span>
-                    <Image
+                    <img
                       width={32}
                       height={32}
                       className="w-8 h-8 rounded-full"
                       src="https://img.freepik.com/premium-vector/bearded-man-illustration-character-avatar_101266-29802.jpg?w=826"
                       alt="user photo"
-                    />
+                    /> 
                   </button>
                 </div>
               </div>

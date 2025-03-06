@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import admin from "@/app/admin/layout"
 
 import HeaderNav from "@/components/layout/HeaderNavigation"
 import FooterNav from "@/components/layout/Footer"
@@ -31,9 +32,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <h2 className="font-bold text-sm sm:text-base">Special Offer: Get 20% off on all products!</h2>
           </div>
 
-          <HeaderNav/>
+          {!admin && <HeaderNav/>}
           {children}
-          <FooterNav/>
+          {!admin && <FooterNav/>}
         </main>
       </body>
     </html>
