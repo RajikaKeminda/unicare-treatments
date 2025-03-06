@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
+
+interface ProductFormData {
+  name: string;
+  description: string;
+  price: string;
+  category: string;
+  stock: string;
+  images: File[];
+  ratings: number;
+}
 
 const AdminProductForm = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     description: "",
     price: "",
@@ -13,7 +23,9 @@ const AdminProductForm = () => {
     ratings: 0,
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -21,15 +33,15 @@ const AdminProductForm = () => {
     });
   };
 
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
     setFormData({
       ...formData,
       images: files,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // For now, we can log the form data. Later, handle image upload and product creation.
     console.log("Form Submitted", formData);
@@ -85,7 +97,7 @@ const AdminProductForm = () => {
               onChange={handleInputChange}
               required
               className="w-full p-2 border border-gray-300 rounded-md"
-              rows="5"
+              rows={5}
             />
           </div>
           <div className="flex-1">
@@ -171,10 +183,10 @@ const AdminProductForm = () => {
         </div>
 
         <button
-         type="submit"
-         className="w-full bg-gray-100 text-black text-bold py-3 rounded-md hover:bg-gray-100 hover:text-black"
-            >
-             Submit
+          type="submit"
+          className="w-full bg-gray-100 text-black text-bold py-3 rounded-md hover:bg-gray-100 hover:text-black"
+        >
+          Submit
         </button>
 
       </form>
