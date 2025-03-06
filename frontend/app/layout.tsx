@@ -32,9 +32,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <h2 className="font-bold text-sm sm:text-base">Special Offer: Get 20% off on all products!</h2>
           </div>
 
-          {!admin && <HeaderNav/>}
+          {<HeaderNav/>}
           {children}
-          {!admin && <FooterNav/>}
+          {<FooterNav/>}
         </main>
       </body>
     </html>
