@@ -3,76 +3,18 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-<<<<<<< HEAD
-    "build": "ts-node ./scripts/build.ts",
-    "clean-install": "rm -rf ./node_modules && rm -r package-lock.json && npm i",
-    "dev": "nodemon server.js",
-    "dev:hot": "nodemon --exec \"npm run dev\" --watch ./src --ext .ts",
-    "lint": "eslint --flag unstable_ts_config",
-    "start": "node server.js",
-    "test": "NODE_ENV=test ts-node ./spec",
-    "test:hot": "nodemon --exec \"npm run test\" --watch ./src --watch ./spec --ext .ts",
-    "type-check": "tsc --noEmit"
-=======
     "dev": "nodemon",
     "start": "nodemon",
     "build": "tsc",
     "serve": "node dist/server.js"
->>>>>>> origin/main
   },
   "engines": {
     "node": ">=20.0.0"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@eslint/js": "^9.20.0",
-    "@stylistic/eslint-plugin-js": "^3.1.0",
-    "@stylistic/eslint-plugin-ts": "^3.1.0",
-    "@swc/core": "^1.10.16",
-    "@types/cookie-parser": "^1.4.8",
-    "@types/eslint__js": "^8.42.3",
-    "@types/express": "^5.0.0",
-    "@types/find": "^0.2.4",
-    "@types/fs-extra": "^11.0.4",
-    "@types/jasmine": "^5.1.6",
-    "@types/jsonfile": "^6.1.4",
-    "@types/module-alias": "^2.0.4",
-    "@types/morgan": "^1.9.9",
-    "@types/node": "^22.13.4",
-    "@types/supertest": "^6.0.2",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dayjs": "^1.11.13",
-    "dotenv": "^16.4.7",
-    "eslint": "^9.20.1",
-    "eslint-plugin-n": "^17.15.1",
-    "express": "^4.21.2",
-    "express-async-errors": "^3.1.1",
-    "find": "^0.3.0",
-    "fs-extra": "^11.3.0",
-    "helmet": "^8.0.0",
-    "inserturlparams": "^2.0.5",
-    "jasmine": "^5.6.0",
-    "jet-env": "^1.1.4",
-    "jet-logger": "^2.0.1",
-    "jet-paths": "^1.1.0",
-    "jet-schema": "^1.4.3",
-    "jet-validators": "^1.0.17",
-    "jiti": "^2.4.2",
-    "jsonfile": "^6.1.0",
-    "module-alias": "^2.2.3",
-    "mongoose": "^8.10.1",
-    "morgan": "^1.10.0",
-    "supertest": "^7.0.0",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.0"
-=======
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mongoose": "^8.11.0"
->>>>>>> origin/main
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
