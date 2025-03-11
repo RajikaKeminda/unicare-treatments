@@ -127,12 +127,18 @@ export default function PatientList() {
                 <option>Chiropractic</option>
               </select>
             </div>
-            
+            <div className="mb-4 flex items-center">
+              <label className="block text-gray-700 w-1/3">Medicines/Oils:</label>
+              <textarea
+                className="border px-3 py-2 rounded w-2/3 h-28"
+                placeholder={"1.\n2.\n3.\n4."}
+              ></textarea>
+            </div>            
             <div className="mb-4 flex items-center">
               <label className="block text-gray-700 w-1/3">Yoga/Exercises:</label>
               <textarea
                 className="border px-3 py-2 rounded w-2/3"
-                placeholder="Describe Yoga/Exercises"
+                placeholder="Describe Yoga/Exercises if needed"
               ></textarea>
             </div>
             <div className="mb-4 flex items-center">
