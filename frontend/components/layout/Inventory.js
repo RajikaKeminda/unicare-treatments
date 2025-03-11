@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import "@/app/Inventory/Inventory.css";
+import "../../app/admin/app/Inventory/Inventory.css"; // Adjusted import path
 
 const initialInventory = [
   { id: 1, name: "Ashwagandha", quantity: 100, unit: "bottles", perItemPrice: 350, expiryDate: "2025-05-01" },
@@ -47,85 +47,89 @@ export default function InventoryManager() {
 
     let reportContent = `
       <html>
-        <head>
-          <title>Inventory Report - ${currentDate}</title>
-          <style>
-            body { font-family: Arial, sans-serif; }
-            .report-header { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
-            .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            .table th, .table td { padding: 10px; text-align: left; border: 1px solid #ddd; }
-            .table th { background-color: #f2f2f2; }
-            .table td { font-size: 14px; }
-            .footer { margin-top: 20px; text-align: center; font-size: 12px; }
-          </style>
-        </head>
-        <body>
-          <div class="report-header">Inventory Report - ${currentDate}</div>
-          
-          <h3>Current Inventory:</h3>
-          <table class="table">
-            <thead>
+      <head>
+        <title>Inventory Report - ${currentDate}</title>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          .report-header { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+          .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          .table th, .table td { padding: 10px; text-align: left; border: 1px solid #ddd; }
+          .table th { background-color: #f2f2f2; }
+          .table td { font-size: 14px; }
+          .footer { margin-top: 20px; text-align: center; font-size: 12px; }
+          .expiredIcon { color: red; }
+        </style>
+      </head>
+      <body>
+        <div class="report-header">Inventory Report - ${currentDate}</div>
+        
+        <h3>Current Inventory:</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Price per Item (Rs)</th>
+              <th>Total Price (Rs)</th>
+              <th>Unit</th>
+              <th>Expiry Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${inventory.map(item => `
               <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Price per Item (Rs)</th>
-                <th>Total Price (Rs)</th>
-                <th>Unit</th>
-                <th>Expiry Date</th>
+                <td>${item.name}</td>
+                <td>${item.quantity}</td>
+                <td>Rs ${item.perItemPrice}</td>
+                <td>Rs ${item.quantity * item.perItemPrice}</td>
+                <td>${item.unit}</td>
+                <td>
+                  ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ''} ${item.expiryDate}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              ${inventory.map(item => `
-                <tr>
-                  <td>${item.name}</td>
-                  <td>${item.quantity}</td>
-                  <td>Rs ${item.perItemPrice}</td>
-                  <td>Rs ${item.quantity * item.perItemPrice}</td>
-                  <td>${item.unit}</td>
-                  <td>${item.expiryDate}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+            `).join('')}
+          </tbody>
+        </table>
 
-          <h3>Removed Products:</h3>
-          <table class="table">
-            <thead>
+        <h3>Removed Products:</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Price per Item (Rs)</th>
+              <th>Total Price (Rs)</th>
+              <th>Unit</th>
+              <th>Expiry Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${removedProducts.map(item => `
               <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Price per Item (Rs)</th>
-                <th>Total Price (Rs)</th>
-                <th>Unit</th>
-                <th>Expiry Date</th>
+                <td>${item.name}</td>
+                <td>${item.quantity}</td>
+                <td>Rs ${item.perItemPrice}</td>
+                <td>Rs ${item.quantity * item.perItemPrice}</td>
+                <td>${item.unit}</td>
+                <td>
+                  ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ''} ${item.expiryDate}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              ${removedProducts.map(item => `
-                <tr>
-                  <td>${item.name}</td>
-                  <td>${item.quantity}</td>
-                  <td>Rs ${item.perItemPrice}</td>
-                  <td>Rs ${item.quantity * item.perItemPrice}</td>
-                  <td>${item.unit}</td>
-                  <td>${item.expiryDate}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          
-          <div class="footer">Generated on ${currentDate}</div>
-        </body>
-      </html>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <div class="footer">Generated on ${currentDate}</div>
+      </body>
+    </html>
     `;
-
+  
     const blob = new Blob([reportContent], { type: 'text/html' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `inventory_report_${currentDate}.html`;
     link.click();
-  };
-
+};
   const isExpired = (expiryDate) => {
     const today = new Date();
     const expiry = new Date(expiryDate);
@@ -136,8 +140,10 @@ export default function InventoryManager() {
     <div className="container">
       <h2 className="productsTitle">Products</h2>
 
-      <button className="addButton" onClick={() => setShowModal(true)}>Add Item</button>
-      <button className="reportButton" onClick={generateHTMLReport}>Generate Report</button>
+      <div className="buttonWrapper">
+        <button className="addButton" onClick={() => setShowModal(true)}>Add Item</button>
+        <button className="reportButton" onClick={generateHTMLReport}>Generate Report</button>
+      </div>
 
       {showModal && (
         <div className="modal">
@@ -222,7 +228,6 @@ export default function InventoryManager() {
                 <td>{item.quantity}</td>
                 <td>Rs {item.perItemPrice}</td>
                 <td>Rs {item.quantity * item.perItemPrice}</td>
-
                 <td>{item.unit}</td>
                 <td>{isExpired(item.expiryDate) && <span className="expiredIcon">⚠️</span>} {item.expiryDate}</td>
                 <td>
