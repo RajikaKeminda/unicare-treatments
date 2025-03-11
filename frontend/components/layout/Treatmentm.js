@@ -48,7 +48,7 @@ export default function PatientList() {
             </button>
           </div><br />
 
-          <table className="w-full border-collapse border text-left">
+          <table className="w-full border-collapse border text-center">
             <thead className="bg-[#374151] text-white">
               <tr>
                 <th className="p-2 border">Patient ID</th>
