@@ -1,4 +1,7 @@
 import { Router } from "express";
+
+//test
+
 import {
   getAllProducts,
   getProductById,
@@ -6,12 +9,14 @@ import {
   createProduct,
   deleteProduct,
 } from "../controllers/productController.ts";
-import { getAllUsers } from "../controllers/userController.ts";
 
 const router = Router();
 
+/*
+import { getAllUsers } from "../controllers/userController.ts";
 // api/users/
 router.route("/users").get(getAllUsers);
+*/
 
 // api/products/
 router.route("/products").get(getAllProducts).post(createProduct);
@@ -23,4 +28,14 @@ router
   .put(updateProduct)
   .delete(deleteProduct);
 
-export default router;
+//Signup and login routes - pulindu
+import { getAllUsers, registerUser, loginUser } from "../controllers/signupController.ts"; 
+
+// api/users/
+router.route("/users").get(getAllUsers).post(registerUser); // POST uses registerUser
+
+// api/users/login (new login route)
+router.route("/users/login").post(loginUser); // POST uses loginUser
+
+export default router; // Export the router
+
