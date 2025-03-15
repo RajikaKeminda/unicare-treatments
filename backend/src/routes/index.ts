@@ -23,4 +23,8 @@ router
   .put(updateProduct)
   .delete(deleteProduct);
 
+
+  import { addTreatment } from '../controllers/treatmentController.ts';
+  router.post('/treatments', addTreatment);
+
 export default router;
