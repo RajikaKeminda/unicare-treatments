@@ -39,6 +39,9 @@ const ProductOptionsPage = () => {
                 <Image
                   src="/product-see.png"
                   alt="Add Product"
+                  width={100}
+                  height={100}
+                  unoptimized
                   className="w-full h-full object-cover border-t-2 border-b-2 border-gray-900 dark:border-gray-600"
                 />
                 {/* Hover Effect: Text appears when hovering over the image */}
@@ -61,6 +64,9 @@ const ProductOptionsPage = () => {
                 <Image
                   src="/see-products.png"
                   alt="See All Products"
+                  width={100}
+                  height={100}
+                  unoptimized
                   className="w-full h-full object-cover border-t-2 border-b-2 border-gray-900 dark:border-gray-600"
                 />
                 {/* Hover Effect: Text appears when hovering over the image */}

@@ -81,7 +81,7 @@ export default function AdminAppLayout({
                       width={32}
                       height={32}
                       className="w-8 h-8 rounded-full "
-                      src="https://img.freepik.com/premium-vector/bearded-man-illustration-character-avatar_101266-29802.jpg?w=826"
+                      src="/user.png"
                       alt="user photo"
                     />
                   </button>
