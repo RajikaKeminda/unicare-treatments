@@ -1,32 +1,17 @@
-import { Router } from "express";
+import express, { Request, Response } from "express";
+const router = express.Router();
 
-//test
+// Importing controllers for products
+import { createProduct, getProducts } from '../controllers/productContoller.ts';
 
-import {
-  getAllProducts,
-  getProductById,
-  updateProduct,
-  createProduct,
-  deleteProduct,
-} from "../controllers/productController.ts";
+// Middleware to parse JSON request bodies
+router.use(express.json());
 
-const router = Router();
+// Routes for handling products
+router.post('/products/add', createProduct);  // Route to add a new product
+router.get('/products', getProducts);  // Route to get all products
 
-/*
-import { getAllUsers } from "../controllers/userController.ts";
-// api/users/
-router.route("/users").get(getAllUsers);
-*/
 
-// api/products/
-router.route("/products").get(getAllProducts).post(createProduct);
-
-// api/products/:id
-router
-  .route("/products/:id")
-  .get(getProductById)
-  .put(updateProduct)
-  .delete(deleteProduct);
 
 //Signup and login routes - pulindu
 import { getAllUsers, registerUser, loginUser } from "../controllers/signupController.ts"; 
