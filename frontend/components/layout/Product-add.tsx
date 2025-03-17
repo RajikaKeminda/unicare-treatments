@@ -49,7 +49,7 @@ const AdminProductForm = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:8082/api/products/add", formData, {
+      const response = await axios.post("http://localhost:8082/api/product/add", formData, {
         headers: {
           "Content-Type": "application/json", 
         },

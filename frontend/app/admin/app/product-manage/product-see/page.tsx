@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaSearch } from 'react-icons/fa'; // Importing search icon
+import { FaSearch } from 'react-icons/fa';
+import { jsPDF } from 'jspdf';
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   price: number;
@@ -18,7 +19,18 @@ const InstrumentTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [updatedProduct, setUpdatedProduct] = useState<Product>({
+    _id: '',
+    name: '',
+    description: '',
+    price: 0,
+    category: '',
+    stock: 0,
+    ratings: 0,
+  });
 
+  // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -30,22 +42,56 @@ const InstrumentTable: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  const handleUpdate = (id: string) => {
-    console.log('Update product with id:', id);
-    // Implement your update logic here
-  };
-
+  // Handle product deletion
   const handleDelete = async (id: string) => {
     try {
       await axios.delete(`http://localhost:8082/api/products/${id}`);
-      setProducts(products.filter(product => product.id !== id));
+      setProducts(products.filter((product) => product._id !== id));
       console.log('Product deleted successfully');
     } catch (error) {
       console.error('Error deleting product:', error);
+    }
+  };
+
+  // Handle product update form open
+  const handleUpdate = (product: Product) => {
+    setEditProduct(product);
+    setUpdatedProduct(product); // Pre-fill the update form
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUpdatedProduct((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Update product on backend
+  const handleSaveUpdate = async () => {
+    try {
+      const { _id, name, description, price, category, stock, ratings } = updatedProduct;
+      const response = await axios.put(`http://localhost:8082/api/products/${_id}`, {
+        name,
+        description,
+        price,
+        category,
+        stock,
+        ratings,
+      });
+      setProducts((prev) =>
+        prev.map((product) =>
+          product._id === _id ? { ...product, ...updatedProduct } : product
+        )
+      );
+      console.log('Product updated successfully');
+      setEditProduct(null); // Close edit form
+    } catch (error) {
+      console.error('Error updating product:', error);
     }
   };
 
@@ -55,6 +101,51 @@ const InstrumentTable: React.FC = () => {
     product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text('Available Products Report', 20, 20);
+    const currentDate = new Date().toLocaleDateString();
+    doc.setFontSize(12);
+    doc.text(`Date: ${currentDate}`, 20, 30);
+
+    let yPosition = 40;
+    const rowHeight = 10;
+    const columnWidths = [40, 60, 30, 40];
+
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+
+    doc.rect(20, yPosition, columnWidths[0], rowHeight);
+    doc.rect(20 + columnWidths[0], yPosition, columnWidths[1], rowHeight);
+    doc.rect(20 + columnWidths[0] + columnWidths[1], yPosition, columnWidths[2], rowHeight);
+    doc.rect(20 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, columnWidths[3], rowHeight);
+    doc.text('Name', 25, yPosition + 6);
+    const descriptionX = 20 + columnWidths[0] + (columnWidths[1] - doc.getTextWidth('Description')) / 2;
+    doc.text('Description', descriptionX, yPosition + 6);
+    const priceX = 20 + columnWidths[0] + columnWidths[1] + (columnWidths[2] - doc.getTextWidth('Price')) / 2;
+    doc.text('Price', priceX, yPosition + 6);
+    doc.text('Category', 160, yPosition + 6);
+
+    yPosition += rowHeight;
+
+    filteredProducts.forEach((product) => {
+      doc.rect(20, yPosition, columnWidths[0], rowHeight);
+      doc.rect(20 + columnWidths[0], yPosition, columnWidths[1], rowHeight);
+      doc.rect(20 + columnWidths[0] + columnWidths[1], yPosition, columnWidths[2], rowHeight);
+      doc.rect(20 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, columnWidths[3], rowHeight);
+      doc.text(product.name, 25, yPosition + 6);
+      const descriptionXData = 20 + columnWidths[0] + (columnWidths[1] - doc.getTextWidth(product.description)) / 2;
+      doc.text(product.description, descriptionXData, yPosition + 6);
+      const priceXData = 20 + columnWidths[0] + columnWidths[1] + (columnWidths[2] - doc.getTextWidth(`$${product.price.toFixed(2)}`)) / 2;
+      doc.text(`$${product.price.toFixed(2)}`, priceXData, yPosition + 6);
+      doc.text(product.category, 160, yPosition + 6);
+      yPosition += rowHeight;
+    });
+
+    doc.save('products-report.pdf');
+  };
 
   if (loading) return <div className="text-center p-5 text-xl">Loading...</div>;
 
@@ -69,10 +160,93 @@ const InstrumentTable: React.FC = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full p-3 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
-          {/* Search Icon */}
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         </div>
+
+        <button
+          onClick={generatePDF}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition"
+        >
+          Generate Report
+        </button>
       </div>
+
+      {/* Product Update Form */}
+      {editProduct && (
+        <div className="mb-4 p-5 bg-white rounded shadow-md">
+          <h3 className="text-xl font-semibold mb-4">Update Product</h3>
+          <form onSubmit={(e) => { e.preventDefault(); handleSaveUpdate(); }}>
+            <div className="mb-4">
+              <label>Name</label>
+              <input
+                type="text"
+                name="name"
+                value={updatedProduct.name}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label>Description</label>
+              <input
+                type="text"
+                name="description"
+                value={updatedProduct.description}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label>Price</label>
+              <input
+                type="number"
+                name="price"
+                value={updatedProduct.price}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label>Category</label>
+              <input
+                type="text"
+                name="category"
+                value={updatedProduct.category}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label>Stock</label>
+              <input
+                type="number"
+                name="stock"
+                value={updatedProduct.stock}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label>Ratings</label>
+              <input
+                type="number"
+                name="ratings"
+                value={updatedProduct.ratings}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="shadow-lg rounded-lg overflow-hidden">
         <table className="min-w-full border border-gray-300 bg-white rounded-lg">
@@ -89,16 +263,26 @@ const InstrumentTable: React.FC = () => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredProducts.map((product) => (
-              <tr key={product.id} className="hover:bg-gray-50 transition">
-                <td className="px-6 py-4">{product.name}</td>
-                <td className="px-6 py-4">{product.description}</td>
-                <td className="px-6 py-4 text-center">${product.price}</td>
+              <tr key={product._id} className="hover:bg-gray-50 transition">
+                <td className="px-6 py-4 break-words">{product.name}</td>
+                <td className="px-6 py-4 break-words">{product.description}</td>
+                <td className="px-6 py-4 text-center">${product.price.toFixed(2)}</td>
                 <td className="px-6 py-4 text-center">{product.category}</td>
                 <td className="px-6 py-4 text-center">{product.stock}</td>
                 <td className="px-6 py-4 text-center">{product.ratings}</td>
-                <td className="px-6 py-4 text-center space-x-2">
-                  <button onClick={() => handleUpdate(product.id)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded transition">Update</button>
-                  <button onClick={() => handleDelete(product.id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded transition">Delete</button>
+                <td className="px-6 py-4 text-center">
+                  <button
+                    onClick={() => handleUpdate(product)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product._id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded-md"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
