@@ -75,7 +75,7 @@ const InstrumentTable: React.FC = () => {
   const handleSaveUpdate = async () => {
     try {
       const { _id, name, description, price, category, stock, ratings } = updatedProduct;
-      const response = await axios.put(`http://localhost:8082/api/products/${_id}`, {
+      await axios.put(`http://localhost:8082/api/products/${_id}`, {
         name,
         description,
         price,

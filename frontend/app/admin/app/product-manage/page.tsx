@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+//import React, { useState } from "react";
+import Image from 'next/image';
 import { useRouter } from "next/navigation";
-import { FaBox, FaMoon, FaSun } from "react-icons/fa"; // Importing the icons
-
+import { FaBox } from "react-icons/fa"; // Importing the icons
 const ProductOptionsPage = () => {
-  const router = useRouter();
-  const [isDarkMode, setIsDarkMode] = useState(false); // Dark mode state
+ const router = useRouter();
+
 
   const handleNavigation = (path: string) => {
     router.push(path);
   };
 
   return (
-    <div> {/* Apply dark mode class conditionally */}
+    <div> 
       <div className="min-h-screen bg-white dark:bg-gray-900 p-6 mt-8">
         {/* Heading Section */}
         <div className="text-center mb-8">
@@ -36,7 +36,7 @@ const ProductOptionsPage = () => {
                 onClick={() => handleNavigation("/admin/app/product-manage/product-add")}
                 className="relative group"
               >
-                <img
+                <Image
                   src="/product-see.png"
                   alt="Add Product"
                   className="w-full h-full object-cover border-t-2 border-b-2 border-gray-900 dark:border-gray-600"
@@ -58,7 +58,7 @@ const ProductOptionsPage = () => {
                 onClick={() => handleNavigation("/admin/app/product-manage/product-see")}
                 className="relative group"
               >
-                <img
+                <Image
                   src="/see-products.png"
                   alt="See All Products"
                   className="w-full h-full object-cover border-t-2 border-b-2 border-gray-900 dark:border-gray-600"

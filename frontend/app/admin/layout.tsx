@@ -77,7 +77,7 @@ export default function AdminAppLayout({
                     data-dropdown-toggle="dropdown-user"
                   >
                     <span className="sr-only">Open user menu</span>
-                    <img
+                    <Image
                       width={32}
                       height={32}
                       className="w-8 h-8 rounded-full "
