@@ -7,6 +7,7 @@ import {
   deleteProduct,
 } from "../controllers/productController.ts";
 import { getAllUsers } from "../controllers/userController.ts";
+import { addTreatment, deleteTreatment, getAllPatients, getPatientTreatment, updateTreatment } from '../controllers/treatmentController.ts';  // Corrected import
 
 const router = Router();
 
@@ -23,8 +24,13 @@ router
   .put(updateProduct)
   .delete(deleteProduct);
 
+// api/treatments
+router.post('/treatments', addTreatment);
+router.get('/treatments', getAllPatients);
+router.get('/treatments/:id', getPatientTreatment);
+router.put('/treatments/:id', updateTreatment);
+router.delete('/treatments/:id', deleteTreatment);
 
-  import { addTreatment } from '../controllers/treatmentController.ts';
-  router.post('/treatments', addTreatment);
+
 
 export default router;
