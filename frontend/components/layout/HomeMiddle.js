@@ -13,6 +13,7 @@ const HeaderAndProducts = () => {
   const [products, setProducts] = useState([]);       // State to store fetched products
   const [loading, setLoading] = useState(true);       // Loading state
   const [error, setError] = useState(null);           // Error state
+  const [cartCount, setCartCount] = useState(0);      // Cart item count
 
   // Fetch products on component mount
   useEffect(() => {
@@ -38,6 +39,10 @@ const HeaderAndProducts = () => {
     };
 
     fetchProducts();
+
+    // Update cart count from localStorage
+    const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    setCartCount(savedCart.length);
   }, []);
 
   // Filter products based on search input
@@ -47,8 +52,13 @@ const HeaderAndProducts = () => {
       ) : [] // Ensure that products is an array before filtering
     : products;
 
-  // Log filteredProducts to inspect its value
-  console.log('Filtered Products:', filteredProducts);
+  // Add to cart handler
+  const addToCart = (product) => {
+    const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    savedCart.push({ ...product, quantity: 1 });
+    localStorage.setItem('cart', JSON.stringify(savedCart));
+    setCartCount(savedCart.length); // Update cart count in header
+  };
 
   return (
     <div>
@@ -82,14 +92,14 @@ const HeaderAndProducts = () => {
           {/* User and Cart Icons */}
           <div className="flex items-center gap-5 md:gap-7 mt-3 md:mt-0">
             <div className="text-3xl cursor-pointer">
-              <FaRegCircleUser/>
+              <FaRegCircleUser />
             </div>
 
             <Link href="/Shopping-cart">
               <div className="text-2xl relative">
                 <span><FaShoppingCart /></span>
                 <div className="bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center absolute -top-2 -right-3 text-xs">
-                  0 
+                  {cartCount}
                 </div>
               </div>
             </Link>
@@ -100,42 +110,6 @@ const HeaderAndProducts = () => {
           </div>
         </div>
       </header>
-
-      {/* Categories Row Below Search Bar */}
-      <div className="mb-6">
-        <div className="flex justify-center space-x-10 mt-6 bg-gray-700 p-2 rounded-full shadow-lg">
-          <Link 
-            href="/" 
-            className="text-lg text-white font-medium transition-colors duration-300 ease-in-out transform hover:text-red-500 hover:scale-105"
-          >
-            Category 1
-          </Link>
-          <Link 
-            href="/" 
-            className="text-lg text-white font-medium transition-colors duration-300 ease-in-out transform hover:text-red-500 hover:scale-105"
-          >
-            Category 2
-          </Link>
-          <Link 
-            href="/" 
-            className="text-lg text-white font-medium transition-colors duration-300 ease-in-out transform hover:text-red-500 hover:scale-105"
-          >
-            Category 3
-          </Link>
-          <Link 
-            href="/" 
-            className="text-lg text-white font-medium transition-colors duration-300 ease-in-out transform hover:text-red-500 hover:scale-105"
-          >
-            Category 4
-          </Link>
-          <Link 
-            href="/" 
-            className="text-lg text-white font-medium transition-colors duration-300 ease-in-out transform hover:text-red-500 hover:scale-105"
-          >
-            Category 5
-          </Link>
-        </div>
-      </div>
 
       {/* Loading, Error, and Product Display */}
       <section className="relative p-4">
@@ -159,13 +133,13 @@ const HeaderAndProducts = () => {
                   />
                   <h4 className="text-lg font-bold mt-2">{product.name}</h4>
                   <p className="text-gray-500 text-sm mt-1">{product.description}</p>
-                  {/* Reviews & Ratings */}
                   <p className="text-yellow-500 text-sm mt-1">{product.ratings} ★ ({product.reviews} reviews)</p>
-                  {/* Offers/Discounts */}
                   <p className="text-red-500 text-sm mt-1">{product.offer}</p>
-                  {/* Buttons */}
                   <div className="mt-3 flex justify-center space-x-2">
-                    <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-900 transform hover:scale-105 transition-all">
+                    <button 
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-900 transform hover:scale-105 transition-all"
+                      onClick={() => addToCart(product)} // Add to cart
+                    >
                       Add to Cart ${product.price}
                     </button>
                     <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-900 transform hover:scale-105 transition-all">
