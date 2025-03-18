@@ -7,7 +7,6 @@ import { connectToMongoDB } from "./util/dbConnector.ts"; // MongoDB connection 
 const app = express();
 const PORT = process.env.PORT || 8001; // Ensure a default port if not set
 
-// DB Connection -->
 connectToMongoDB();
 
 // Middleware -->
