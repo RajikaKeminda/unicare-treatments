@@ -1,10 +1,11 @@
-'use client';
+'use client'
 
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify'; 
 import Link from 'next/link';
+import axios from 'axios';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,12 +13,22 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const router = useRouter();
 
-  const handleLogin = async () => {
-    if (email === 'user@example.com' && password === 'password123') {
-      toast.success('Login successful!');
-      router.push('/dashboard');
-    } else {
-      toast.error('Invalid credentials. Please try again.');
+  // Handle the login request
+  const handleLogin = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault(); // Prevents default behavior like form submission or page reload
+    
+    try {
+      // Send login request to backend API
+      const response = await axios.post('http://localhost:881/api/users/login', { email, password });
+
+      // If login is successful, save the token (optional) and redirect
+      if (response.data.token) {
+        toast.success('Login successful!');
+        localStorage.setItem('token', response.data.token); // Store the token
+        router.push('/dashboard'); // Redirect to dashboard
+      }
+    } catch (error) {
+      toast.error('Invalid credentials. Please try again.' + error);
     }
   };
 
@@ -63,9 +74,11 @@ const Login = () => {
             </div>
           </div>
 
+          {/* Explicitly set type="button" to avoid form submission */}
           <button
+            type="button" // Prevents form submission
             className="w-full p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onClick={handleLogin}
+            onClick={handleLogin} // Trigger login
           >
             Login
           </button>

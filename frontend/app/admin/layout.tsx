@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import Logo from '@/public/logo-bg-removed2.png';
 import Image from 'next/image'; // Ensure this import is there
@@ -9,7 +9,7 @@ import { FiSettings } from 'react-icons/fi';
 import { HiMenuAlt2 } from 'react-icons/hi';
 import { IoMdPhotos } from 'react-icons/io';
 import { MdOutlineContactSupport } from 'react-icons/md';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AdminAppLayout({
   children,
@@ -18,6 +18,7 @@ export default function AdminAppLayout({
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isBlogOpen, setIsBlogOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleBlogDropdown = () => {
     setIsBlogOpen(!isBlogOpen);
@@ -27,12 +28,25 @@ export default function AdminAppLayout({
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  // Apply the dark mode based on the state
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         <div className="px-3 py-3 lg:px-5 lg:pl-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center justify-start rtl:justify-end">
+            <div className="flex items-center justify-start rtl:justify-end -ml-4">
               <button
                 onClick={toggleSidebar}
                 className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
@@ -41,26 +55,35 @@ export default function AdminAppLayout({
                 <HiMenuAlt2 className="w-6 h-6" />
               </button>
               <a href="https://flowbite.com" className="flex ms-2 md:me-24">
-                <Image src={Logo} className="h-10 w-28" alt="Unicare Logo" />
+                <Image src={Logo} className="h-10 w-28 " alt="Unicare Logo" />
               </a>
             </div>
             <div className="flex items-center">
-              <div className="flex items-center ms-3">
+              <div className="flex items-center ms-2">
                 <div>
                   <button
                     type="button"
-                    className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                    onClick={toggleDarkMode} // Toggle dark mode
+                    className="text-gray-500 dark:text-white p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    {isDarkMode ? 'Light Mode' : 'Dark Mode'} {/* Toggle text */}
+                  </button>
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 "
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
                     <span className="sr-only">Open user menu</span>
-                    <img
+                    <Image
                       width={32}
                       height={32}
-                      className="w-8 h-8 rounded-full"
-                      src="https://img.freepik.com/premium-vector/bearded-man-illustration-character-avatar_101266-29802.jpg?w=826"
+                      className="w-8 h-8 rounded-full "
+                      src="/user.png"
                       alt="user photo"
-                    /> 
+                    />
                   </button>
                 </div>
               </div>
@@ -172,8 +195,7 @@ export default function AdminAppLayout({
         </div>
       </aside>
 
-      
-      <div className="p-4 sm:ml-64 mt-14">
+      <div className="p-4 sm:ml-60 mt-14 ">
         {children}
       </div>
     </div>
