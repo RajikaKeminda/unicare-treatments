@@ -52,13 +52,20 @@ const HeaderAndProducts = () => {
       ) : [] // Ensure that products is an array before filtering
     : products;
 
-  // Add to cart handler
-  const addToCart = (product) => {
-    const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
-    savedCart.push({ ...product, quantity: 1 });
-    localStorage.setItem('cart', JSON.stringify(savedCart));
-    setCartCount(savedCart.length); // Update cart count in header
-  };
+    const addToCart = (product) => {
+        const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+      
+        // Check if the product is already in the cart
+        const productExists = savedCart.some(item => item._id === product._id);
+      
+        if (!productExists) {
+          savedCart.push({ ...product, quantity: 1 });
+          localStorage.setItem('cart', JSON.stringify(savedCart));
+          setCartCount(savedCart.length); // Update cart count in header
+        } else {
+          alert('This product is already in your cart!'); // Optionally alert the user
+        }
+      };
 
   return (
     <div>

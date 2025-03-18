@@ -28,6 +28,28 @@ export default function ShoppingCart() {
     setCart(updatedCart);
   };
 
+  // Add item to cart (prevents duplicates and updates quantity)
+  const handleAddToCart = (product) => {
+    // Check if product already exists in the cart by matching _id
+    const existingProduct = cart.find((item) => item._id === product._id);
+
+    if (existingProduct) {
+      // If the product exists, update the quantity
+      const updatedCart = cart.map((item) =>
+        item._id === product._id
+          ? { ...item, quantity: item.quantity + 1 }  // Increment quantity
+          : item
+      );
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      setCart(updatedCart);
+    } else {
+      // If it doesn't exist, add the new product to the cart
+      const updatedCart = [...cart, { ...product, quantity: 1 }];
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      setCart(updatedCart);
+    }
+  };
+
   // Calculate total price
   const getTotalPrice = () => {
     return cart.reduce((total, item) => total + item.price * item.quantity, 0);
