@@ -10,7 +10,7 @@ interface ErrorResponse {
 }
 
 const Signup = () => {
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>('');
@@ -18,13 +18,15 @@ const Signup = () => {
 
   const handleSignup = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/users/register', {
-        username,
+      const response = await axios.post('http://localhost:8081/api/users', {
+        name,
         email,
         password,
       });
 
       if (response.status === 201) {
+        // Show success message and redirect
+        alert('Signup successful! You can now login.');
         router.push('/login');
       }
     } catch (err) {
@@ -51,94 +53,44 @@ const Signup = () => {
   };
 
   return (
-    <div className="signup-container">
-      <div className="signup-form">
-        <h2>Create Account</h2>
-        {error && <div className="error-message">{error}</div>}
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
+        <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
+        {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
         <input 
           type="text" 
-          placeholder="Username" 
-          value={username}
-          onChange={(e) => setUsername(e.target.value)} 
+          placeholder="Name" 
+          className="w-full p-3 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          value={name}
+          onChange={(e) => setName(e.target.value)} 
         />
         <input 
           type="email" 
           placeholder="Email" 
+          className="w-full p-3 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           value={email}
           onChange={(e) => setEmail(e.target.value)} 
         />
         <input 
           type="password" 
           placeholder="Password" 
+          className="w-full p-3 border border-gray-300 rounded-md mb-6 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           value={password}
           onChange={(e) => setPassword(e.target.value)} 
         />
-        <button onClick={handleSignup}>Sign Up</button>
-        <p className="login-link">
-          Already have an account? <a href="/login">Login</a>
+        <button 
+          onClick={handleSignup} 
+          className="w-full p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          Sign Up
+        </button>
+        <p className="text-center mt-4 text-sm text-gray-600">
+          Already have an account?{' '}
+          <a href="/login" className="text-indigo-600 hover:underline">
+            Login
+          </a>
         </p>
       </div>
-      
-      <style jsx>{`
-        .signup-container {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          background-color: #f7f7f7;
-        }
-        .signup-form {
-          background-color: white;
-          padding: 30px;
-          border-radius: 8px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          width: 100%;
-          max-width: 400px;
-        }
-        h2 {
-          font-size: 2rem;
-          margin-bottom: 20px;
-          text-align: center;
-        }
-        input {
-          width: 100%;
-          padding: 12px;
-          margin: 8px 0;
-          border-radius: 6px;
-          border: 1px solid #ddd;
-          font-size: 1rem;
-        }
-        button {
-          width: 100%;
-          padding: 12px;
-          background-color: #007bff;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          font-size: 1.2rem;
-          cursor: pointer;
-          transition: background-color 0.3s;
-        }
-        button:hover {
-          background-color: #0056b3;
-        }
-        .error-message {
-          color: red;
-          margin-bottom: 10px;
-          font-size: 1rem;
-        }
-        .login-link {
-          text-align: center;
-          margin-top: 20px;
-        }
-        .login-link a {
-          color: #007bff;
-          text-decoration: none;
-        }
-        .login-link a:hover {
-          text-decoration: underline;
-        }
-      `}</style>
     </div>
   );
 };
