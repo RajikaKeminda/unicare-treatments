@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Payment from './payment';  // Import the Payment component
 
 export default function ShoppingCart() {
   const [cart, setCart] = useState([]);
+  const [proceedToCheckout, setProceedToCheckout] = useState(false); // State to handle checkout view
 
   // Load cart from localStorage when component mounts
   useEffect(() => {
@@ -27,11 +29,19 @@ export default function ShoppingCart() {
     setCart(updatedCart);
   };
   
-  //get total price
+  // Get total price
   const getTotalPrice = () => {
     return cart.reduce((total, item) => total + (item.price * item.quantity || 0), 0);
   };
-  
+
+  // Handle Proceed to Checkout button click
+  const handleProceedToCheckout = () => {
+    setProceedToCheckout(true);  // Show Payment component
+  };
+
+  if (proceedToCheckout) {
+    return <Payment />;  // Render Payment component if proceeding to checkout
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -80,7 +90,10 @@ export default function ShoppingCart() {
         {cart.length > 0 && (
           <div className="mt-6 flex justify-between items-center">
             <p className="text-2xl font-semibold text-gray-800">Total: ${getTotalPrice().toFixed(2)}</p>
-            <button className="px-8 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+            <button
+              onClick={handleProceedToCheckout}  // Handle click to navigate to Payment component
+              className="px-8 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+            >
               Proceed to Checkout
             </button>
           </div>
