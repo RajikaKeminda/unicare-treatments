@@ -28,6 +28,7 @@ export default function ShoppingCart() {
     setCart(updatedCart);
   };
 
+  /*
   // Add item to cart (prevents duplicates and updates quantity)
   const handleAddToCart = (product) => {
     // Check if product already exists in the cart by matching _id
@@ -48,7 +49,7 @@ export default function ShoppingCart() {
       localStorage.setItem('cart', JSON.stringify(updatedCart));
       setCart(updatedCart);
     }
-  };
+  }; */
 
   // Calculate total price
   const getTotalPrice = () => {
