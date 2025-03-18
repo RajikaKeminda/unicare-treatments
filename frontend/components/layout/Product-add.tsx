@@ -162,12 +162,12 @@ const AdminProductForm = () => {
               className="w-full p-2 border border-gray-300 rounded-md"
             >
               <option value="">Select Category</option>
-              <option value="Guitar">Herbal Supplements</option>
-              <option value="Piano">Skincare & Beauty Products</option>
-              <option value="Drums">Hair Care</option>
-              <option value="Violin">Digestive Health</option>
-              <option value="Accessories">Massage & Body Oils</option>
-              <option value="Accessories">therapeutic devices and equipment </option>
+              <option value="Herbal Supplements">Herbal Supplements</option>
+              <option value="Skincare & Beauty Products">Skincare & Beauty Products</option>
+              <option value="Hair Care<">Hair Care</option>
+              <option value="Digestive Health">Digestive Health</option>
+              <option value="Massage & Body Oils">Massage & Body Oils</option>
+              <option value="therapeutic devices and equipment">therapeutic devices and equipment </option>
             </select>
           </div>
         </div>
