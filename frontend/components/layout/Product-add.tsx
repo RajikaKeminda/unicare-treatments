@@ -197,12 +197,15 @@ const AdminProductForm = () => {
               type="number"
               id="ratings"
               name="ratings"
-              value={formData.ratings}
+              value={isNaN(formData.ratings) ? 0 : formData.ratings} // Ensure a valid number is displayed
               onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  ratings: parseFloat(e.target.value),
-                });
+                const rating = parseFloat(e.target.value);
+                if (!isNaN(rating) && rating >= 0 && rating <= 5) {
+                  setFormData({
+                    ...formData,
+                    ratings: rating,
+                  });
+                }
               }}
               required
               min="0"

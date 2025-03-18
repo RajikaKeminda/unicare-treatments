@@ -18,43 +18,20 @@ export default function ShoppingCart() {
     setCart(updatedCart);
   };
 
-  // Update item quantity in cart
   const handleUpdateQuantity = (productId, quantity) => {
-    if (quantity < 1) return;  // Prevent quantity below 1
+    if (quantity < 1 || isNaN(quantity)) return;  // Prevent quantity below 1 or NaN values
     const updatedCart = cart.map((item) =>
       item._id === productId ? { ...item, quantity } : item
     );
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     setCart(updatedCart);
   };
-
-  /*
-  // Add item to cart (prevents duplicates and updates quantity)
-  const handleAddToCart = (product) => {
-    // Check if product already exists in the cart by matching _id
-    const existingProduct = cart.find((item) => item._id === product._id);
-
-    if (existingProduct) {
-      // If the product exists, update the quantity
-      const updatedCart = cart.map((item) =>
-        item._id === product._id
-          ? { ...item, quantity: item.quantity + 1 }  // Increment quantity
-          : item
-      );
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      setCart(updatedCart);
-    } else {
-      // If it doesn't exist, add the new product to the cart
-      const updatedCart = [...cart, { ...product, quantity: 1 }];
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      setCart(updatedCart);
-    }
-  }; */
-
-  // Calculate total price
+  
+  //get total price
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cart.reduce((total, item) => total + (item.price * item.quantity || 0), 0);
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -74,24 +51,23 @@ export default function ShoppingCart() {
                     <p className="text-sm text-gray-500">${item.price.toFixed(2)} each</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-4">
                   <button
                     onClick={() => handleUpdateQuantity(item._id, item.quantity - 1)}
-                    disabled={item.quantity <= 1}
-                    className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 focus:outline-none"
+                    className="px-3 py-1 bg-gray-300 rounded-full hover:bg-gray-400 transition-all"
                   >
                     -
                   </button>
-                  <span className="text-lg font-semibold">{item.quantity}</span>
+                  <span>{item.quantity}</span>
                   <button
                     onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}
-                    className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 focus:outline-none"
+                    className="px-3 py-1 bg-gray-300 rounded-full hover:bg-gray-400 transition-all"
                   >
                     +
                   </button>
                   <button
                     onClick={() => handleRemoveFromCart(item._id)}
-                    className="text-red-500 hover:text-red-700 focus:outline-none"
+                    className="text-red-600 hover:text-red-800"
                   >
                     Remove
                   </button>
@@ -102,10 +78,10 @@ export default function ShoppingCart() {
         </div>
 
         {cart.length > 0 && (
-          <div className="flex justify-between items-center mt-6">
-            <p className="text-xl font-semibold text-gray-800">Total: ${getTotalPrice().toFixed(2)}</p>
-            <button className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none">
-              Checkout
+          <div className="mt-6 flex justify-between items-center">
+            <p className="text-2xl font-semibold text-gray-800">Total: ${getTotalPrice().toFixed(2)}</p>
+            <button className="px-8 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+              Proceed to Checkout
             </button>
           </div>
         )}
