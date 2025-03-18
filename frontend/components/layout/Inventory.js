@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import "../../app/admin/app/Inventory/Inventory.css"; // Adjusted import path
+
 
 const API_URL = "http://localhost:3001/api/inventory"; // Backend API
 

@@ -1,7 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // No need to add turbopack configuration here anymore.
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.freepik.com",
+        port: "",
+        pathname: "/**", // Allow all paths
+      },
+    ],
+  },
+  devIndicators: {
+    position: "bottom-right",
+  },
 };
 
 export default nextConfig;

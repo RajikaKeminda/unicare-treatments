@@ -1,12 +1,9 @@
-// RootLayout.tsx
-'use client';  // Add this line at the top of the file to mark it as a client-side component
-
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { usePathname } from 'next/navigation'; // Now you can use this hook in this file
-
-import HeaderNav from "@/components/layout/HeaderNavigation";
-import FooterNav from "@/components/layout/Footer";
+import "@/app/globals.css";
+import { Toaster } from "@/shadcn/ui/sonner";
+import AuthProvider from "@/helpers/providers/auth-provider";
+import { ThemeProvider } from "@/helpers/providers/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,35 +15,33 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isAdminRoute = pathname?.startsWith('/admin'); 
+export const metadata: Metadata = {
+  title: "Home",
+  description: "Welcome to Unicare Treatments",
+};
 
-  if (!isAdminRoute) {
-    return (
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <main className="w-full mx-auto px-4 md:px-8 bg-white">
-            <div className="bg-gray-900 text-center py-1 mb-4">
-              <h2 className="font-bold text-sm sm:text-base">Special Offer: Get 20% off on all products!</h2>
-            </div>
-
-            <HeaderNav />
-            {children}
-            <FooterNav />
-          </main>
-        </body>
-      </html>
-    );
-  }
-
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <main className="w-full mx-auto px-4 md:px-8 bg-white">
-          {children}
-        </main>
-      </body>
+    <html lang="en" suppressHydrationWarning>
+      <AuthProvider>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </body>
+      </AuthProvider>
     </html>
   );
 }

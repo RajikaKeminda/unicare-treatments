@@ -19,7 +19,7 @@ const HeaderAndProducts = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8082/api/products');  // Use axios for better handling
+        const response = await axios.get('http://localhost:8081/api/products');  // Use axios for better handling
         console.log('API Response:', response);  // Log full response to inspect it
         
         // Check if the data is an array or nested within an object
@@ -104,7 +104,7 @@ const HeaderAndProducts = () => {
               <FaRegCircleUser />
             </div>
 
-            <Link href="/Shopping-cart">
+            <Link href="/shopping-cart">
               <div className="text-2xl relative">
                 <span><FaShoppingCart /></span>
                 <div className="bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center absolute -top-2 -right-3 text-xs">

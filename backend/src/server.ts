@@ -3,6 +3,7 @@ import "dotenv/config";
 import cors from "cors"; // Import CORS middleware
 import apiRouter from "./routes/index.ts"; // Your API routes
 import { connectToMongoDB } from "./util/dbConnector.ts"; // MongoDB connection utility
+import { handleOtherErrors, handleURIError } from "./util/individualErrors.ts"; // error handling
 
 const app = express();
 const PORT = process.env.PORT || 8001; // Ensure a default port if not set
@@ -16,6 +17,10 @@ app.use(express.json()); // Parse incoming JSON requests
 
 // Routes -->
 app.use("/api", apiRouter); // All routes will be prefixed with "/api"
+
+// Error handling middleware
+app.use(handleURIError);
+app.use(handleOtherErrors);
 
 // Start server -->
 app.listen(PORT, () => {
