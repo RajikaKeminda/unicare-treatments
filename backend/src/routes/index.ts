@@ -3,9 +3,11 @@ const router = express.Router();
 
 // Importing controllers for products
 import { createProduct, getProducts, deleteProduct, updateProduct } from '../controllers/productContoller.ts';
+//Signup and login routes - pulindu
 import { getAllUsers, registerUser, loginUser } from "../controllers/signupController.ts"; 
 // Import inventory controller functions
 import { getInventory, addItem, updateQuantity, deleteItem } from "../controllers/inventoryController.ts";
+import { addTreatment } from '../controllers/treatmentController.ts';
 
 // Middleware to parse JSON request bodies
 router.use(express.json());
@@ -20,9 +22,6 @@ router.delete('/products/:id', deleteProduct);
 // Update product route
 router.put('/products/:id', updateProduct);
 
-
-//Signup and login routes - pulindu
-
 // api/users/
 router.route("/users").get(getAllUsers).post(registerUser); // POST uses registerUser
 
@@ -35,5 +34,8 @@ router.get("/inventory", getInventory); // Get all inventory items
 router.post("/inventory", addItem); // Add an item to the inventory
 router.put("/inventory/:id", updateQuantity); // Update the quantity of an inventory item
 router.delete("/inventory/:id", deleteItem); // Delete an inventory item
+
+
+  router.post('/treatments', addTreatment);
 
 export default router;
