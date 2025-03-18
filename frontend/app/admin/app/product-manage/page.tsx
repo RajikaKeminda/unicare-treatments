@@ -84,9 +84,9 @@ const ProductOptionsPage = () => {
           <div className="mt-8 flex justify-center">
             <button
               onClick={() => handleNavigation("/Product")}
-              className="bg-blue-500 text-white py-3 px-6 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+              className="bg-red-500 text-white py-3 px-6 rounded-lg shadow-md hover:bg-red-800 transition duration-300"
             >
-              View User Side
+              User Side View
             </button>
           </div>
         </div>
