@@ -1,50 +1,143 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../../app/admin/app/Inventory/Inventory.css"; // Adjusted import path
 
-const initialInventory = [
-  { id: 1, name: "Ashwagandha", quantity: 100, unit: "bottles", perItemPrice: 350, expiryDate: "2025-05-01" },
-  { id: 2, name: "Brahmi", quantity: 50, unit: "bottles", perItemPrice: 250, expiryDate: "2025-06-01" },
-  { id: 3, name: "Turmeric", quantity: 200, unit: "grams", perItemPrice: 120, expiryDate: "2025-08-01" }
-];
+const API_URL = "http://localhost:3001/api/inventory"; // Backend API
 
 export default function InventoryManager() {
-  const [inventory, setInventory] = useState(initialInventory);
+  const [inventory, setInventory] = useState([]);
   const [removedProducts, setRemovedProducts] = useState([]);
   const [newItem, setNewItem] = useState({ name: "", quantity: 1, unit: "bottles", perItemPrice: 1, expiryDate: "" });
   const [showModal, setShowModal] = useState(false);
-  const [idCounter, setIdCounter] = useState(initialInventory.length + 1);
+  const [loading, setLoading] = useState(true);
 
-  const addItem = () => {
+  // 📌 Fetch inventory from backend on component mount
+  useEffect(() => {
+    fetchInventory();
+  }, []);
+
+  const fetchInventory = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setInventory(data);
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 📌 Add new item to backend
+  const addItem = async () => {
     if (!newItem.name || newItem.quantity <= 0 || newItem.perItemPrice <= 0 || !newItem.expiryDate) {
       alert("Please fill out all fields correctly.");
       return;
     }
-    const newId = idCounter;
-    const productPrice = newItem.quantity * newItem.perItemPrice;
-    setInventory([...inventory, { ...newItem, id: newId, price: productPrice }]);
-    setNewItem({ name: "", quantity: 1, unit: "bottles", perItemPrice: 1, expiryDate: "" });
-    setIdCounter(idCounter + 1);
-    setShowModal(false);
+
+    try {
+      console.log("Sending POST request to:", API_URL); // Log the URL
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newItem),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to add item. Status: ${response.status}`);
+      }
+
+      const addedItem = await response.json();
+      setInventory([...inventory, addedItem]);
+      setNewItem({ name: "", quantity: 1, unit: "bottles", perItemPrice: 1, expiryDate: "" });
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error adding item:", error);
+      alert("An error occurred while adding the item. Please try again.");
+    }
   };
 
-  const updateQuantity = (id, amount) => {
-    setInventory(inventory.map(item =>
-      item.id === id
-        ? { ...item, quantity: Math.max(0, item.quantity + amount), price: (Math.max(0, item.quantity + amount) * item.perItemPrice) }
-        : item
-    ));
+  // 📌 Update quantity in backend
+  const updateQuantity = async (itemId, change) => {
+    try {
+      // Find the current item from inventory
+      const item = inventory.find((item) => item._id === itemId);
+      
+      // Calculate the new quantity
+      const newQuantity = item.quantity + change;
+  
+      // Ensure the quantity doesn't go below 0
+      if (newQuantity < 0) {
+        alert("Quantity cannot be less than 0.");
+        return;
+      }
+  
+      // Send PUT request to backend to update the quantity
+      const response = await fetch(`http://localhost:3001/api/inventory/${itemId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ quantity: newQuantity }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to update quantity");
+      }
+  
+      const updatedItem = await response.json();
+      console.log("Updated item:", updatedItem);
+  
+      // Update the inventory state
+      setInventory((prevInventory) =>
+        prevInventory.map((item) =>
+          item._id === itemId ? { ...item, quantity: newQuantity } : item
+        )
+      );
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+    }
+  };
+  
+  // 📌 Delete item from backend
+  const deleteItem = async (id) => {
+    try {
+      // Find the item being deleted
+      const deletedItem = inventory.find((item) => item._id === id);
+      
+      // If the item is found, add it to removedProducts before deletion
+      if (deletedItem) {
+        setRemovedProducts((prevRemoved) => {
+          const updatedRemovedProducts = [...prevRemoved, deletedItem];
+          console.log("Updated Removed Products:", updatedRemovedProducts);  // Log removed items
+          return updatedRemovedProducts;
+        });
+      }
+  
+      const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+  
+      if (!response.ok) throw new Error("Failed to delete item");
+  
+      // Remove the item from the inventory
+      setInventory(inventory.filter((item) => item._id !== id));
+  
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
+  };
+  
+
+  // 📌 Check if the date is expired
+  const isExpired = (expiryDate) => {
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+    return expiry < today;
   };
 
-  const deleteItem = (id) => {
-    const deletedItem = inventory.find(item => item.id === id);
-    setInventory(inventory.filter(item => item.id !== id));
-    setRemovedProducts([...removedProducts, deletedItem]);
-  };
-
+  // 📌 Generate report
   const generateHTMLReport = () => {
     const currentDate = new Date().toLocaleDateString();
-
+  
     let reportContent = `
       <html>
       <head>
@@ -57,7 +150,7 @@ export default function InventoryManager() {
           .table th { background-color: #f2f2f2; }
           .table td { font-size: 14px; }
           .footer { margin-top: 20px; text-align: center; font-size: 12px; }
-          .expiredIcon { color: red; }
+          .expiredIcon { color: red; font-size: 18px; }
         </style>
       </head>
       <body>
@@ -84,13 +177,14 @@ export default function InventoryManager() {
                 <td>Rs ${item.quantity * item.perItemPrice}</td>
                 <td>${item.unit}</td>
                 <td>
-                  ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ''} ${item.expiryDate}
+                  ${item.expiryDate}
+                  ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ''}
                 </td>
               </tr>
             `).join('')}
           </tbody>
         </table>
-
+  
         <h3>Removed Products:</h3>
         <table class="table">
           <thead>
@@ -104,7 +198,7 @@ export default function InventoryManager() {
             </tr>
           </thead>
           <tbody>
-            ${removedProducts.map(item => `
+            ${removedProducts.length > 0 ? removedProducts.map(item => `
               <tr>
                 <td>${item.name}</td>
                 <td>${item.quantity}</td>
@@ -112,10 +206,11 @@ export default function InventoryManager() {
                 <td>Rs ${item.quantity * item.perItemPrice}</td>
                 <td>${item.unit}</td>
                 <td>
-                  ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ''} ${item.expiryDate}
+                  ${item.expiryDate}
+                  ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ''}
                 </td>
               </tr>
-            `).join('')}
+            `).join('') : `<tr><td colspan="6">No removed items</td></tr>`}
           </tbody>
         </table>
         
@@ -129,12 +224,8 @@ export default function InventoryManager() {
     link.href = URL.createObjectURL(blob);
     link.download = `inventory_report_${currentDate}.html`;
     link.click();
-};
-  const isExpired = (expiryDate) => {
-    const today = new Date();
-    const expiry = new Date(expiryDate);
-    return expiry < today;
   };
+  
 
   return (
     <div className="container">
@@ -148,7 +239,7 @@ export default function InventoryManager() {
       {showModal && (
         <div className="modal">
           <div className="modalContent">
-            <h2 style={{ fontWeight: 'bold', color: 'black' }}>Add New Item</h2>
+            <h2>Add New Item</h2>
             <input
               type="text"
               value={newItem.name}
@@ -156,90 +247,81 @@ export default function InventoryManager() {
               placeholder="Item Name"
               className="inputField"
             />
-            <div className="quantityPriceWrapper">
-              <div className="field">
-                <label>Quantity</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={newItem.quantity}
-                  onChange={(e) => setNewItem({ ...newItem, quantity: Math.max(1, parseInt(e.target.value)) })}
-                  className="inputField"
-                  placeholder="Quantity"
-                />
-              </div>
-              <div className="field">
-                <label>Price per Item</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={newItem.perItemPrice}
-                  onChange={(e) => setNewItem({ ...newItem, perItemPrice: Math.max(1, parseFloat(e.target.value)) })}
-                  className="inputField"
-                  placeholder="Price per Item"
-                />
-              </div>
-            </div>
-            <div className="unitField">
-              <label>Unit</label>
-              <select
-                value={newItem.unit}
-                onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
-                className="inputField"
-              >
-                <option value="bottles">Bottles</option>
-                <option value="grams">Grams</option>
-                <option value="packs">Packs</option>
-              </select>
-            </div>
-            <div className="field">
-              <label>Expiry Date</label>
-              <input
-                type="date"
-                value={newItem.expiryDate}
-                onChange={(e) => setNewItem({ ...newItem, expiryDate: e.target.value })}
-                className="inputField"
-              />
-            </div>
+            <input
+              type="number"
+              value={newItem.quantity}
+              onChange={(e) => setNewItem({ ...newItem, quantity: Math.max(1, parseInt(e.target.value)) })}
+              className="inputField"
+              placeholder="Quantity"
+            />
+            <input
+              type="number"
+              value={newItem.perItemPrice}
+              onChange={(e) => setNewItem({ ...newItem, perItemPrice: Math.max(1, parseFloat(e.target.value)) })}
+              className="inputField"
+              placeholder="Price per Item"
+            />
+            <select
+              value={newItem.unit}
+              onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
+              className="inputField"
+            >
+              <option value="bottles">Bottles</option>
+              <option value="grams">Grams</option>
+              <option value="packs">Packs</option>
+            </select>
+            <input
+              type="date"
+              value={newItem.expiryDate}
+              onChange={(e) => setNewItem({ ...newItem, expiryDate: e.target.value })}
+              className="inputField"
+            />
             <button onClick={addItem} className="confirmButton">Add Item</button>
             <button className="closeButton" onClick={() => setShowModal(false)}>Close</button>
           </div>
         </div>
       )}
 
-      <div className="inventoryTable">
-        <h3 className="tableTitle">Inventory List</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Quantity</th>
-              <th>Per Item Price (Rs)</th>
-              <th>Product Price (Rs)</th>
-              <th>Unit</th>
-              <th>Expiry Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inventory.map((item) => (
-              <tr key={item.id}>
-                <td>{item.name}</td>
-                <td>{item.quantity}</td>
-                <td>Rs {item.perItemPrice}</td>
-                <td>Rs {item.quantity * item.perItemPrice}</td>
-                <td>{item.unit}</td>
-                <td>{isExpired(item.expiryDate) && <span className="expiredIcon">⚠️</span>} {item.expiryDate}</td>
-                <td>
-                  <button onClick={() => updateQuantity(item.id, 1)} className="quantityButton">+</button>
-                  <button onClick={() => updateQuantity(item.id, -1)} className="quantityButton">-</button>
-                  <button onClick={() => deleteItem(item.id)} className="deleteButton">Remove Item</button>
-                </td>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="inventoryTable">
+          <h3 className="tableTitle">Inventory List</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Per Item Price (Rs)</th>
+                <th>Total Price (Rs)</th>
+                <th>Unit</th>
+                <th>Expiry Date</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {inventory.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.name}</td>
+                  <td>{item.quantity}</td>
+                  <td>Rs {item.perItemPrice}</td>
+                  <td>Rs {item.quantity * item.perItemPrice}</td>
+                  <td>{item.unit}</td>
+                  <td>
+                    {item.expiryDate}
+                    {isExpired(item.expiryDate) ? <span className="expiredIcon">⚠️</span> : ''}
+                  </td>
+                  <td>
+                    <button onClick={() => updateQuantity(item._id, 1)} className="quantityButton">+</button>
+                    <button onClick={() => updateQuantity(item._id, -1)} className="quantityButton">-</button>
+                    <button onClick={() => deleteItem(item._id)} className="deleteButton">Remove</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
