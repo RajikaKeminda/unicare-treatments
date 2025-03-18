@@ -5,18 +5,22 @@ import { useState, useEffect } from 'react';
 export default function ShoppingCart() {
   const [cart, setCart] = useState([]);
 
+  // Load cart from localStorage when component mounts
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
-    setCart(savedCart);  // Load cart from localStorage when component mounts
+    setCart(savedCart);
   }, []);
 
+  // Remove item from cart
   const handleRemoveFromCart = (productId) => {
     const updatedCart = cart.filter((item) => item._id !== productId);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     setCart(updatedCart);
   };
 
+  // Update item quantity in cart
   const handleUpdateQuantity = (productId, quantity) => {
+    if (quantity < 1) return;  // Prevent quantity below 1
     const updatedCart = cart.map((item) =>
       item._id === productId ? { ...item, quantity } : item
     );
@@ -24,6 +28,7 @@ export default function ShoppingCart() {
     setCart(updatedCart);
   };
 
+  // Calculate total price
   const getTotalPrice = () => {
     return cart.reduce((total, item) => total + item.price * item.quantity, 0);
   };
@@ -38,10 +43,7 @@ export default function ShoppingCart() {
             <p className="text-center text-lg text-gray-600">Your cart is empty.</p>
           ) : (
             cart.map((item) => (
-              <div
-                key={item._id}
-                className="flex justify-between items-center border-b py-6 px-4 hover:bg-gray-50"
-              >
+              <div key={item._id} className="flex justify-between items-center border-b py-6 px-4 hover:bg-gray-50">
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
                   <div>
@@ -55,14 +57,14 @@ export default function ShoppingCart() {
                     disabled={item.quantity <= 1}
                     className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 focus:outline-none"
                   >
-                    <span className="text-xl">-</span>
+                    -
                   </button>
                   <span className="text-lg font-semibold">{item.quantity}</span>
                   <button
                     onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}
                     className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 focus:outline-none"
                   >
-                    <span className="text-xl">+</span>
+                    +
                   </button>
                   <button
                     onClick={() => handleRemoveFromCart(item._id)}
