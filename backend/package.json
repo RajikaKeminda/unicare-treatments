@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "nodemon",
     "start": "nodemon",
-    "build": "tsc",
-    "serve": "node dist/server.js"
+    "build": "tsx build.ts",
+    "serve": "node --experimental-specifier-resolution=node dist/server.js"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -29,6 +29,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.13.10",
+    "esbuild": "^0.25.1",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
