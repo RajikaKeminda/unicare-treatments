@@ -60,11 +60,11 @@ export default function CreateBlog() {
             {/* Squad Selection */}
             <div className="mb-6 relative">
                 <button
-                    className="flex items-center gap-2 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 w-48"
+                    className="flex items-center gap-2 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 w-56"
                     onClick={() => setShowSquadDropdown(!showSquadDropdown)}
                 >
                     <HiUserGroup className="text-gray-500" />
-                    <span className="flex-1 text-left">{selectedSquad || 'Select Squad'}</span>
+                    <span className="flex-1 text-left">{selectedSquad || 'Select Category'}</span>
                     <IoMdArrowDropdown className="text-gray-500" />
                 </button>
 
@@ -135,7 +135,7 @@ export default function CreateBlog() {
                 placeholder="Post Title*"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full text-xl font-medium placeholder-gray-400 mb-6 p-2 focus:outline-none"
+                className="w-full text-xl font-medium placeholder-gray-500 mb-6 p-2 focus:outline-none rounded-md"
                 maxLength={250}
             />
 
