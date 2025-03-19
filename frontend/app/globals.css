@@ -70,3 +70,41 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Rich Text Editor Styles */
+.ql-editor {
+  min-height: 200px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.ql-toolbar.ql-snow {
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 0.5rem !important;
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+}
+
+/* Preview Mode Styles */
+.prose {
+  max-width: none;
+}
+
+.prose img {
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+}
+
+.prose a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.prose a:hover {
+  text-decoration: underline;
+}
