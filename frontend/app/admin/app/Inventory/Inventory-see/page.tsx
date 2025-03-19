@@ -1,6 +1,6 @@
 "use client";
 
-import InventoryManager from"@/components/layout/Inventory.js"
+import InventoryManager from"@/components/layout/Inventory"
 //import "@/app/admin/app/Inventory/Inventory-see/";  // Adjust the path accordingly
 
 import Header from"@/components/layout/Header"

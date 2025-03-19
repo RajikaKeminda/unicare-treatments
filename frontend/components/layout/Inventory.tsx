@@ -1,14 +1,58 @@
 "use client";
 import { useState, useEffect } from "react";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const API_URL = "http://localhost:8082/api/inventory"; // Backend API
 
+interface InventoryItem {
+  _id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  perItemPrice: number;
+  expiryDate: string;
+}
+
+interface NewItem {
+  name: string;
+  quantity: number;
+  unit: string;
+  perItemPrice: number;
+  expiryDate: string;
+}
+
 export default function InventoryManager() {
-  const [inventory, setInventory] = useState([]);
-  const [removedProducts, setRemovedProducts] = useState([]);
-  const [newItem, setNewItem] = useState({ name: "", quantity: 1, unit: "bottles", perItemPrice: 1, expiryDate: "" });
-  const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [removedProducts, setRemovedProducts] = useState<InventoryItem[]>([]);
+  const [newItem, setNewItem] = useState<NewItem>({
+    name: "",
+    quantity: 1,
+    unit: "bottles",
+    perItemPrice: 1,
+    expiryDate: "",
+  });
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showChart, setShowChart] = useState<boolean>(false); // State to toggle chart visibility
 
   // 📌 Fetch inventory from backend on component mount
   useEffect(() => {
@@ -29,7 +73,12 @@ export default function InventoryManager() {
 
   // 📌 Add new item to backend
   const addItem = async () => {
-    if (!newItem.name || newItem.quantity <= 0 || newItem.perItemPrice <= 0 || !newItem.expiryDate) {
+    if (
+      !newItem.name ||
+      newItem.quantity <= 0 ||
+      newItem.perItemPrice <= 0 ||
+      !newItem.expiryDate
+    ) {
       alert("Please fill out all fields correctly.");
       return;
     }
@@ -48,7 +97,13 @@ export default function InventoryManager() {
 
       const addedItem = await response.json();
       setInventory([...inventory, addedItem]);
-      setNewItem({ name: "", quantity: 1, unit: "bottles", perItemPrice: 1, expiryDate: "" });
+      setNewItem({
+        name: "",
+        quantity: 1,
+        unit: "bottles",
+        perItemPrice: 1,
+        expiryDate: "",
+      });
       setShowModal(false);
     } catch (error) {
       console.error("Error adding item:", error);
@@ -57,36 +112,41 @@ export default function InventoryManager() {
   };
 
   // 📌 Update quantity in backend
-  const updateQuantity = async (itemId, change) => {
+  const updateQuantity = async (itemId: string, change: number) => {
     try {
       // Find the current item from inventory
       const item = inventory.find((item) => item._id === itemId);
-      
+
+      if (!item) {
+        alert("Item not found.");
+        return;
+      }
+
       // Calculate the new quantity
       const newQuantity = item.quantity + change;
-  
+
       // Ensure the quantity doesn't go below 0
       if (newQuantity < 0) {
         alert("Quantity cannot be less than 0.");
         return;
       }
-  
+
       // Send PUT request to backend to update the quantity
-      const response = await fetch(`http://localhost:8082/api/inventory/${itemId}`, {
+      const response = await fetch(`${API_URL}/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ quantity: newQuantity }),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to update quantity");
       }
-  
+
       const updatedItem = await response.json();
       console.log("Updated item:", updatedItem);
-  
+
       // Update the inventory state
       setInventory((prevInventory) =>
         prevInventory.map((item) =>
@@ -97,37 +157,35 @@ export default function InventoryManager() {
       console.error("Error updating quantity:", error);
     }
   };
-  
+
   // 📌 Delete item from backend
-  const deleteItem = async (id) => {
+  const deleteItem = async (id: string) => {
     try {
       // Find the item being deleted
       const deletedItem = inventory.find((item) => item._id === id);
-      
+
       // If the item is found, add it to removedProducts before deletion
       if (deletedItem) {
         setRemovedProducts((prevRemoved) => {
           const updatedRemovedProducts = [...prevRemoved, deletedItem];
-          console.log("Updated Removed Products:", updatedRemovedProducts);  // Log removed items
+          console.log("Updated Removed Products:", updatedRemovedProducts); // Log removed items
           return updatedRemovedProducts;
         });
       }
-  
+
       const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-  
+
       if (!response.ok) throw new Error("Failed to delete item");
-  
+
       // Remove the item from the inventory
       setInventory(inventory.filter((item) => item._id !== id));
-  
     } catch (error) {
       console.error("Error deleting item:", error);
     }
   };
-  
 
   // 📌 Check if the date is expired
-  const isExpired = (expiryDate) => {
+  const isExpired = (expiryDate: string) => {
     const today = new Date();
     const expiry = new Date(expiryDate);
     return expiry < today;
@@ -136,7 +194,7 @@ export default function InventoryManager() {
   // 📌 Generate report
   const generateHTMLReport = () => {
     const currentDate = new Date().toLocaleDateString();
-  
+
     let reportContent = `
       <html>
       <head>
@@ -168,7 +226,9 @@ export default function InventoryManager() {
             </tr>
           </thead>
           <tbody>
-            ${inventory.map(item => `
+            ${inventory
+              .map(
+                (item) => `
               <tr>
                 <td>${item.name}</td>
                 <td>${item.quantity}</td>
@@ -177,10 +237,12 @@ export default function InventoryManager() {
                 <td>${item.unit}</td>
                 <td>
                   ${item.expiryDate}
-                  ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ''}
+                  ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ""}
                 </td>
               </tr>
-            `).join('')}
+            `
+              )
+              .join("")}
           </tbody>
         </table>
   
@@ -197,19 +259,27 @@ export default function InventoryManager() {
             </tr>
           </thead>
           <tbody>
-            ${removedProducts.length > 0 ? removedProducts.map(item => `
-              <tr>
-                <td>${item.name}</td>
-                <td>${item.quantity}</td>
-                <td>Rs ${item.perItemPrice}</td>
-                <td>Rs ${item.quantity * item.perItemPrice}</td>
-                <td>${item.unit}</td>
-                <td>
-                  ${item.expiryDate}
-                  ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ''}
-                </td>
-              </tr>
-            `).join('') : `<tr><td colspan="6">No removed items</td></tr>`}
+            ${
+              removedProducts.length > 0
+                ? removedProducts
+                    .map(
+                      (item) => `
+                  <tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>Rs ${item.perItemPrice}</td>
+                    <td>Rs ${item.quantity * item.perItemPrice}</td>
+                    <td>${item.unit}</td>
+                    <td>
+                      ${item.expiryDate}
+                      ${isExpired(item.expiryDate) ? '<span class="expiredIcon">⚠️</span>' : ""}
+                    </td>
+                  </tr>
+                `
+                    )
+                    .join("")
+                : `<tr><td colspan="6">No removed items</td></tr>`
+            }
           </tbody>
         </table>
         
@@ -217,22 +287,64 @@ export default function InventoryManager() {
       </body>
     </html>
     `;
-  
-    const blob = new Blob([reportContent], { type: 'text/html' });
-    const link = document.createElement('a');
+
+    const blob = new Blob([reportContent], { type: "text/html" });
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = `inventory_report_${currentDate}.html`;
     link.click();
   };
-  
+
+  // 📌 Prepare data for the chart
+  const chartData = {
+    labels: inventory.map((item) => item.name),
+    datasets: [
+      {
+        label: "Quantity",
+        data: inventory.map((item) => item.quantity),
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const, // Explicitly set to "top"
+      },
+      title: {
+        display: true,
+        text: "Inventory Quantity Analysis",
+      },
+    },
+  };
 
   return (
     <div className="container mx-auto p-6">
       <h2 className="text-3xl font-bold mb-4">Products</h2>
 
       <div className="mb-4">
-        <button className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600" onClick={() => setShowModal(true)}>Add Item</button>
-        <button className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 ml-4" onClick={generateHTMLReport}>Generate Report</button>
+        <button
+          className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+          onClick={() => setShowModal(true)}
+        >
+          Add Item
+        </button>
+        <button
+          className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 ml-4"
+          onClick={generateHTMLReport}
+        >
+          Generate Report
+        </button>
+        <button
+          className="bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 ml-4"
+          onClick={() => setShowChart(!showChart)}
+        >
+          {showChart ? "Hide Chart" : "Show Chart"}
+        </button>
       </div>
 
       {showModal && (
@@ -242,28 +354,42 @@ export default function InventoryManager() {
             <input
               type="text"
               value={newItem.name}
-              onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+              onChange={(e) =>
+                setNewItem({ ...newItem, name: e.target.value })
+              }
               placeholder="Item Name"
               className="border border-gray-300 rounded-md p-2 mb-4 w-full"
             />
             <input
               type="number"
               value={newItem.quantity}
-              onChange={(e) => setNewItem({ ...newItem, quantity: Math.max(1, parseInt(e.target.value)) })}
+              onChange={(e) =>
+                setNewItem({
+                  ...newItem,
+                  quantity: Math.max(1, parseInt(e.target.value)),
+                })
+              }
               className="border border-gray-300 rounded-md p-2 mb-4 w-full"
               placeholder="Quantity"
             />
             <input
               type="number"
               value={newItem.perItemPrice}
-              onChange={(e) => setNewItem({ ...newItem, perItemPrice: Math.max(1, parseFloat(e.target.value)) })}
+              onChange={(e) =>
+                setNewItem({
+                  ...newItem,
+                  perItemPrice: Math.max(1, parseFloat(e.target.value)),
+                })
+              }
               className="border border-gray-300 rounded-md p-2 mb-4 w-full"
               placeholder="Price per Item (Rs)"
             />
             <input
               type="date"
               value={newItem.expiryDate}
-              onChange={(e) => setNewItem({ ...newItem, expiryDate: e.target.value })}
+              onChange={(e) =>
+                setNewItem({ ...newItem, expiryDate: e.target.value })
+              }
               className="border border-gray-300 rounded-md p-2 mb-4 w-full"
             />
 
@@ -282,6 +408,12 @@ export default function InventoryManager() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {showChart && (
+        <div className="mt-8">
+          <Bar data={chartData} options={chartOptions} />
         </div>
       )}
 
@@ -335,4 +467,3 @@ export default function InventoryManager() {
     </div>
   );
 }
-
