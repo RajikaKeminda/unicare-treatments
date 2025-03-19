@@ -21,12 +21,13 @@ const geistMono = Geist_Mono({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith('/admin'); 
+  const isLoginRoute = pathname?.startsWith('/login');
 
-  if (!isAdminRoute) {
+  if (!isAdminRoute && !isLoginRoute) {
     return (
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <main className="w-full mx-auto px-4 md:px-8 bg-white">
+          <main className="w-full mx-auto bg-white">
             <div className="bg-gray-900 text-center py-1 mb-4">
               <h2 className="font-bold text-sm sm:text-base">Special Offer: Get 20% off on all products!</h2>
             </div>
@@ -43,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <main className="w-full mx-auto px-4 md:px-8 bg-white">
+        <main className="w-full mx-auto bg-white">
           {children}
         </main>
       </body>

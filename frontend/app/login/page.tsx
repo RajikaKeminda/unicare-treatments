@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify'; 
+import { toast, ToastContainer } from 'react-toastify'; 
 import Link from 'next/link';
 import axios from 'axios';
+import 'react-toastify/dist/ReactToastify.css';
 
-const Login = () => {
+export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,17 +16,15 @@ const Login = () => {
 
   // Handle the login request
   const handleLogin = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault(); // Prevents default behavior like form submission or page reload
+    e.preventDefault();
     
     try {
-      // Send login request to backend API
       const response = await axios.post('http://localhost:881/api/users/login', { email, password });
 
-      // If login is successful, save the token (optional) and redirect
       if (response.data.token) {
         toast.success('Login successful!');
-        localStorage.setItem('token', response.data.token); // Store the token
-        router.push('/dashboard'); // Redirect to dashboard
+        localStorage.setItem('token', response.data.token);
+        router.push('/dashboard');
       }
     } catch (error) {
       toast.error('Invalid credentials. Please try again.' + error);
@@ -33,67 +32,67 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-200">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-700">Welcome Back!</h2>
-          <p className="text-sm text-gray-500 mt-2">Please login to continue</p>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-600">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+    <>
+      <ToastContainer position="top-right" />
+      <div className="flex justify-center items-center min-h-screen bg-gray-200">
+        <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-extrabold text-gray-700">Welcome Back!</h2>
+            <p className="text-sm text-gray-500 mt-2">Please login to continue</p>
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-600">Password</label>
-            <div className="relative">
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-600">Email Address</label>
               <input
-                type={showPassword ? "text" : "password"}
-                id="password"
+                type="email"
+                id="email"
                 className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
             </div>
-          </div>
 
-          {/* Explicitly set type="button" to avoid form submission */}
-          <button
-            type="button" // Prevents form submission
-            className="w-full p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onClick={handleLogin} // Trigger login
-          >
-            Login
-          </button>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-600">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+            </div>
 
-          <div className="mt-4 text-center">
-            <Link href="/forgot-password" className="text-sm text-indigo-600 hover:underline">Forgot Password?</Link>
-          </div>
+            <button
+              type="button"
+              className="w-full p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              onClick={handleLogin}
+            >
+              Login
+            </button>
 
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">Don&apos;t have an account? <Link href="/signup" className="text-indigo-600 hover:underline">Sign up</Link></p>
+            <div className="mt-4 text-center">
+              <Link href="/forgot-password" className="text-sm text-indigo-600 hover:underline">Forgot Password?</Link>
+            </div>
+
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-600">Don&apos;t have an account? <Link href="/signup" className="text-indigo-600 hover:underline">Sign up</Link></p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
-};
-
-export default Login;
+}

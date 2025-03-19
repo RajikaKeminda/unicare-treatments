@@ -1,4 +1,4 @@
-import InternalLayout from "@/app/admin/layout";
+import InternalLayout from "@/app/admin/app/layout";
 
 export default function Home() {
   return <div>Home</div>;
