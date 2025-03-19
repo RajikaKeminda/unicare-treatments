@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 export default function ViewTreatment({ patient, onClose }) {
   const [editedPatient, setEditedPatient] = useState(patient);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const { _id } = patient;
 
@@ -47,10 +46,8 @@ export default function ViewTreatment({ patient, onClose }) {
         alert("Updated Successfully!");
         onClose(); // Close the modal after successful update
       } else {
-        setError(data.message || "Error updating treatment.");
+        console.error(data.message || "Error updating treatment.");
       }
-    } catch (error) {
-      setError("Error: Failed to update treatment.");
     } finally {
       setLoading(false);
     }
@@ -74,10 +71,8 @@ export default function ViewTreatment({ patient, onClose }) {
         alert('Deleted Successfully!');
         onClose(); // Close the modal after successful delete
       } else {
-        setError(data.message || 'Error deleting treatment.');
+        console.error(data.message || 'Error deleting treatment.');
       }
-    } catch (error) {
-      setError('Error: Failed to delete treatment.');
     } finally {
       setLoading(false);
     }
@@ -105,8 +100,6 @@ export default function ViewTreatment({ patient, onClose }) {
         <h1 className="text-black text-2xl font-bold mb-4 text-center">Treatment Form</h1>
         {loading ? (
           <div className="text-center text-gray-700">Loading...</div>
-        ) : error ? (
-          <div className="text-center text-red-500">{error}</div>
         ) : (
           <form>
             <div className="mb-4 flex items-center">
