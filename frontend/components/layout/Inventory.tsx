@@ -53,6 +53,9 @@ export default function InventoryManager() {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [showChart, setShowChart] = useState<boolean>(false); // State to toggle chart visibility
+  const [showExpiringSoon, setShowExpiringSoon] = useState<boolean>(false); // State to toggle expiring soon view
+  const [showLowStock, setShowLowStock] = useState<boolean>(false); // State to toggle low stock view
+  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
 
   // 📌 Fetch inventory from backend on component mount
   useEffect(() => {
@@ -191,6 +194,20 @@ export default function InventoryManager() {
     return expiry < today;
   };
 
+  // 📌 Check if the date is expiring soon (within 7 days)
+  const isExpiringSoon = (expiryDate: string) => {
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+    const timeDifference = expiry.getTime() - today.getTime();
+    const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+    return daysDifference <= 7 && daysDifference >= 0;
+  };
+
+  // 📌 Check if the item is low in stock (quantity <= 5)
+  const isLowStock = (quantity: number) => {
+    return quantity <= 5;
+  };
+
   // 📌 Generate report
   const generateHTMLReport = () => {
     const currentDate = new Date().toLocaleDateString();
@@ -322,9 +339,31 @@ export default function InventoryManager() {
     },
   };
 
+  // 📌 Filter inventory for expiring soon items
+  const expiringSoonItems = inventory.filter((item) => isExpiringSoon(item.expiryDate));
+
+  // 📌 Filter inventory for low stock items
+  const lowStockItems = inventory.filter((item) => isLowStock(item.quantity));
+
+  // 📌 Filter inventory based on search query
+  const filteredInventory = inventory.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="container mx-auto p-6">
       <h2 className="text-3xl font-bold mb-4">Products</h2>
+
+      {/* Search Bar */}
+      <div className="mb-4 flex items-center">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search product by name..."
+          className="border border-gray-300 rounded-md p-2 w-full max-w-md"
+        />
+      </div>
 
       <div className="mb-4">
         <button
@@ -345,12 +384,25 @@ export default function InventoryManager() {
         >
           {showChart ? "Hide Chart" : "Show Chart"}
         </button>
+        <button
+          className="bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 ml-4"
+          onClick={() => setShowExpiringSoon(!showExpiringSoon)}
+        >
+          {showExpiringSoon ? "Show All Products" : "Show Expiring Soon"}
+        </button>
+        <button
+          className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 ml-4"
+          onClick={() => setShowLowStock(!showLowStock)}
+        >
+          {showLowStock ? "Show All Products" : "Show Low Stock"}
+        </button>
       </div>
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-2xl font-semibold mb-4">Add New Item</h2>
+            <h5>Item name</h5>
             <input
               type="text"
               value={newItem.name}
@@ -360,30 +412,33 @@ export default function InventoryManager() {
               placeholder="Item Name"
               className="border border-gray-300 rounded-md p-2 mb-4 w-full"
             />
+            <h5>Quantity</h5>
             <input
               type="number"
-              value={newItem.quantity}
+              value={newItem.quantity || ""}
               onChange={(e) =>
                 setNewItem({
                   ...newItem,
-                  quantity: Math.max(1, parseInt(e.target.value)),
+                  quantity: Math.max(1, Number(e.target.value) || 1),
                 })
               }
               className="border border-gray-300 rounded-md p-2 mb-4 w-full"
               placeholder="Quantity"
             />
+            <h5>Price</h5>
             <input
               type="number"
-              value={newItem.perItemPrice}
+              value={newItem.perItemPrice || ""}
               onChange={(e) =>
                 setNewItem({
                   ...newItem,
-                  perItemPrice: Math.max(1, parseFloat(e.target.value)),
+                  perItemPrice: Math.max(1, Number(e.target.value) || 1),
                 })
               }
               className="border border-gray-300 rounded-md p-2 mb-4 w-full"
               placeholder="Price per Item (Rs)"
             />
+            <h5>Expire date</h5>
             <input
               type="date"
               value={newItem.expiryDate}
@@ -432,8 +487,22 @@ export default function InventoryManager() {
             </tr>
           </thead>
           <tbody>
-            {inventory.map((item) => (
-              <tr key={item._id}>
+            {(showExpiringSoon
+              ? expiringSoonItems
+              : showLowStock
+              ? lowStockItems
+              : filteredInventory // Use filtered inventory based on search query
+            ).map((item) => (
+              <tr
+                key={item._id}
+                className={
+                  isExpiringSoon(item.expiryDate)
+                    ? "bg-yellow-100"
+                    : isLowStock(item.quantity)
+                    ? "bg-red-100"
+                    : ""
+                }
+              >
                 <td className="border px-4 py-2">{item.name}</td>
                 <td className="border px-4 py-2">{item.quantity}</td>
                 <td className="border px-4 py-2">{item.unit}</td>
