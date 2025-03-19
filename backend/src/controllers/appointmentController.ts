@@ -13,23 +13,21 @@ export const createPatientAppointment = async (
   req: Request,
   res: Response
 ): Promise<void> => {
+  const data = req.body;
   try {
-    //! Take patient Id from the session
-    //const patientId = req.user.id;
-
     const newAppointment = await appointmentService.createAppointmentByPatient({
-      patientId: "5678",
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      dateOfBirth: req.body.dateOfBirth,
-      gender: req.body.gender,
-      maritalState: req.body.maritalState,
-      phoneNumber: req.body.phoneNumber,
-      alternativePhoneNumber: req.body.alternativePhoneNumber,
-      email: req.body.email,
-      address: req.body.address,
-      appointmentDate: req.body.appointmentDate,
-      paymentStatus: req.body.paymentStatus,
+      patientId: data.patientId,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      dateOfBirth: data.dateOfBirth,
+      gender: data.gender,
+      maritalState: data.maritalState,
+      phoneNumber: data.phoneNumber,
+      alternativePhoneNumber: data.alternativePhoneNumber,
+      email: data.email,
+      address: data.address,
+      appointmentDate: data.appointmentDate,
+      paymentStatus: data.paymentStatus,
     });
 
     res.status(HttpStatusCodes.CREATED).json({
@@ -192,7 +190,7 @@ export const rescheduleAppointmentByRefNo = async (
       await appointmentService.rescheduleAppointmentByRefNo({
         referenceNumber,
         appointment: {
-          patientId: "5678",
+          patientId: req.body.patientId,
           firstName: req.body.firstName,
           lastName: req.body.lastName,
           dateOfBirth: req.body.dateOfBirth,

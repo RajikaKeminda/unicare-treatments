@@ -35,7 +35,7 @@ export function NavUser({
   user,
 }: {
   user: {
-    _id?: string;
+    id?: string;
     isVerified?: boolean;
     isAcceptingMessages?: boolean;
     username?: string;

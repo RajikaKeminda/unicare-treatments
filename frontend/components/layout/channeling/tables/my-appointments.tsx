@@ -29,6 +29,7 @@ import { DataTablePagination } from "./pagination";
 import { DataTableViewOptions } from "./view-options";
 
 import { Input } from "@/shadcn/ui/input";
+import { cn } from "@/libs/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -105,8 +106,13 @@ export function DataTable<TData, TValue>({
           className="max-w-sm"
         />
       </div>
-      <div className="w-full rounded-md border min-h-[300px]">
-        <Table className="min-h-[300px] flex-auto">
+      <div className="w-full rounded-md border">
+        <Table
+          className={cn(
+            table.getRowModel().rows?.length === 0 && "min-h-[400px]",
+            "flex-auto"
+          )}
+        >
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow

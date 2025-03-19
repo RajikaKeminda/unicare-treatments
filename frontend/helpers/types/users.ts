@@ -20,5 +20,6 @@ export interface UserApiResponse extends TApiResponse {
 }
 
 export interface AppointmentResponse extends TApiResponse {
-  appointments: IAppointment[];
+  appointments?: IAppointment[];
+  appointment?: IAppointment;
 }

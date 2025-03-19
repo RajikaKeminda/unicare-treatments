@@ -7,24 +7,29 @@ import { useEffect, useState } from "react";
 import { Stethoscope } from "lucide-react";
 import { AppointmentResponse } from "@/types/users";
 import { apiService } from "@/libs/api";
+import { useSession } from "next-auth/react";
 
 export default function ViewAppointment() {
   const [data, setData] = useState<IAppointment[]>([]);
+  const { data: session } = useSession();
+  const user = session?.user;
 
   useEffect(() => {
     const getData = async () => {
       const response = await apiService.get<AppointmentResponse>(
-        `/appointments/patient/5678`
-      ); // change the patient id
+        `/appointments/patient/${user?.id}`
+      );
       if (response.success) {
-        setData(response.appointments);
+        setData(response?.appointments || []);
       }
     };
 
-    getData();
+    if (user?.id) {
+      getData();
+    }
 
     // setData();
-  }, []);
+  }, [user?.id]);
 
   return (
     <div className=" bg-white py-5 px-10 min-h-svh">

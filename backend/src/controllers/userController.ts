@@ -211,7 +211,7 @@ export const signInUser = async (
         success: true,
         message: "Login successful",
         user: {
-          id: user._id,
+          id: user._id.toString(),
           username: user.username,
           email: user.email,
           role: user.role,

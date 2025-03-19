@@ -28,9 +28,13 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { apiService } from "@/libs/api";
-import { TApiResponse } from "@/types/users";
+import { AppointmentResponse } from "@/types/users";
+import { useSession } from "next-auth/react";
 
 export default function ChannelAppointmentForm() {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   // form initializer
   const form = useForm<channelSchema>({
     resolver: zodResolver(channelAppointmentSchema),
@@ -51,14 +55,20 @@ export default function ChannelAppointmentForm() {
 
   const handleSubmit = async (values: channelSchema) => {
     try {
-      const response = await apiService.post<TApiResponse>(
-        `/appointments/patientAppointments`,
-        values
-      );
-      if (response.success) {
-        toast.success("Appointment successfully created");
-      }
-      if (!response.success) {
+      if (user?.id) {
+        const response = await apiService.post<AppointmentResponse>(
+          `/appointments/patientAppointments`,
+          { ...values, patientId: user?.id }
+        );
+        if (response.success) {
+          toast.success(
+            `Appointment successfully created ${response.appointment?.referenceNumber}`
+          );
+        }
+        if (!response.success) {
+          toast.error("Something went wrong, try again");
+        }
+      } else {
         toast.error("Something went wrong, try again");
       }
     } catch {
