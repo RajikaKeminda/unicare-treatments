@@ -55,7 +55,7 @@ export default function ProductPage() {
             </div>
           </Link>
 
-          <Link href="/product/product-3">
+          <Link href="/Product/product-details">
             <div className="rounded-lg border border-gray-300 shadow-md p-3 transition-all transform hover:scale-105 hover:shadow-xl hover:bg-gray-50 cursor-pointer">
               <div className="relative h-32">
                 <Image src={story} alt="appointments" layout="fill" objectFit="cover" className="rounded-t-lg" />
