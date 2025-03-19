@@ -7,7 +7,7 @@ const ComingSoonPage: React.FC = () => {
         <h1 className="text-4xl font-semibold text-red-500 mb-6">AI Product Assistant</h1>
         <h2 className="text-2xl font-bold text-gray-700 mb-4">Coming Soon</h2>
         <p className="text-lg text-gray-600 mb-6">
-          We're working hard to bring you an AI-powered product assistant that will revolutionize your experience.
+            We&apos;re working hard to bring you an AI-powered product assistant that will revolutionize your experience.
         </p>
         
         <div className="mb-6">
