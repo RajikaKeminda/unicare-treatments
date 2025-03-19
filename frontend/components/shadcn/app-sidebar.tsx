@@ -2,7 +2,12 @@
 
 import * as React from "react";
 
-import { BsBox, BsFilePost, BsGrid } from "react-icons/bs";
+import { BsFilePost, BsGrid } from "react-icons/bs";
+import { MdInventory } from "react-icons/md";
+import { FaShoppingCart } from "react-icons/fa";
+import { MdQueue } from "react-icons/md";
+import { FaHistory } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa";
 import { FiSettings } from "react-icons/fi";
 import { IoMdPhotos } from "react-icons/io";
 import { FaBlog } from "react-icons/fa";
@@ -34,11 +39,6 @@ const data = {
       items: [],
     },
     {
-      title: "Items",
-      url: "/dashboard/items",
-      icon: BsBox,
-    },
-    {
       title: "Blog",
       url: "/dashboard/blog",
       icon: FaBlog,
@@ -63,12 +63,12 @@ const data = {
     },
     {
       title: "Inquiries",
-      url: "/dashboard/inquiries",
+      url: "/dashboard/inquiry-management",
       icon: MdOutlineContactSupport,
     },
     {
       title: "Products",
-      url: "/dashboard/product-manage",
+      url: "/dashboard/product-management",
       icon: FaBoxOpen,
       isActive: true,
       items: [
@@ -83,6 +83,31 @@ const data = {
           url: "/dashboard/product-manage/product-see",
         },
       ],
+    },
+    {
+      title: "Inventory",
+      url: "/dashboard/Inventory-management",
+      icon: MdInventory,
+    },
+    {
+      title: "Orders",
+      url: "/dashboard/order-management",
+      icon: FaShoppingCart,
+    },
+    {
+      title: "Appointments",
+      url: "/dashboard/appointment-management",
+      icon: MdQueue,
+    },
+    {
+      title: "Treatment History",
+      url: "/dashboard/treatment-history-management",
+      icon: FaHistory,
+    },
+    {
+      title: "Users",
+      url: "/dashboard/user-management",
+      icon: FaUsers,
     },
     {
       title: "Settings",
