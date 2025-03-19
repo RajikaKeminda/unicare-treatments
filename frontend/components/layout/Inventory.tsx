@@ -212,7 +212,7 @@ export default function InventoryManager() {
   const generateHTMLReport = () => {
     const currentDate = new Date().toLocaleDateString();
 
-    let reportContent = `
+    const reportContent = `
       <html>
       <head>
         <title>Inventory Report - ${currentDate}</title>

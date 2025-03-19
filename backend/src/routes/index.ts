@@ -5,7 +5,7 @@ const router = express.Router();
 import { createProduct, getProducts, deleteProduct, updateProduct } from '../controllers/productContoller.ts';
 import { getAllUsers, registerUser, loginUser } from "../controllers/signupController.ts"; 
 // Import inventory controller functions
-import { getInventory, addItem, updateQuantity, deleteItem } from "../controllers/inventoryController.ts";
+import { getInventory, addItem, updateQuantity, deleteItem, updateItem} from "../controllers/inventoryController.ts";
 
 // Middleware to parse JSON request bodies
 router.use(express.json());
@@ -35,5 +35,5 @@ router.get("/inventory", getInventory); // Get all inventory items
 router.post("/inventory", addItem); // Add an item to the inventory
 router.put("/inventory/:id", updateQuantity); // Update the quantity of an inventory item
 router.delete("/inventory/:id", deleteItem); // Delete an inventory item
-
+router.put("/inventory-item/:id", updateItem); // Update this line
 export default router;

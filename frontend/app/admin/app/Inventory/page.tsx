@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
-import { FaWarehouse, FaRobot } from "react-icons/fa"; // Importing the icons
+import { FaWarehouse } from "react-icons/fa"; // Importing the icons
 
 const InventoryManagementPage = () => {
   const router = useRouter();
