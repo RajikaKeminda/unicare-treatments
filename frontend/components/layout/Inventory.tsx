@@ -21,7 +21,7 @@ ChartJS.register(
   Legend
 );
 
-const API_URL = "http://localhost:8082/api/inventory"; // Backend API
+const API_URL = "http://localhost:3001/api/inventory"; // Backend API
 
 interface InventoryItem {
   _id: string;
