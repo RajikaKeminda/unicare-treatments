@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import "../../app/admin/app/Inventory/Inventory.css"; // Adjusted import path
 
-const API_URL = "http://localhost:3001/api/inventory"; // Backend API
+const API_URL = "http://localhost:8082/api/inventory"; // Backend API
 
 export default function InventoryManager() {
   const [inventory, setInventory] = useState([]);
@@ -73,7 +72,7 @@ export default function InventoryManager() {
       }
   
       // Send PUT request to backend to update the quantity
-      const response = await fetch(`http://localhost:3001/api/inventory/${itemId}`, {
+      const response = await fetch(`http://localhost:8082/api/inventory/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -228,56 +227,60 @@ export default function InventoryManager() {
   
 
   return (
-    <div className="container">
-      <h2 className="productsTitle">Products</h2>
+    <div className="container mx-auto p-6">
+      <h2 className="text-3xl font-bold mb-4">Products</h2>
 
-      <div className="buttonWrapper">
-        <button className="addButton" onClick={() => setShowModal(true)}>Add Item</button>
-        <button className="reportButton" onClick={generateHTMLReport}>Generate Report</button>
+      <div className="mb-4">
+        <button className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600" onClick={() => setShowModal(true)}>Add Item</button>
+        <button className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 ml-4" onClick={generateHTMLReport}>Generate Report</button>
       </div>
 
       {showModal && (
-        <div className="modal">
-          <div className="modalContent">
-            <h2>Add New Item</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-2xl font-semibold mb-4">Add New Item</h2>
             <input
               type="text"
               value={newItem.name}
               onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
               placeholder="Item Name"
-              className="inputField"
+              className="border border-gray-300 rounded-md p-2 mb-4 w-full"
             />
             <input
               type="number"
               value={newItem.quantity}
               onChange={(e) => setNewItem({ ...newItem, quantity: Math.max(1, parseInt(e.target.value)) })}
-              className="inputField"
+              className="border border-gray-300 rounded-md p-2 mb-4 w-full"
               placeholder="Quantity"
             />
             <input
               type="number"
               value={newItem.perItemPrice}
               onChange={(e) => setNewItem({ ...newItem, perItemPrice: Math.max(1, parseFloat(e.target.value)) })}
-              className="inputField"
-              placeholder="Price per Item"
+              className="border border-gray-300 rounded-md p-2 mb-4 w-full"
+              placeholder="Price per Item (Rs)"
             />
-            <select
-              value={newItem.unit}
-              onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
-              className="inputField"
-            >
-              <option value="bottles">Bottles</option>
-              <option value="grams">Grams</option>
-              <option value="packs">Packs</option>
-            </select>
             <input
               type="date"
               value={newItem.expiryDate}
               onChange={(e) => setNewItem({ ...newItem, expiryDate: e.target.value })}
-              className="inputField"
+              className="border border-gray-300 rounded-md p-2 mb-4 w-full"
             />
-            <button onClick={addItem} className="confirmButton">Add Item</button>
-            <button className="closeButton" onClick={() => setShowModal(false)}>Close</button>
+
+            <div className="flex justify-between mt-4">
+              <button
+                className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+                onClick={addItem}
+              >
+                Add Item
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -285,43 +288,51 @@ export default function InventoryManager() {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <div className="inventoryTable">
-          <h3 className="tableTitle">Inventory List</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Per Item Price (Rs)</th>
-                <th>Total Price (Rs)</th>
-                <th>Unit</th>
-                <th>Expiry Date</th>
-                <th>Actions</th>
+        <table className="table-auto w-full border-collapse mt-4">
+          <thead>
+            <tr>
+              <th className="border px-4 py-2">Item Name</th>
+              <th className="border px-4 py-2">Quantity</th>
+              <th className="border px-4 py-2">Unit</th>
+              <th className="border px-4 py-2">Price per Item (Rs)</th>
+              <th className="border px-4 py-2">Expiry Date</th>
+              <th className="border px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {inventory.map((item) => (
+              <tr key={item._id}>
+                <td className="border px-4 py-2">{item.name}</td>
+                <td className="border px-4 py-2">{item.quantity}</td>
+                <td className="border px-4 py-2">{item.unit}</td>
+                <td className="border px-4 py-2">{item.perItemPrice}</td>
+                <td className="border px-4 py-2">{item.expiryDate}</td>
+                <td className="border px-4 py-2">
+                  <button
+                    className="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 mr-2"
+                    onClick={() => updateQuantity(item._id, 1)}
+                  >
+                    +
+                  </button>
+                  <button
+                    className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 mr-2"
+                    onClick={() => updateQuantity(item._id, -1)}
+                  >
+                    -
+                  </button>
+                  <button
+                    className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
+                    onClick={() => deleteItem(item._id)}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {inventory.map((item) => (
-                <tr key={item._id}>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
-                  <td>Rs {item.perItemPrice}</td>
-                  <td>Rs {item.quantity * item.perItemPrice}</td>
-                  <td>{item.unit}</td>
-                  <td>
-                    {item.expiryDate}
-                    {isExpired(item.expiryDate) ? <span className="expiredIcon">⚠️</span> : ''}
-                  </td>
-                  <td>
-                    <button onClick={() => updateQuantity(item._id, 1)} className="quantityButton">+</button>
-                    <button onClick={() => updateQuantity(item._id, -1)} className="quantityButton">-</button>
-                    <button onClick={() => deleteItem(item._id)} className="deleteButton">Remove</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
 }
+
