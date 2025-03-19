@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { FiHeart, FiMessageCircle, FiShare2, FiCopy, FiSend, FiThumbsUp, FiThumbsDown } from 'react-icons/fi'
+import { FiHeart, FiMessageCircle, FiShare2, FiCopy, FiSend, FiThumbsUp, FiThumbsDown, FiArrowRight, FiEye } from 'react-icons/fi'
 import { format } from 'date-fns'
+import Link from 'next/link'
 
 interface Comment {
   id: string
@@ -101,6 +102,63 @@ export default function BlogViewPage({ params }: { params: { id: string } }) {
           replies: [],
         },
       ],
+    },
+  ])
+
+  const [suggestedPosts] = useState<Post[]>([
+    {
+      id: '2',
+      title: 'Healthy Living Tips',
+      content: 'Discover the best practices for maintaining a healthy lifestyle...',
+      thumbnail: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+      createdAt: '2024-03-19T15:30:00Z',
+      updatedAt: '2024-03-19T15:30:00Z',
+      category: 'Health',
+      author: {
+        name: 'Jane Smith',
+        avatar: 'https://ui-avatars.com/api/?name=Jane+Smith',
+      },
+      stats: {
+        views: 856,
+        likes: 45,
+        comments: 12,
+      },
+    },
+    {
+      id: '3',
+      title: 'The Future of Web Development',
+      content: 'Explore the latest trends and technologies shaping the future of web development...',
+      thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+      createdAt: '2024-03-18T09:15:00Z',
+      updatedAt: '2024-03-18T09:15:00Z',
+      category: 'Technology',
+      author: {
+        name: 'Mike Johnson',
+        avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson',
+      },
+      stats: {
+        views: 654,
+        likes: 32,
+        comments: 8,
+      },
+    },
+    {
+      id: '4',
+      title: 'Business Strategy in 2024',
+      content: 'Learn about the key business strategies that will drive success in 2024...',
+      thumbnail: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+      createdAt: '2024-03-17T14:20:00Z',
+      updatedAt: '2024-03-17T14:20:00Z',
+      category: 'Business',
+      author: {
+        name: 'Sarah Wilson',
+        avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson',
+      },
+      stats: {
+        views: 432,
+        likes: 28,
+        comments: 15,
+      },
     },
   ])
 
@@ -325,6 +383,64 @@ export default function BlogViewPage({ params }: { params: { id: string } }) {
         {/* Comments List */}
         <div className="space-y-8">
           {comments.map(comment => renderComment(comment))}
+        </div>
+      </div>
+
+      {/* Suggested Posts */}
+      <div className="mt-16 pt-8 border-t border-gray-200">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">Suggested Posts</h2>
+          <Link 
+            href="/blog"
+            className="flex items-center gap-2 text-purple-600 hover:text-purple-700 transition-colors"
+          >
+            View All
+            <FiArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {suggestedPosts.map((suggestedPost) => (
+            <Link 
+              key={suggestedPost.id} 
+              href={`/blog/${suggestedPost.id}`}
+              className="group"
+            >
+              <article className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="relative h-40">
+                  <img
+                    src={suggestedPost.thumbnail}
+                    alt={suggestedPost.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+                      {suggestedPost.category}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                    {suggestedPost.title}
+                  </h3>
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <FiHeart className="w-4 h-4" />
+                      <span>{suggestedPost.stats.likes}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FiMessageCircle className="w-4 h-4" />
+                      <span>{suggestedPost.stats.comments}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FiEye className="w-4 h-4" />
+                      <span>{suggestedPost.stats.views}</span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </Link>
+          ))}
         </div>
       </div>
     </div>
