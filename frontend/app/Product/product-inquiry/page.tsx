@@ -24,7 +24,7 @@ const ExpertAyurvedicAdvicePage = () => {
         <div className="container mx-auto text-center px-6">
           <h2 className="text-3xl font-semibold mb-6">Get Personalized Advice</h2>
           <p className="text-lg text-gray-700 mb-8">
-            Fill out the form below to receive personalized Ayurvedic advice from our expert practitioners. Whether you're seeking solutions for skin care, digestion, stress, or overall wellness, our team is here to help!
+            Fill out the form below to receive personalized Ayurvedic advice from our expert practitioners. Whether you&apos;re seeking solutions for skin care, digestion, stress, or overall wellness, our team is here to help!
           </p>
 
           {/* Form Section */}
@@ -87,7 +87,7 @@ const ExpertAyurvedicAdvicePage = () => {
           <h2 className="text-3xl font-semibold">A Message from Our Ayurvedic Doctor</h2>
           <div className="text-lg text-gray-600">
             <p>
-              "At our Ayurveda clinic, we believe that true wellness comes from harmony between your body, mind, and spirit. Our approach is not a one-size-fits-all solution, but a personalized plan designed specifically for your needs. Ayurveda takes into account your unique constitution (Prakriti) and helps to restore balance through natural remedies, diet, and lifestyle adjustments. We are here to guide you every step of the way in your wellness journey."
+            &quot;At our Ayurveda clinic, we believe that true wellness comes from harmony between your body, mind, and spirit. Our approach is not a one-size-fits-all solution, but a personalized plan designed specifically for your needs. Ayurveda takes into account your unique constitution (Prakriti) and helps to restore balance through natural remedies, diet, and lifestyle adjustments. We are here to guide you every step of the way in your wellness journey.&quot;
             </p>
             <p className="mt-6 text-xl font-semibold text-red-600">- Dr. Asha Patil, Ayurvedic Practitioner</p>
           </div>

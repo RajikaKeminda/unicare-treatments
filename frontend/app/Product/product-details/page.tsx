@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 const ProductStoryPage = () => {
   return (
@@ -14,7 +15,7 @@ const ProductStoryPage = () => {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Left Section: Product Image */}
           <div className="flex justify-center">
-            <img
+            <Image
               src="/path-to-your-image.jpg" // Replace with your image source
               alt="Ayurveda Product"
               className="w-full max-w-md rounded-lg shadow-lg"
@@ -39,7 +40,7 @@ const ProductStoryPage = () => {
 
             <h3 className="text-2xl font-semibold">Key Benefits:</h3>
             <p className="text-gray-600">
-              Our products promote balance, healing, and rejuvenation from the inside out. With consistent use, you'll experience:
+              Our products promote balance, healing, and rejuvenation from the inside out. With consistent use, you&apos;ll experience:
             </p>
             <ul className="list-disc list-inside text-gray-700">
               <li>Glowing and Healthy Skin</li>
@@ -59,7 +60,7 @@ const ProductStoryPage = () => {
             Our Ayurveda products are rooted in the wisdom of over 5,000 years of ancient healing traditions. The formulations are designed to balance the mind, body, and spirit through the use of potent natural ingredients. From the tranquil Himalayan mountains to the lush Indian forests, we source the best herbs, roots, and flowers to create remedies that have been passed down through generations.
           </p>
           <div className="mt-8">
-            <img
+            <Image
               src="/path-to-your-image-2.jpg" // Replace with your image source
               alt="Ayurvedic Process"
               className="w-full max-w-2xl mx-auto rounded-lg shadow-lg"
@@ -75,21 +76,21 @@ const ProductStoryPage = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="p-6 bg-white rounded-lg shadow-lg">
               <p className="text-lg text-gray-600">
-                "I’ve been using the Ayurveda skincare products for a few weeks now, and my skin has never looked better. The natural ingredients really make a difference!"
+              &quot;I&apos;ve been using the Ayurveda skincare products for a few weeks now, and my skin has never looked better. The natural ingredients really make a difference!&quot;
               </p>
               <p className="mt-4 font-semibold text-red-600">- Priya M.</p>
             </div>
 
             <div className="p-6 bg-white rounded-lg shadow-lg">
               <p className="text-lg text-gray-600">
-                "These wellness supplements have helped me feel more energized and at peace. I love how natural and safe they feel."
+              &quot;These wellness supplements have helped me feel more energized and at peace. I love how natural and safe they feel.&quot;
               </p>
               <p className="mt-4 font-semibold text-red-600">- Arjun R.</p>
             </div>
 
             <div className="p-6 bg-white rounded-lg shadow-lg">
               <p className="text-lg text-gray-600">
-                "I’ve struggled with stress for years, but since I started using these products, my anxiety has decreased significantly. Truly life-changing!"
+              &quot;I&apos;ve struggled with stress for years, but since I started using these products, my anxiety has decreased significantly. Truly life-changing!&quot;
               </p>
               <p className="mt-4 font-semibold text-red-600">- Seema S.</p>
             </div>
