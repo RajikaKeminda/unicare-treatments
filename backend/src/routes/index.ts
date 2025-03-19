@@ -3,11 +3,18 @@ const router = express.Router();
 
 // Importing controllers for products
 import { createProduct, getProducts, deleteProduct, updateProduct } from '../controllers/productContoller.ts';
-//Signup and login routes - pulindu
-import { getAllUsers, registerUser, loginUser } from "../controllers/signupController.ts"; 
+
 // Import inventory controller functions
 import { getInventory, addItem, updateQuantity, deleteItem } from "../controllers/inventoryController.ts";
 import { addTreatment } from '../controllers/treatmentController.ts';
+
+import appointmentRoute from "./appointmentRoute.ts";
+import {
+  checkUniqueUserName,
+  signInUser,
+  signUpUser,
+  verifyUser,
+} from "../controllers/userController.ts";
 
 // Middleware to parse JSON request bodies
 router.use(express.json());
@@ -22,11 +29,6 @@ router.delete('/products/:id', deleteProduct);
 // Update product route
 router.put('/products/:id', updateProduct);
 
-// api/users/
-router.route("/users").get(getAllUsers).post(registerUser); // POST uses registerUser
-
-// api/users/login (new login route)
-router.route("/users/login").post(loginUser); // POST uses loginUser
 
 
 // api/inventory/
@@ -36,6 +38,15 @@ router.put("/inventory/:id", updateQuantity); // Update the quantity of an inven
 router.delete("/inventory/:id", deleteItem); // Delete an inventory item
 
 
-  router.post('/treatments', addTreatment);
+router.post('/treatments', addTreatment);
+
+
+router.use("/appointments", appointmentRoute);
+
+// --------------------------------------------------------
+router.get("/user/check-username-unique/:username", checkUniqueUserName);
+router.post("/user/sign-up", signUpUser);
+router.post("/user/verify-code", verifyUser);
+router.post("/user/sign-in", signInUser);
 
 export default router;

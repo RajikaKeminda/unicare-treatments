@@ -13,12 +13,32 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
+      "@/icons/*": ["./public/assets/icons/*"],
+      "@/images/*": ["./public/assets/images/*"],
+      "@/shadcn/*": ["./components/shadcn/*"],
+      "@/components/*": ["./components/*"],
+
+      "@/actions/*": ["./helpers/actions/*"],
+      "@/schemas/*": ["./helpers/validation/*"],
+      "@/contexts/*": ["./helpers/contexts/*"],
+      "@/templates/*": ["./helpers/templates/*"],
+      "@/connectors/*": ["./helpers/connectors/*"],
+      "@/models/*": ["./helpers/models/*"],
+      "@/styles/*": ["./helpers/styles/*"],
+      "@/types/*": ["./helpers/types/*"],
+      "@/hooks/*": ["./helpers/hooks/*"],
+      "@/libs/*": ["./helpers/libs/*"],
+
+      "@/channeling/*": ["./components/layout/channeling/*"],
+
+      "@/helpers/*": ["./helpers/*"],
       "@/*": ["./*"]
     }
   },

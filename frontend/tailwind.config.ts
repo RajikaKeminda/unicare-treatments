@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
     darkMode: ["class"],
@@ -9,6 +10,9 @@ export default {
   ],
   theme: {
   	extend: {
+			backgroundImage: {
+        scope: "url('/assets/images/scope.png')",
+      },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -49,7 +53,17 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
-  			}
+  			},
+				sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          accent: "hsl(var(--sidebar-accent))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+        },
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -59,5 +73,5 @@ export default {
   	}
   },
 
-  plugins: [require("tailwindcss-animate"),],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

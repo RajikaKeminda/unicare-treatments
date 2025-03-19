@@ -1,29 +1,46 @@
+import { IUser } from "../util/user-schema.ts";
 import { Schema, model } from "mongoose";
 
-const UserSchema = new Schema(
+const userSchema = new Schema<IUser>(
   {
-    id: {
+    username: {
       type: String,
-      required: true,
+      required: [true, "Username is required"],
       trim: true,
-      index: true, // Adding index
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
+      unique: true,
     },
     email: {
       type: String,
-      required: true,
-      min: 0,
+      required: [true, "Email is required"],
+      unique: true,
+      match: [/.+\@.+\..+/, "Please use a valid email address"],
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+    },
+    verifyCode: {
+      type: String,
+      required: [true, "Verify Code is required"],
+    },
+    verifyCodeExpiry: {
+      type: Date,
+      required: [true, "Verify Code Expiry is required"],
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    role: {
+      type: String,
+      enum: ["doctor", "admin", "supplier", "user"],
+      default: "admin",
     },
   },
   {
-    timestamps: true, // Automatically manage createdAt and updatedAt
-    collection: "user"
+    timestamps: true,
   }
 );
 
-const UserModel = model("user", UserSchema);
-export default UserModel;
+const userModel = model("user", userSchema);
+export default userModel;

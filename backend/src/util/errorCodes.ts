@@ -1,0 +1,6 @@
+export enum userErrorCodes {
+  ALREADY_EXIST = 601,
+  IDENTIFIER_ALREADY_TAKEN = 602,
+  UNABLE_TO_SEND_OTP = 603,
+  VALIDATION_ERROR = 604,
+}
