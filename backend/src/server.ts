@@ -1,30 +1,27 @@
 import express from "express";
 import "dotenv/config";
-import cors from "cors";  // Import the cors package
-
-import apiRouter from "./routes/index.ts";
-import { connectToMongoDB } from "./util/dbConnector.ts";
+import cors from "cors"; // Import CORS middleware
+import apiRouter from "./routes/index.ts"; // Your API routes
+import { connectToMongoDB } from "./util/dbConnector.ts"; // MongoDB connection utility
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8001; // Ensure a default port if not set
 
-// DB Connection -->
 connectToMongoDB();
 
 // Middleware -->
-app.use(express.json()); // set req.body as a JSON
-app.use(cors()); // Enable CORS for all origins (or specify allowed origins)
-
+// Enable CORS for requests only from localhost:3000 (your Next.js frontend)
+app.use(cors({ origin: 'http://localhost:3000' })); // CORS for specific origin
+app.use(express.json()); // Parse incoming JSON requests
 
 // Routes -->
-app.use("/api", apiRouter);
+app.use("/api", apiRouter); // All routes will be prefixed with "/api"
 
 // Start server -->
-app
-  .listen(PORT, () => {
-    const now = new Date().toLocaleString();
-    console.log(`[${now}]  Server is up and running on port number: ${PORT}`);
-  })
-  .on("error", (error) => {
-    console.error(`Error occurred: ${error.message}`);
-  });
+app.listen(PORT, () => {
+  const now = new Date().toLocaleString();
+  console.log(`[${now}] Server is up and running on port number: ${PORT}`);
+})
+.on("error", (error) => {
+  console.error(`Error occurred: ${error.message}`);
+});

@@ -5,6 +5,6 @@ export interface IProduct {
   category: string;
   stock: number;
   images: string[];
-  ratings: number;
-  reviews: number;
-}
+  ratings: number[];
+  reviews: string[];
+} 
