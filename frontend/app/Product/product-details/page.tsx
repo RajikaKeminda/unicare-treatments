@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const ProductStoryPage = () => {
   return (
@@ -19,6 +20,8 @@ const ProductStoryPage = () => {
               src="/path-to-your-image.jpg" // Replace with your image source
               alt="Ayurveda Product"
               className="w-full max-w-md rounded-lg shadow-lg"
+              width={100}
+              height={100}
             />
           </div>
 
@@ -64,6 +67,8 @@ const ProductStoryPage = () => {
               src="/path-to-your-image-2.jpg" // Replace with your image source
               alt="Ayurvedic Process"
               className="w-full max-w-2xl mx-auto rounded-lg shadow-lg"
+              width={100}
+              height={50}
             />
           </div>
         </div>
@@ -102,7 +107,9 @@ const ProductStoryPage = () => {
       <section className="bg-red-600 text-white py-10 text-center">
         <h2 className="text-3xl font-semibold mb-4">Embrace the Healing Power of Ayurveda</h2>
         <p className="text-lg mb-6">Start your journey to holistic health and well-being today. Explore our product range and experience the natural goodness.</p>
+        <Link href="/Product/product-view">
         <button className="bg-white text-red-600 px-6 py-3 text-xl rounded-lg hover:bg-gray-100 transition duration-300">Shop Now</button>
+        </Link>
       </section>
     </div>
   );

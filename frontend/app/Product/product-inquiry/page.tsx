@@ -89,7 +89,7 @@ const ExpertAyurvedicAdvicePage = () => {
             <p>
             &quot;At our Ayurveda clinic, we believe that true wellness comes from harmony between your body, mind, and spirit. Our approach is not a one-size-fits-all solution, but a personalized plan designed specifically for your needs. Ayurveda takes into account your unique constitution (Prakriti) and helps to restore balance through natural remedies, diet, and lifestyle adjustments. We are here to guide you every step of the way in your wellness journey.&quot;
             </p>
-            <p className="mt-6 text-xl font-semibold text-red-600">- Dr. Asha Patil, Ayurvedic Practitioner</p>
+            <p className="mt-6 text-xl font-semibold text-red-600">- Dr. Dilshan</p>
           </div>
         </div>
       </section>

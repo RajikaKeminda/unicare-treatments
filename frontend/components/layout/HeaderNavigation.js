@@ -22,7 +22,7 @@ export default function Header() {
         <Link className="block text-gray-500 hover:text-white hover:bg-primary hover:px-4 hover:py-2 hover:rounded-lg transition-all duration-200" href={''}>Home</Link>
         <Link className="block text-gray-500 hover:text-white hover:bg-primary hover:px-4 hover:py-2 hover:rounded-lg transition-all duration-200"  href={''}>Appointment</Link>
         <Link  className="block text-gray-500 hover:text-white hover:bg-primary hover:px-4 hover:py-2 hover:rounded-lg transition-all duration-200" href={''}>Treatments Updates</Link>
-        <Link className="block text-gray-500 hover:text-white hover:bg-primary hover:px-4 hover:py-2 hover:rounded-lg transition-all duration-200"  href={''}>Products</Link>
+        <Link className="block text-gray-500 hover:text-white hover:bg-primary hover:px-4 hover:py-2 hover:rounded-lg transition-all duration-200"  href={'/Product'}>Products</Link>
         <Link  className="block text-gray-500 hover:text-white hover:bg-primary hover:px-4 hover:py-2 hover:rounded-lg transition-all duration-200" href={''}>Instruction blogs</Link>
         <Link  className="block text-gray-500 hover:text-white hover:bg-primary hover:px-4 hover:py-2 hover:rounded-lg transition-all duration-200" href={''}>Contact Us</Link>
         <Link className="bg-primary rounded-full text-white px-8 py-2 hover:bg-red-900 hover:shadow-lg transform hover:scale-105 transition-all duration-200 ease-in-out" href={''} >
