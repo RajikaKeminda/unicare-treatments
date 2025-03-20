@@ -6,7 +6,9 @@ import { createProduct, getProducts, deleteProduct, updateProduct } from '../con
 
 // Import inventory controller functions
 import { getInventory, addItem, updateQuantity, deleteItem } from "../controllers/inventoryController.ts";
-import { addTreatment } from '../controllers/treatmentController.ts';
+
+// Import treatment controller
+import { addTreatment, deleteTreatment, getAllPatients, getPatientTreatment, updateTreatment } from '../controllers/treatmentController.ts';
 
 import appointmentRoute from "./appointmentRoute.ts";
 import {
@@ -29,7 +31,12 @@ router.delete('/products/:id', deleteProduct);
 // Update product route
 router.put('/products/:id', updateProduct);
 
-
+// api/treatments
+router.post('/treatments', addTreatment);
+router.get('/treatments', getAllPatients);
+router.get('/treatments/:id', getPatientTreatment);
+router.put('/treatments/:id', updateTreatment);
+router.delete('/treatments/:id', deleteTreatment);
 
 // api/inventory/
 router.get("/inventory", getInventory); // Get all inventory items
