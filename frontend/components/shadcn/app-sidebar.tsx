@@ -75,12 +75,12 @@ const data = {
         {
           icon: MdAdd,
           title: "Add Product",
-          url: "/dashboard/product-manage/product-add",
+          url: "/dashboard/product-management/product-add",
         },
         {
           icon: IoIosList,
           title: "All Products",
-          url: "/dashboard/product-manage/product-see",
+          url: "/dashboard/product-management/product-see",
         },
       ],
     },
@@ -103,6 +103,19 @@ const data = {
       title: "Treatment History",
       url: "/dashboard/treatment-history-management",
       icon: FaHistory,
+      isActive: true,
+      items: [
+        {
+          icon: MdAdd,
+          title: "Add Treatment",
+          url: "/dashboard/treatment-history-management/treatment-add",
+        },
+        {
+          icon: IoIosList,
+          title: "Ongoing Treatments",
+          url: "/dashboard/treatment-history-management/treatment-see",
+        },
+      ],
     },
     {
       title: "Users",

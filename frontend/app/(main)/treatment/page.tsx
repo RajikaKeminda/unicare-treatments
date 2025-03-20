@@ -1,12 +1,9 @@
-import { FaStethoscope, FaPills, FaDumbbell, FaCalendarAlt, FaRegStickyNote, FaCheckCircle, FaClock } from 'react-icons/fa';
-
 export default function TreatmentUpdates() {
   const patientName = "John Doe"; // Dynamically fetched patient name
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-screen-lg mx-auto px-4">
-        {/* Top Section: Welcome & Treatment Updates Title */}
         <div className="text-center space-y-8 p-8">
           <h2 className="text-2xl text-gray-800 dark:text-white">
             Welcome, {patientName}!
@@ -21,40 +18,9 @@ export default function TreatmentUpdates() {
           <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
             Current Treatment
           </h2>
-          <div className="mt-4 space-y-4">
-            <div className="flex items-center">
-              <FaStethoscope className="mr-2 text-gray-600 dark:text-gray-300" />
-              <p className="text-lg text-gray-600 dark:text-gray-300"><strong>Treatment Type:</strong> Physical Therapy</p>
-            </div>
-            <div className="flex items-center">
-              <FaPills className="mr-2 text-gray-600 dark:text-gray-300" />
-              <p className="text-lg text-gray-600 dark:text-gray-300"><strong>Medicines/Oils:</strong> Healing Oil (2x per day)</p>
-            </div>
-            <div className="flex items-center">
-              <FaDumbbell className="mr-2 text-gray-600 dark:text-gray-300" />
-              <p className="text-lg text-gray-600 dark:text-gray-300"><strong>Yoga/Exercises:</strong> Stretching exercises (10 minutes)</p>
-            </div>
-            <div className="flex items-center">
-              <FaCalendarAlt className="mr-2 text-gray-600 dark:text-gray-300" />
-              <p className="text-lg text-gray-600 dark:text-gray-300"><strong>Start Date:</strong> 2025-03-10</p>
-            </div>
-            <div className="flex items-center">
-              <FaCalendarAlt className="mr-2 text-gray-600 dark:text-gray-300" />
-              <p className="text-lg text-gray-600 dark:text-gray-300"><strong>End Date:</strong> 2025-03-24</p>
-            </div>
-            <div className="flex items-center">
-              <FaRegStickyNote className="mr-2 text-gray-600 dark:text-gray-300" />
-              <p className="text-lg text-gray-600 dark:text-gray-300"><strong>Doctor’s Notes:</strong> Continue with the treatment and exercises daily.</p>
-            </div>
-            <div className="flex items-center">
-              {true ? (
-                <FaCheckCircle className="mr-2 text-green-600 dark:text-green-400" />
-              ) : (
-                <FaClock className="mr-2 text-gray-600 dark:text-gray-300" />
-              )}
-              <p className="text-lg text-gray-600 dark:text-gray-300"><strong>Status:</strong> Ongoing</p>
-            </div>
-          </div>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            You have no current treatments yet.
+          </p>
         </div>
 
         {/* Previous Treatments Section */}
