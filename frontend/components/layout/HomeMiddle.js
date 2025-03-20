@@ -19,7 +19,7 @@ const HeaderAndProducts = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8081/api/products');  // Use axios for better handling
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/products`);  // Use axios for better handling
         console.log('API Response:', response);  // Log full response to inspect it
         
         // Check if the data is an array or nested within an object
