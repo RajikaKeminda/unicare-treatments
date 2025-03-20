@@ -21,7 +21,7 @@ export const addTreatment = async (req: Request, res: Response) => {
 //Function to get all treatments 
 export const getAllPatients = async (req: Request, res: Response) => {
   try {
-
+   
     const treatments = await Treatment.find(); 
 
     res.status(200).json({

@@ -8,7 +8,7 @@ import { createProduct, getProducts, deleteProduct, updateProduct } from '../con
 import { getInventory, addItem, updateQuantity, deleteItem, updateItem} from "../controllers/inventoryController.ts";
 
 // Import treatment controller
-import { addTreatment, deleteTreatment, getAllPatients, getPatientTreatment, updateTreatment } from '../controllers/treatmentController.ts';
+import { addTreatment, deleteTreatment, getAllPatients, getPatientTreatment, updateTreatment } from '../controllers/treatmentController.ts'; 
 
 import appointmentRoute from "./appointmentRoute.ts";
 import {
@@ -37,6 +37,7 @@ router.get('/treatments', getAllPatients);
 router.get('/treatments/:id', getPatientTreatment);
 router.put('/treatments/:id', updateTreatment);
 router.delete('/treatments/:id', deleteTreatment);
+
 
 // api/inventory/
 router.get("/inventory", getInventory); // Get all inventory items
