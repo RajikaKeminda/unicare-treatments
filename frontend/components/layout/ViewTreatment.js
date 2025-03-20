@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export default function ViewTreatment({ patient, onClose }) {
   const [editedPatient, setEditedPatient] = useState(patient);
@@ -26,7 +27,8 @@ export default function ViewTreatment({ patient, onClose }) {
 
     // Prevent updating patientID
     if (editedPatient.patientID !== patient.patientID) {
-      alert("Patient ID cannot be changed!");
+      // alert("Patient ID cannot be changed!");
+      toast.error("Patient ID cannot be changed!");
       return;
     }
 
@@ -43,7 +45,8 @@ export default function ViewTreatment({ patient, onClose }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Updated Successfully!");
+        // alert("Updated Successfully!");
+        toast.success("Updated Successfully!");
         onClose(); // Close the modal after successful update
       } else {
         console.error(data.message || "Error updating treatment.");
@@ -68,7 +71,8 @@ export default function ViewTreatment({ patient, onClose }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Deleted Successfully!');
+        // alert('Deleted Successfully!');
+        toast.success("Deleted Successfully!");
         onClose(); // Close the modal after successful delete
       } else {
         console.error(data.message || 'Error deleting treatment.');

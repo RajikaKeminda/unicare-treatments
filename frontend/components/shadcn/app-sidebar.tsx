@@ -103,19 +103,6 @@ const data = {
       title: "Treatment History",
       url: "/dashboard/treatment-history-management",
       icon: FaHistory,
-      isActive: true,
-      items: [
-        {
-          icon: MdAdd,
-          title: "Add Treatment",
-          url: "/dashboard/treatment-history-management/treatment-add",
-        },
-        {
-          icon: IoIosList,
-          title: "Ongoing Treatments",
-          url: "/dashboard/treatment-history-management/treatment-see",
-        },
-      ],
     },
     {
       title: "Users",
