@@ -17,11 +17,12 @@ const ProductStoryPage = () => {
           {/* Left Section: Product Image */}
           <div className="flex justify-center">
             <Image
-              src="/path-to-your-image.jpg" // Replace with your image source
+              src="/product-details.png" // Replace with your image source
               alt="Ayurveda Product"
               className="w-full max-w-md rounded-lg shadow-lg"
               width={100}
               height={100}
+              unoptimized 
             />
           </div>
 
@@ -64,11 +65,12 @@ const ProductStoryPage = () => {
           </p>
           <div className="mt-8">
             <Image
-              src="/path-to-your-image-2.jpg" // Replace with your image source
+              src="/product-details-2.png" // Replace with your image source
               alt="Ayurvedic Process"
               className="w-full max-w-2xl mx-auto rounded-lg shadow-lg"
               width={100}
               height={50}
+              unoptimized
             />
           </div>
         </div>

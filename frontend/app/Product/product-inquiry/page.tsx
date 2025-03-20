@@ -102,16 +102,18 @@ const ExpertAyurvedicAdvicePage = () => {
         </p>
 
        {/* Google Maps Embed */}
-<div className="w-full h-96">
-  <iframe
-    src="https://www.google.com/maps/place/Unicare+Holistic+Treatment+Center+-+Dharga+Town/@6.4387838,80.0369078,17z/data=!3m1!4b1!4m6!3m5!1s0x3ae22d951dafa2cb:0xff01918bb691cbbb!8m2!3d6.4387838!4d80.0394827!16s%2Fg%2F11l22c71pl?entry=ttu&g_ep=EgoyMDI1MDMxNi4wIKXMDSoASAFQAw%3D%3D"
-    width="100%"
-    height="100%"
-    style={{ border: 0 }}
-    allowFullScreen={true} 
-    loading="lazy"
-  ></iframe>
-</div>
+       <div className="w-full h-96">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.6514944721343!2d80.03690777480512!3d6.438783793552445!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae22d951dafa2cb%3A0xff01918bb691cbbb!2sUnicare%20Holistic%20Treatment%20Center%20-%20Dharga%20Town!5e0!3m2!1sen!2slk!4v1742447175303!5m2!1sen!2slk"
+        width="100%"
+        height="100%"
+        style={{ border: 0 }}
+        allowFullScreen
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      ></iframe>
+    </div>
+
       </section>
     </div>
   );
