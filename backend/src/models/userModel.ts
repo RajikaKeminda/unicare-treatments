@@ -36,6 +36,13 @@ const userSchema = new Schema<IUser>(
       enum: ["doctor", "admin", "supplier", "user"],
       default: "admin",
     },
+    reports: {
+      type: [
+        {
+          type: String,
+        },
+      ],
+    },
   },
   {
     timestamps: true,

@@ -23,3 +23,7 @@ export interface AppointmentResponse extends TApiResponse {
   appointments?: IAppointment[];
   appointment?: IAppointment;
 }
+
+export interface ReportResponse extends TApiResponse {
+  reports: string[];
+}

@@ -18,6 +18,12 @@ import {
   verifyUser,
 } from "../controllers/userController.ts";
 
+import {
+  createReport,
+  getAllReports,
+  removeReport,
+} from "../controllers/reportController.ts";
+
 // Middleware to parse JSON request bodies
 router.use(express.json());
 
@@ -57,5 +63,14 @@ router.get("/user/check-username-unique/:username", checkUniqueUserName);
 router.post("/user/sign-up", signUpUser);
 router.post("/user/verify-code", verifyUser);
 router.post("/user/sign-in", signInUser);
+
+// ---------------------------------------------------------
+// api/reports/
+router
+  .route("/reports/:patientId")
+  .post(createReport)
+  .get(getAllReports)
+  .put(removeReport);
+
 
 export default router;
