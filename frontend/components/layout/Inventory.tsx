@@ -21,7 +21,7 @@ ChartJS.register(
   Legend
 );
 
-const API_URL = "http://localhost:8081/api/inventory"; // Backend API
+const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/inventory`; // Backend API
 
 interface InventoryItem {
   _id: string;

@@ -34,7 +34,7 @@ const InstrumentTable: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8081/api/products');
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/products`);
         setProducts(response.data.products);
         setLoading(false);
       } catch (error) {
@@ -48,7 +48,7 @@ const InstrumentTable: React.FC = () => {
   // Handle product deletion
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:8081/api/products/${id}`);
+      await axios.delete(`${process.env.NEXT_PUBLIC_BASE_URL}/products/${id}`);
       setProducts(products.filter((product) => product._id !== id));
       console.log('Product deleted successfully');
     } catch (error) {
@@ -75,7 +75,7 @@ const InstrumentTable: React.FC = () => {
   const handleSaveUpdate = async () => {
     try {
       const { _id, name, description, price, category, stock, ratings } = updatedProduct;
-      await axios.put(`http://localhost:8081/api/products/${_id}`, {
+      await axios.put(`${process.env.NEXT_PUBLIC_BASE_URL}/products/${_id}`, {
         name,
         description,
         price,

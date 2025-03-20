@@ -18,7 +18,7 @@ export default function PatientList() {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await fetch('http://localhost:8081/api/treatments'); // Correct API endpoint
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/treatments`); // Correct API endpoint
         const data = await response.json();
 
         console.log('API response:', data); // Log the response for debugging

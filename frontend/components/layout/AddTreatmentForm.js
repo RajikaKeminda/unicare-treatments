@@ -66,7 +66,7 @@ export default function AddTreatmentForm({ onClose }) {
     };
 
     try {
-      const response = await axios.post('http://localhost:8081/api/treatments', treatmentData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/treatments`, treatmentData);
 
       if (response.status === 200) {
         alert('Treatment form saved!');
