@@ -33,7 +33,7 @@ const ProductOptionsPage = () => {
             <div className="group cursor-pointer relative rounded-lg shadow-lg overflow-hidden border-2 border-gray-900 dark:border-gray-600">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 text-center mb-4 mt-3">Add Product</h2>
               <div
-                onClick={() => handleNavigation("/dashboard/product-manage/product-add")}
+                onClick={() => handleNavigation("/dashboard/product-management/product-add")}
                 className="relative group"
               >
                 <Image
@@ -58,7 +58,7 @@ const ProductOptionsPage = () => {
             <div className="group cursor-pointer relative rounded-lg shadow-lg overflow-hidden border-2 border-gray-900 dark:border-gray-600">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 text-center mb-4 mt-3">All Products</h2>
               <div
-                onClick={() => handleNavigation("/dashboard/product-manage/product-see")}
+                onClick={() => handleNavigation("/dashboard/product-management/product-see")}
                 className="relative group"
               >
                 <Image
@@ -83,7 +83,7 @@ const ProductOptionsPage = () => {
           {/* Admin Side Button */}
           <div className="mt-8 flex justify-center">
             <button
-              onClick={() => handleNavigation("/products")}
+              onClick={() => handleNavigation("/products/product-view")}
               className="bg-red-500 text-white py-3 px-6 rounded-lg shadow-md hover:bg-red-800 transition duration-300"
             >
               User Side View

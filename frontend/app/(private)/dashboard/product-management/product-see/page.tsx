@@ -106,7 +106,10 @@ const InstrumentTable: React.FC = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
     doc.text('Available Products Report', 20, 20);
-    const currentDate = new Date().toLocaleDateString();
+
+    // Move this to generatePDF to ensure it's client-side only
+    const currentDate = new Date().toLocaleDateString(); 
+
     doc.setFontSize(12);
     doc.text(`Date: ${currentDate}`, 20, 30);
 
@@ -151,8 +154,8 @@ const InstrumentTable: React.FC = () => {
 
   return (
     <div className="overflow-x-auto px-4 py-5">
-      <div className="mb-4 flex justify-between items-center">
-        <div className="relative w-full md:w-1/3">
+      <div className="mb-4 flex justify-between items-center flex-wrap">
+        <div className="relative w-full sm:w-1/3">
           <input
             type="text"
             placeholder="Search products..."
@@ -165,7 +168,7 @@ const InstrumentTable: React.FC = () => {
 
         <button
           onClick={generatePDF}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition"
+          className="mt-4 sm:mt-0 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition"
         >
           Generate Report
         </button>
@@ -239,56 +242,59 @@ const InstrumentTable: React.FC = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition"
+                className="bg-blue-500 text-white py-2 px-4 rounded mr-2"
               >
-                Save Changes
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditProduct(null)}
+                className="bg-gray-500 text-white py-2 px-4 rounded"
+              >
+                Cancel
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="shadow-lg rounded-lg overflow-hidden">
-        <table className="min-w-full border border-gray-300 bg-white rounded-lg">
-          <thead className="bg-gray-100 text-gray-700">
-            <tr>
-              <th className="px-6 py-3 text-left font-semibold uppercase">Name</th>
-              <th className="px-6 py-3 text-left font-semibold uppercase">Description</th>
-              <th className="px-6 py-3 text-center font-semibold uppercase">Price</th>
-              <th className="px-6 py-3 text-center font-semibold uppercase">Category</th>
-              <th className="px-6 py-3 text-center font-semibold uppercase">Stock</th>
-              <th className="px-6 py-3 text-center font-semibold uppercase">Ratings</th>
-              <th className="px-6 py-3 text-center font-semibold uppercase">Actions</th>
+      <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
+        <thead>
+          <tr>
+            <th className="py-3 px-6 border-b">Name</th>
+            <th className="py-3 px-6 border-b">Category</th>
+            <th className="py-3 px-6 border-b">Price</th>
+            <th className="py-3 px-6 border-b">Stock</th>
+            <th className="py-3 px-6 border-b">Ratings</th>
+            <th className="py-3 px-6 border-b">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredProducts.map((product) => (
+            <tr key={product._id}>
+              <td className="py-3 px-6 border-b">{product.name}</td>
+              <td className="py-3 px-6 border-b">{product.category}</td>
+              <td className="py-3 px-6 border-b">${product.price}</td>
+              <td className="py-3 px-6 border-b">{product.stock}</td>
+              <td className="py-3 px-6 border-b">{product.ratings}</td>
+              <td className="px-6 py-4 text-center flex justify-center space-x-4">
+                <button
+                  onClick={() => handleUpdate(product)}
+                  className="bg-blue-500 text-white py-2 px-4 rounded"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(product._id)}
+                  className="bg-red-500 text-white py-2 px-4 rounded"
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredProducts.map((product) => (
-              <tr key={product._id} className="hover:bg-gray-50 transition">
-                <td className="px-6 py-4 break-words">{product.name}</td>
-                <td className="px-6 py-4 break-words">{product.description}</td>
-                <td className="px-6 py-4 text-center">${product.price.toFixed(2)}</td>
-                <td className="px-6 py-4 text-center">{product.category}</td>
-                <td className="px-6 py-4 text-center">{product.stock}</td>
-                <td className="px-6 py-4 text-center">{product.ratings}</td>
-                <td className="px-6 py-4 text-center">
-                  <button
-                    onClick={() => handleUpdate(product)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product._id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-md"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

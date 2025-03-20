@@ -1,9 +1,100 @@
 import React, { useState } from 'react';
 
+// Define the Product interface
+interface Product {
+  id: number;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+// Define the OrderDetails component
+interface OrderDetailsProps {
+  paymentMethod: string;
+  creditCardNumber?: string;
+  expiryDate?: string;
+  cvv?: string;
+  paypalEmail?: string;
+  bankAccount?: string;
+  products: Product[];
+  totalAmount: number;
+}
+
+const OrderDetails: React.FC<OrderDetailsProps> = ({
+  paymentMethod,
+  creditCardNumber,
+  expiryDate,
+  cvv,
+  paypalEmail,
+  bankAccount,
+  products,
+  totalAmount,
+}) => {
+  return (
+    <div className="mt-6 text-left">
+      <h3 className="text-xl font-semibold text-gray-800 mb-4">Order Details</h3>
+      <div className="space-y-4">
+        {/* Payment Method Details */}
+        <div>
+          <p className="text-gray-700"><strong>Payment Method:</strong> {paymentMethod}</p>
+          {paymentMethod === 'credit' && (
+            <>
+              <p className="text-gray-700"><strong>Credit Card Number:</strong> {creditCardNumber}</p>
+              <p className="text-gray-700"><strong>Expiry Date:</strong> {expiryDate}</p>
+              <p className="text-gray-700"><strong>CVV:</strong> {cvv}</p>
+            </>
+          )}
+          {paymentMethod === 'paypal' && (
+            <p className="text-gray-700"><strong>PayPal Email:</strong> {paypalEmail}</p>
+          )}
+          {paymentMethod === 'bank' && (
+            <p className="text-gray-700"><strong>Bank Account Number:</strong> {bankAccount}</p>
+          )}
+        </div>
+
+        {/* Products List */}
+        <div>
+          <h4 className="text-lg font-semibold text-gray-800 mb-2">Products</h4>
+          <div className="space-y-2">
+            {products.map((product) => (
+              <div key={product.id} className="flex justify-between">
+                <p className="text-gray-700">{product.name} (x{product.quantity})</p>
+                <p className="text-gray-700">${(product.price * product.quantity).toFixed(2)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Total Amount */}
+        <div className="border-t pt-4">
+          <p className="text-lg font-semibold text-gray-800">
+            <strong>Total Amount:</strong> ${totalAmount.toFixed(2)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PaymentComponent = () => {
   const [paymentMethod, setPaymentMethod] = useState<string>('credit');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [paymentSuccess, setPaymentSuccess] = useState<boolean>(false);
+  const [showOrderDetails, setShowOrderDetails] = useState<boolean>(false);
+  const [creditCardNumber, setCreditCardNumber] = useState<string>('');
+  const [expiryDate, setExpiryDate] = useState<string>('');
+  const [cvv, setCvv] = useState<string>('');
+  const [paypalEmail, setPaypalEmail] = useState<string>('');
+  const [bankAccount, setBankAccount] = useState<string>('');
+
+  // Mock order details
+  const [products] = useState<Product[]>([
+    { id: 1, name: 'Product A', quantity: 2, price: 25.0 },
+    { id: 2, name: 'Product B', quantity: 1, price: 50.0 },
+    { id: 3, name: 'Product C', quantity: 3, price: 10.0 },
+  ]);
+
+  const totalAmount = products.reduce((total, product) => total + product.price * product.quantity, 0);
 
   // Handle payment method selection
   const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,14 +113,37 @@ const PaymentComponent = () => {
     }, 2000);
   };
 
+  // Toggle order details visibility
+  const toggleOrderDetails = () => {
+    setShowOrderDetails(!showOrderDetails);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
       <div className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-xl">
         <h2 className="text-3xl font-semibold text-gray-800 mb-6 text-center">Payment</h2>
         
         {paymentSuccess ? (
-          <div className="text-center text-green-500 font-semibold">
-            <p>Your payment was successful! 🎉</p>
+          <div className="text-center">
+            <p className="text-green-500 font-semibold">Your payment was successful! 🎉</p>
+            <button
+              onClick={toggleOrderDetails}
+              className="mt-4 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+            >
+              {showOrderDetails ? 'Hide Order Details' : 'View Order Details'}
+            </button>
+            {showOrderDetails && (
+              <OrderDetails
+                paymentMethod={paymentMethod}
+                creditCardNumber={creditCardNumber}
+                expiryDate={expiryDate}
+                cvv={cvv}
+                paypalEmail={paypalEmail}
+                bankAccount={bankAccount}
+                products={products}
+                totalAmount={totalAmount}
+              />
+            )}
           </div>
         ) : (
           <form onSubmit={handlePaymentSubmit} className="space-y-6">
@@ -87,6 +201,8 @@ const PaymentComponent = () => {
                     placeholder="Enter your credit card number"
                     className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                     required
+                    value={creditCardNumber}
+                    onChange={(e) => setCreditCardNumber(e.target.value)}
                   />
                 </div>
 
@@ -101,6 +217,8 @@ const PaymentComponent = () => {
                       placeholder="MM/YY"
                       className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                       required
+                      value={expiryDate}
+                      onChange={(e) => setExpiryDate(e.target.value)}
                     />
                   </div>
 
@@ -114,6 +232,8 @@ const PaymentComponent = () => {
                       placeholder="CVV"
                       className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                       required
+                      value={cvv}
+                      onChange={(e) => setCvv(e.target.value)}
                     />
                   </div>
                 </div>
@@ -132,6 +252,8 @@ const PaymentComponent = () => {
                   placeholder="Enter your PayPal email"
                   className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                   required
+                  value={paypalEmail}
+                  onChange={(e) => setPaypalEmail(e.target.value)}
                 />
               </div>
             )}
@@ -148,6 +270,8 @@ const PaymentComponent = () => {
                   placeholder="Enter your bank account number"
                   className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                   required
+                  value={bankAccount}
+                  onChange={(e) => setBankAccount(e.target.value)}
                 />
               </div>
             )}
