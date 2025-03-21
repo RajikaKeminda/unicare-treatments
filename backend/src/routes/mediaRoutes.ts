@@ -5,6 +5,7 @@ import {
   deleteMedia,
   getMediaById,
   getMediaByPostId,
+  getAllMedia,
 } from '../controllers/mediaController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -12,6 +13,9 @@ const router = express.Router();
 
 // Apply authentication middleware to all routes
 router.use(authenticateToken);
+
+// Get all media
+router.get('/', getAllMedia);
 
 // Generate upload URL
 router.post('/upload-url', generateUploadUrl);

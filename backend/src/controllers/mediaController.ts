@@ -152,3 +152,19 @@ export const getMediaByPostId = async (req: Request, res: Response): Promise<voi
     });
   }
 };
+
+
+export const getAllMedia = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const media = await mediaService.getAllMedia();
+      res.status(HttpStatusCodes.OK).json({
+        success: true,
+        data: media,
+      });
+    } catch (error) {
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: 'Failed to get all media',
+      });
+    }
+  };

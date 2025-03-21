@@ -117,6 +117,16 @@ class MediaService {
       throw new Error('Failed to get media for post');
     }
   }
+
+  // Get all media
+  async getAllMedia() {
+    try {
+      const media = await Media.find();
+      return media;
+    } catch (error) {
+      throw new Error('Failed to get all media');
+    }
+  }
 }
 
 export default new MediaService();
