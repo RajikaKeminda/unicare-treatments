@@ -164,7 +164,7 @@ const AdminProductForm = () => {
               <option value="">Select Category</option>
               <option value="Herbal Supplements">Herbal Supplements</option>
               <option value="Skincare & Beauty">Skincare & Beauty</option>
-              <option value="Hair Care<">Hair Care</option>
+              <option value="Hair Care">Hair Care</option>
               <option value="Digestive Health">Digestive Health</option>
               <option value="Massage & Body Oils">Massage & Body Oils</option>
               <option value="therapeutic devices and equipment">therapeutic devices and equipment </option>
