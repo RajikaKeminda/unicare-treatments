@@ -52,13 +52,16 @@ export default function InventoryManager() {
   });
   const [showModal, setShowModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [showChart, setShowChart] = useState<boolean>(false); // State to toggle chart visibility
-  const [showExpiringSoon, setShowExpiringSoon] = useState<boolean>(false); // State to toggle expiring soon view
-  const [showLowStock, setShowLowStock] = useState<boolean>(false); // State to toggle low stock view
-  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
+  const [showChart, setShowChart] = useState<boolean>(false);
+  const [showExpiringSoon, setShowExpiringSoon] = useState<boolean>(false);
+  const [showLowStock, setShowLowStock] = useState<boolean>(false);
+  const [showExpired, setShowExpired] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isClient, setIsClient] = useState(false); // Track client-side rendering
 
   // 📌 Fetch inventory from backend on component mount
   useEffect(() => {
+    setIsClient(true); // Set to true after mounting on the client
     fetchInventory();
   }, []);
 
@@ -189,16 +192,18 @@ export default function InventoryManager() {
 
   // 📌 Check if the date is expired
   const isExpired = (expiryDate: string) => {
-    const today = new Date();
-    const expiry = new Date(expiryDate);
+    if (!isClient) return false; // Avoid running on the server
+    const today = new Date().toISOString().split("T")[0]; // Use ISO date string
+    const expiry = new Date(expiryDate).toISOString().split("T")[0];
     return expiry < today;
   };
 
   // 📌 Check if the date is expiring soon (within 7 days)
   const isExpiringSoon = (expiryDate: string) => {
-    const today = new Date();
-    const expiry = new Date(expiryDate);
-    const timeDifference = expiry.getTime() - today.getTime();
+    if (!isClient) return false; // Avoid running on the server
+    const today = new Date().toISOString().split("T")[0]; // Use ISO date string
+    const expiry = new Date(expiryDate).toISOString().split("T")[0];
+    const timeDifference = new Date(expiry).getTime() - new Date(today).getTime();
     const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
     return daysDifference <= 7 && daysDifference >= 0;
   };
@@ -347,6 +352,9 @@ export default function InventoryManager() {
     (item) => isLowStock(item.quantity) && !isExpired(item.expiryDate)
   );
 
+  // 📌 Filter inventory for expired items
+  const expiredItems = inventory.filter((item) => isExpired(item.expiryDate));
+
   // 📌 Filter inventory based on search query
   const filteredInventory = inventory.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -398,6 +406,12 @@ export default function InventoryManager() {
         >
           {showLowStock ? "Show All Products" : "Show Low Stock"}
         </button>
+        <button
+          className="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600"
+          onClick={() => setShowExpired(!showExpired)}
+        >
+          {showExpired ? "Show All Products" : "Show Expired Products"}
+        </button>
       </div>
 
       {showModal && (
@@ -444,9 +458,19 @@ export default function InventoryManager() {
             <input
               type="date"
               value={newItem.expiryDate}
-              onChange={(e) =>
-                setNewItem({ ...newItem, expiryDate: e.target.value })
-              }
+              onChange={(e) => {
+                const selectedDate = e.target.value;
+                const today = new Date().toISOString().split("T")[0]; // Get today's date in yyyy-mm-dd format
+                
+                // Check if the selected date is before today's date
+                if (selectedDate < today) {
+                  alert("Please set the expiry date to a date after today.");
+                  return; // Prevent the state update if the date is invalid
+                }
+
+                // If valid, update the state with the selected expiry date
+                setNewItem({ ...newItem, expiryDate: selectedDate });
+              }}
               className="border border-gray-300 rounded-md p-2 mb-4 w-full"
             />
 
@@ -494,6 +518,8 @@ export default function InventoryManager() {
                 ? expiringSoonItems
                 : showLowStock
                 ? lowStockItems
+                : showExpired
+                ? expiredItems // Show expired items
                 : filteredInventory // Use filtered inventory based on search query
               ).map((item) => (
                 <tr
@@ -503,6 +529,8 @@ export default function InventoryManager() {
                       ? "bg-yellow-100"
                       : isLowStock(item.quantity)
                       ? "bg-red-100"
+                      : isExpired(item.expiryDate) // Add a class for expired items
+                      ? "bg-gray-200"
                       : ""
                   }
                 >
