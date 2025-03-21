@@ -59,8 +59,12 @@ router.post("/user/verify-code", verifyUser);
 router.post("/user/sign-in", signInUser);
 
 //product-inquiry-pulindu
-import { submitAdviceRequest } from '../controllers/product-inquiry.ts'
+import { submitAdviceRequest, getAllAdviceRequests } from '../controllers/product-inquiry.ts'
 
 router.post('/submit-advice-request', submitAdviceRequest);
+
+//fetch inquiries
+// Fetch all advice requests
+router.get('/advice-requests', getAllAdviceRequests);
 
 export default router;
