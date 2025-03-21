@@ -55,6 +55,7 @@ export default function InventoryManager() {
   const [showChart, setShowChart] = useState<boolean>(false); // State to toggle chart visibility
   const [showExpiringSoon, setShowExpiringSoon] = useState<boolean>(false); // State to toggle expiring soon view
   const [showLowStock, setShowLowStock] = useState<boolean>(false); // State to toggle low stock view
+  const [showExpired, setShowExpired] = useState<boolean>(false); // State to toggle expired products view
   const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
 
   // 📌 Fetch inventory from backend on component mount
@@ -347,6 +348,9 @@ export default function InventoryManager() {
     (item) => isLowStock(item.quantity) && !isExpired(item.expiryDate)
   );
 
+  // 📌 Filter inventory for expired items
+  const expiredItems = inventory.filter((item) => isExpired(item.expiryDate));
+
   // 📌 Filter inventory based on search query
   const filteredInventory = inventory.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -397,6 +401,12 @@ export default function InventoryManager() {
           onClick={() => setShowLowStock(!showLowStock)}
         >
           {showLowStock ? "Show All Products" : "Show Low Stock"}
+        </button>
+        <button
+          className="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600"
+          onClick={() => setShowExpired(!showExpired)}
+        >
+          {showExpired ? "Show All Products" : "Show Expired Products"}
         </button>
       </div>
 
@@ -494,6 +504,8 @@ export default function InventoryManager() {
                 ? expiringSoonItems
                 : showLowStock
                 ? lowStockItems
+                : showExpired
+                ? expiredItems // Show expired items
                 : filteredInventory // Use filtered inventory based on search query
               ).map((item) => (
                 <tr
@@ -503,6 +515,8 @@ export default function InventoryManager() {
                       ? "bg-yellow-100"
                       : isLowStock(item.quantity)
                       ? "bg-red-100"
+                      : isExpired(item.expiryDate) // Add a class for expired items
+                      ? "bg-gray-200"
                       : ""
                   }
                 >
