@@ -22,6 +22,7 @@ import {
 import appointmentRoute from "./appointmentRoute.ts";
 import blogRoutes from "./blogRoutes.ts";
 import commentRoutes from "./commentRoutes.ts";
+import mediaRoutes from "./mediaRoutes.ts";
 
 // Middleware to parse JSON request bodies
 router.use(express.json());
@@ -66,6 +67,7 @@ router.post("/user/sign-in", signInUser);
 
 router.use("/comments", commentRoutes);
 router.use("/blog", blogRoutes);
+router.use("/media", mediaRoutes);
 
 router.post('/submit-advice-request', submitAdviceRequest);
 

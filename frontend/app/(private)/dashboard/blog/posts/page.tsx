@@ -4,18 +4,35 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { FiSearch, FiPlus, FiTrash2, FiEdit2, FiEye, FiFilter, FiCheck } from 'react-icons/fi'
 import { format } from 'date-fns'
+import axios from 'axios'
+import Image from 'next/image'
 
 interface Post {
-  id: string
+  _id: string
   title: string
   content: string
   thumbnail: string
+  thumbnailUrl?: string
   createdAt: string
   updatedAt: string
   category: string
-  author: {
-    name: string
-    avatar: string
+  author: string
+  likes: string[]
+  comments: string[]
+  views: number
+  isPublished: boolean
+  __v: number
+}
+
+interface ApiResponse {
+  success: boolean
+  data: {
+    posts: Post[]
+    pagination: {
+      total: number
+      page: number
+      pages: number
+    }
   }
 }
 
@@ -27,7 +44,9 @@ const categories = [
   'Business',
   'Education',
   'Entertainment',
-  'Sports'
+  'Sports',
+  'Marketing',
+  'Design'
 ]
 
 export default function PostsPage() {
@@ -36,35 +55,11 @@ export default function PostsPage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const filterRef = useRef<HTMLDivElement>(null)
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: '1',
-      title: 'Getting Started with Next.js',
-      content: 'Learn how to build modern web applications with Next.js...',
-      thumbnail: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-      createdAt: '2024-03-20T10:00:00Z',
-      updatedAt: '2024-03-20T10:00:00Z',
-      category: 'Technology',
-      author: {
-        name: 'John Doe',
-        avatar: 'https://ui-avatars.com/api/?name=John+Doe',
-      },
-    },
-    {
-      id: '2',
-      title: 'Healthy Living Tips',
-      content: 'Discover the best practices for maintaining a healthy lifestyle...',
-      thumbnail: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-      createdAt: '2024-03-19T15:30:00Z',
-      updatedAt: '2024-03-19T15:30:00Z',
-      category: 'Health',
-      author: {
-        name: 'Jane Smith',
-        avatar: 'https://ui-avatars.com/api/?name=Jane+Smith',
-      },
-    },
-  ])
+  const [posts, setPosts] = useState<Post[]>([])
+  const [totalPages, setTotalPages] = useState(1)
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -77,6 +72,53 @@ export default function PostsPage() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+  
+  // Fetch posts from API
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        setLoading(true)
+        const response = await axios.get<ApiResponse>(`${process.env.NEXT_PUBLIC_BASE_URL}/blog`)
+        if (response.data.success) {
+          const data = [];
+          for (const post of response.data.data.posts) {
+            const thumbnailUrl = await getThumbnailUrl(post.thumbnail)
+            data.push({
+              ...post,
+              thumbnailUrl
+            })
+          }
+          setPosts(data)
+          setTotalPages(response.data.data.pagination.pages)
+        } else {
+          setError('Failed to fetch posts')
+        }
+      } catch (err) {
+        setError('Error connecting to the server')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPosts()
+  }, [])
+
+  // Get thumbnail URL
+  const getThumbnailUrl = async (thumbnailPath: string): Promise<string> => {
+    if (thumbnailPath.startsWith('http')) {
+      return thumbnailPath
+    }
+    
+    try {
+      const key = thumbnailPath
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/media/view-url/${Buffer.from(key).toString('base64')}`)
+      return response.data.data.viewUrl
+    } catch (error) {
+      console.error('Error getting thumbnail URL:', error)
+      return 'https://via.placeholder.com/400x300?text=Image+Not+Available'
+    }
+  }
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -86,7 +128,6 @@ export default function PostsPage() {
   })
 
   const postsPerPage = 10
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
   const paginatedPosts = filteredPosts.slice(
     (currentPage - 1) * postsPerPage,
     currentPage * postsPerPage
@@ -94,18 +135,23 @@ export default function PostsPage() {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
-      // Add your delete API call here
-      setPosts(posts.filter(post => post.id !== id))
+      try {
+        await axios.delete(`${process.env.NEXT_PUBLIC_BASE_URL}/blog/${id}`)
+        setPosts(posts.filter(post => post._id !== id))
+      } catch (error) {
+        console.error('Error deleting post:', error)
+        alert('Failed to delete post')
+      }
     }
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl w-2/3 mx-auto p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Blog Posts</h1>
         <button
-          onClick={() => router.push('/admin/app/blog/create-blog')}
+          onClick={() => router.push('/dashboard/blog/create-blog')}
           className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
         >
           <FiPlus className="w-4 h-4" />
@@ -165,72 +211,99 @@ export default function PostsPage() {
         </div>
       </div>
 
-      {/* Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paginatedPosts.map((post) => (
-          <div
-            key={post.id}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
-          >
-            <div className="relative h-48">
-              <img
-                src={post.thumbnail}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-2 right-2 flex gap-2">
-                <button
-                  onClick={() => router.push(`/admin/app/blog/edit/${post.id}`)}
-                  className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
-                >
-                  <FiEdit2 className="w-4 h-4 text-gray-600" />
-                </button>
-                <button
-                  onClick={() => handleDelete(post.id)}
-                  className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
-                >
-                  <FiTrash2 className="w-4 h-4 text-red-500" />
-                </button>
-              </div>
-            </div>
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <img
-                  src={post.author.avatar}
-                  alt={post.author.name}
-                  className="w-6 h-6 rounded-full"
-                />
-                <span className="text-sm text-gray-600">{post.author.name}</span>
-                <span className="text-sm text-gray-400">•</span>
-                <span className="text-sm text-gray-400">
-                  {format(new Date(post.createdAt), 'MMM d, yyyy')}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
-                  {post.category}
-                </span>
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                {post.title}
-              </h2>
-              <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                {post.content}
-              </p>
-              <button
-                onClick={() => router.push(`/admin/app/blog/view/${post.id}`)}
-                className="flex items-center gap-1 text-purple-600 hover:text-purple-700 text-sm font-medium"
-              >
-                <FiEye className="w-4 h-4" />
-                View Post
-              </button>
-            </div>
+      {/* Loading State */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading posts...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <div className="text-center py-12">
+          <div className="text-red-500 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-        ))}
-      </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load posts</h3>
+          <p className="text-gray-500">{error}</p>
+        </div>
+      )}
+
+      {/* Posts Grid */}
+      {!loading && !error && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginatedPosts.map((post) => (
+            <div
+              key={post._id}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+            >
+              <div className="relative h-48">
+                <Image
+                  src={post.thumbnailUrl || 'https://via.placeholder.com/400x300?text=Image+Not+Available'}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <button
+                    onClick={() => router.push(`/admin/app/blog/edit/${post._id}`)}
+                    className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+                  >
+                    <FiEdit2 className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(post._id)}
+                    className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+                  >
+                    <FiTrash2 className="w-4 h-4 text-red-500" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <img
+                    src={`https://ui-avatars.com/api/?name=Author`}
+                    alt="Author"
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                  <span className="text-sm text-gray-600">Author</span>
+                  <span className="text-sm text-gray-400">•</span>
+                  <span className="text-sm text-gray-400">
+                    {format(new Date(post.createdAt), 'MMM d, yyyy')}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+                    {post.category}
+                  </span>
+                </div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  {post.title}
+                </h2>
+                <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+                  {post.content.replace(/<[^>]*>/g, '')}
+                </p>
+                <button
+                  onClick={() => router.push(`/admin/app/blog/view/${post._id}`)}
+                  className="flex items-center gap-1 text-purple-600 hover:text-purple-700 text-sm font-medium"
+                >
+                  <FiEye className="w-4 h-4" />
+                  View Post
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!loading && !error && totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-8">
           <button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -253,7 +326,7 @@ export default function PostsPage() {
       )}
 
       {/* Empty State */}
-      {filteredPosts.length === 0 && (
+      {!loading && !error && filteredPosts.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
             <FiSearch className="w-12 h-12 mx-auto" />

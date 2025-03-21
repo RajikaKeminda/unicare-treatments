@@ -8,14 +8,18 @@ import { FiImage, FiLink } from 'react-icons/fi';
 import { HiUserGroup } from 'react-icons/hi';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import TiptapEditor from '../components/TiptapEditor';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 export default function CreateBlog() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [selectedSquad, setSelectedSquad] = useState('');
     const [thumbnail, setThumbnail] = useState<string | null>(null);
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [showSquadDropdown, setShowSquadDropdown] = useState(false);
     const [isPreview, setIsPreview] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const squads = [
         'Engineering',
@@ -25,9 +29,88 @@ export default function CreateBlog() {
         'General'
     ];
 
+    const getPresignedUrl = async (file: File) => {
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/media/upload-url`, {
+                fileName: file.name,
+                fileType: file.type,
+            });
+            return {
+                presignedUrl: response.data.data.presignedUrl,
+                key: response.data.data.key,
+            };
+        } catch (error) {
+            console.error('Error getting presigned URL:', error);
+            toast.error('Failed to get upload URL');
+            throw error;
+        }
+    };
+
+    const uploadToS3 = async (file: File, presignedUrl: string) => {
+        try {
+            await axios.put(presignedUrl, file, {
+                headers: {
+                    'Content-Type': file.type,
+                },
+            });
+            // Extract the URL from the presigned URL (remove query parameters)
+            return presignedUrl.split('?')[0];
+        } catch (error) {
+            console.error('Error uploading to S3:', error);
+            toast.error('Failed to upload image');
+            throw error;
+        }
+    };
+
+    const createBlogPost = async (s3Key: string) => {
+        try {
+            await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/blog`, {
+                title,
+                content,
+                thumbnail: s3Key,
+                category: selectedSquad,
+                isPublished: true,
+            });
+            toast.success('Blog post created successfully!');
+            // Reset form or redirect
+            setTitle('');
+            setContent('');
+            setThumbnail(null);
+            setThumbnailFile(null);
+            setSelectedSquad('');
+        } catch (error) {
+            console.error('Error creating blog post:', error);
+            toast.error('Failed to create blog post');
+            throw error;
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!title || !content || !selectedSquad) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            let s3Key = '';
+            if (thumbnailFile) {
+                const { presignedUrl, key } = await getPresignedUrl(thumbnailFile);
+                await uploadToS3(thumbnailFile, presignedUrl);
+                s3Key = key;
+            }
+            await createBlogPost(s3Key);
+        } catch (error) {
+            console.error('Error in form submission:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const onDrop = useCallback((acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
         if (file) {
+            setThumbnailFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setThumbnail(reader.result as string);
@@ -46,7 +129,7 @@ export default function CreateBlog() {
     });
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-4xl w-2/3 mx-auto p-6">
             {/* Header */}
             <div className="flex gap-4 mb-6 border-b pb-4">
                 <button className="px-4 py-2 bg-gray-100 rounded-full font-medium text-gray-700 hover:bg-gray-200">
@@ -186,8 +269,12 @@ export default function CreateBlog() {
                                 <BsEmojiSmile className="text-gray-500" />
                             </button>
                         </div>
-                        <button className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                            Post
+                        <button 
+                            onClick={handleSubmit}
+                            disabled={isSubmitting}
+                            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isSubmitting ? 'Posting...' : 'Post'}
                         </button>
                     </div>
                 </div>
