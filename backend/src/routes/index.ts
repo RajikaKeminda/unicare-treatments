@@ -1,22 +1,27 @@
-import express, { Request, Response } from "express";
+import express from "express";
 const router = express.Router();
 
 // Importing controllers for products
-import { createProduct, getProducts, deleteProduct, updateProduct } from '../controllers/productContoller.ts';
+import { createProduct, deleteProduct, getProducts, updateProduct } from '../controllers/productContoller.ts';
 
 // Import inventory controller functions
-import { getInventory, addItem, updateQuantity, deleteItem, updateItem} from "../controllers/inventoryController.ts";
+import { addItem, deleteItem, getInventory, updateItem, updateQuantity } from "../controllers/inventoryController.ts";
 
 // Import treatment controller
-import { addTreatment, deleteTreatment, getAllPatients, getPatientTreatment, updateTreatment } from '../controllers/treatmentController.ts'; 
+import { addTreatment, deleteTreatment, getAllPatients, getPatientTreatment, updateTreatment } from '../controllers/treatmentController.ts';
 
-import appointmentRoute from "./appointmentRoute.ts";
+//product-inquiry-pulindu
+import { submitAdviceRequest, getAllAdviceRequests } from '../controllers/product-inquiry.ts'
+
 import {
   checkUniqueUserName,
   signInUser,
   signUpUser,
   verifyUser,
 } from "../controllers/userController.ts";
+import appointmentRoute from "./appointmentRoute.ts";
+import blogRoutes from "./blogRoutes.ts";
+import commentRoutes from "./commentRoutes.ts";
 
 // Middleware to parse JSON request bodies
 router.use(express.json());
@@ -58,8 +63,9 @@ router.post("/user/sign-up", signUpUser);
 router.post("/user/verify-code", verifyUser);
 router.post("/user/sign-in", signInUser);
 
-//product-inquiry-pulindu
-import { submitAdviceRequest, getAllAdviceRequests } from '../controllers/product-inquiry.ts'
+
+router.use("/comments", commentRoutes);
+router.use("/blog", blogRoutes);
 
 router.post('/submit-advice-request', submitAdviceRequest);
 
