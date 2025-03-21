@@ -10,6 +10,9 @@ import { addItem, deleteItem, getInventory, updateItem, updateQuantity } from ".
 // Import treatment controller
 import { addTreatment, deleteTreatment, getAllPatients, getPatientTreatment, updateTreatment } from '../controllers/treatmentController.ts';
 
+//product-inquiry-pulindu
+import { submitAdviceRequest, getAllAdviceRequests } from '../controllers/product-inquiry.ts'
+
 import {
   checkUniqueUserName,
   signInUser,
@@ -60,6 +63,14 @@ router.post("/user/sign-up", signUpUser);
 router.post("/user/verify-code", verifyUser);
 router.post("/user/sign-in", signInUser);
 
+
 router.use("/comments", commentRoutes);
 router.use("/blog", blogRoutes);
+
+router.post('/submit-advice-request', submitAdviceRequest);
+
+//fetch inquiries
+// Fetch all advice requests
+router.get('/advice-requests', getAllAdviceRequests);
+
 export default router;

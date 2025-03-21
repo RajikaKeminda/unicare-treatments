@@ -342,8 +342,10 @@ export default function InventoryManager() {
   // 📌 Filter inventory for expiring soon items
   const expiringSoonItems = inventory.filter((item) => isExpiringSoon(item.expiryDate));
 
-  // 📌 Filter inventory for low stock items
-  const lowStockItems = inventory.filter((item) => isLowStock(item.quantity));
+  // 📌 Filter inventory for low stock items (excluding expired items)
+  const lowStockItems = inventory.filter(
+    (item) => isLowStock(item.quantity) && !isExpired(item.expiryDate)
+  );
 
   // 📌 Filter inventory based on search query
   const filteredInventory = inventory.filter((item) =>
@@ -365,7 +367,7 @@ export default function InventoryManager() {
         />
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap gap-2">
         <button
           className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
           onClick={() => setShowModal(true)}
@@ -373,25 +375,25 @@ export default function InventoryManager() {
           Add Item
         </button>
         <button
-          className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 ml-4"
+          className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600"
           onClick={generateHTMLReport}
         >
           Generate Report
         </button>
         <button
-          className="bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 ml-4"
+          className="bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600"
           onClick={() => setShowChart(!showChart)}
         >
           {showChart ? "Hide Chart" : "Show Chart"}
         </button>
         <button
-          className="bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 ml-4"
+          className="bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600"
           onClick={() => setShowExpiringSoon(!showExpiringSoon)}
         >
           {showExpiringSoon ? "Show All Products" : "Show Expiring Soon"}
         </button>
         <button
-          className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 ml-4"
+          className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
           onClick={() => setShowLowStock(!showLowStock)}
         >
           {showLowStock ? "Show All Products" : "Show Low Stock"}
@@ -475,63 +477,65 @@ export default function InventoryManager() {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <table className="table-auto w-full border-collapse mt-4">
-          <thead>
-            <tr>
-              <th className="border px-4 py-2">Item Name</th>
-              <th className="border px-4 py-2">Quantity</th>
-              <th className="border px-4 py-2">Unit</th>
-              <th className="border px-4 py-2">Price per Item (Rs)</th>
-              <th className="border px-4 py-2">Expiry Date</th>
-              <th className="border px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(showExpiringSoon
-              ? expiringSoonItems
-              : showLowStock
-              ? lowStockItems
-              : filteredInventory // Use filtered inventory based on search query
-            ).map((item) => (
-              <tr
-                key={item._id}
-                className={
-                  isExpiringSoon(item.expiryDate)
-                    ? "bg-yellow-100"
-                    : isLowStock(item.quantity)
-                    ? "bg-red-100"
-                    : ""
-                }
-              >
-                <td className="border px-4 py-2">{item.name}</td>
-                <td className="border px-4 py-2">{item.quantity}</td>
-                <td className="border px-4 py-2">{item.unit}</td>
-                <td className="border px-4 py-2">{item.perItemPrice}</td>
-                <td className="border px-4 py-2">{item.expiryDate}</td>
-                <td className="border px-4 py-2">
-                  <button
-                    className="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 mr-2"
-                    onClick={() => updateQuantity(item._id, 1)}
-                  >
-                    +
-                  </button>
-                  <button
-                    className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 mr-2"
-                    onClick={() => updateQuantity(item._id, -1)}
-                  >
-                    -
-                  </button>
-                  <button
-                    className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
-                    onClick={() => deleteItem(item._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="table-auto w-full border-collapse mt-4">
+            <thead>
+              <tr>
+                <th className="border px-4 py-2">Item Name</th>
+                <th className="border px-4 py-2">Quantity</th>
+                <th className="border px-4 py-2">Unit</th>
+                <th className="border px-4 py-2">Price per Item (Rs)</th>
+                <th className="border px-4 py-2">Expiry Date</th>
+                <th className="border px-4 py-2">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {(showExpiringSoon
+                ? expiringSoonItems
+                : showLowStock
+                ? lowStockItems
+                : filteredInventory // Use filtered inventory based on search query
+              ).map((item) => (
+                <tr
+                  key={item._id}
+                  className={
+                    isExpiringSoon(item.expiryDate)
+                      ? "bg-yellow-100"
+                      : isLowStock(item.quantity)
+                      ? "bg-red-100"
+                      : ""
+                  }
+                >
+                  <td className="border px-4 py-2">{item.name}</td>
+                  <td className="border px-4 py-2">{item.quantity}</td>
+                  <td className="border px-4 py-2">{item.unit}</td>
+                  <td className="border px-4 py-2">{item.perItemPrice}</td>
+                  <td className="border px-4 py-2">{item.expiryDate}</td>
+                  <td className="border px-4 py-2">
+                    <button
+                      className="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 mr-2"
+                      onClick={() => updateQuantity(item._id, 1)}
+                    >
+                      +
+                    </button>
+                    <button
+                      className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 mr-2"
+                      onClick={() => updateQuantity(item._id, -1)}
+                    >
+                      -
+                    </button>
+                    <button
+                      className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
+                      onClick={() => deleteItem(item._id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
