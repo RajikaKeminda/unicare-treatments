@@ -3,13 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Define the interface for advice requests
 interface AdviceRequest {
   _id: string;
   name: string;
   email: string;
   concern: string;
   message: string;
-  createdAt: string;
+  createdAt: string; // or Date if you parse it
 }
 
 const AdviceRequestsTable = () => {
