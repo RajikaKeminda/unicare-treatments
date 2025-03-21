@@ -290,7 +290,7 @@ export default function PostsPage() {
                   {post.content.replace(/<[^>]*>/g, '')}
                 </p>
                 <button
-                  onClick={() => router.push(`/admin/app/blog/view/${post._id}`)}
+                  onClick={() => router.push(`/instruction-blogs/${post._id}`)}
                   className="flex items-center gap-1 text-purple-600 hover:text-purple-700 text-sm font-medium"
                 >
                   <FiEye className="w-4 h-4" />
