@@ -1,6 +1,50 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const ExpertAyurvedicAdvicePage = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    concern: 'skin',
+    message: '',
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/submit-advice-request`, formData);
+      if (response.status === 201) {
+        setSuccess(true);
+        setFormData({
+          name: '',
+          email: '',
+          concern: 'skin',
+          message: '',
+        });
+      }
+    } catch (error) {
+      setError('Failed to submit the form. Please try again.');
+      console.error('Error submitting form:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white text-gray-800 font-sans">
       {/* Header Section */}
@@ -28,14 +72,18 @@ const ExpertAyurvedicAdvicePage = () => {
           </p>
 
           {/* Form Section */}
-          <form className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
+          <form onSubmit={handleSubmit} className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
             <div className="space-y-4">
               <div>
                 <label className="block text-lg text-gray-700">Name</label>
                 <input
                   type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
                   placeholder="Your Name"
+                  required
                 />
               </div>
 
@@ -43,15 +91,23 @@ const ExpertAyurvedicAdvicePage = () => {
                 <label className="block text-lg text-gray-700">Email</label>
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
                   placeholder="Your Email"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-lg text-gray-700">Select Concern</label>
                 <select
+                  name="concern"
+                  value={formData.concern}
+                  onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+                  required
                 >
                   <option value="skin">Skin Care</option>
                   <option value="digestion">Digestion</option>
@@ -63,21 +119,38 @@ const ExpertAyurvedicAdvicePage = () => {
               <div>
                 <label className="block text-lg text-gray-700">Your Message</label>
                 <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
                   placeholder="Tell us about your health concern"
+                  required
                 />
               </div>
 
               <div className="text-center">
                 <button
                   type="submit"
-                  className="bg-red-600 text-white px-8 py-3 text-xl rounded-lg hover:bg-red-700 transition duration-300"
+                  disabled={loading}
+                  className="bg-red-600 text-white px-8 py-3 text-xl rounded-lg hover:bg-red-700 transition duration-300 disabled:bg-gray-400"
                 >
-                  Submit
+                  {loading ? 'Submitting...' : 'Submit'}
                 </button>
               </div>
             </div>
           </form>
+
+          {/* Success and Error Messages */}
+          {success && (
+            <div className="mt-4 text-green-600">
+              Your request has been submitted successfully!
+            </div>
+          )}
+          {error && (
+            <div className="mt-4 text-red-600">
+              {error}
+            </div>
+          )}
         </div>
       </section>
 
