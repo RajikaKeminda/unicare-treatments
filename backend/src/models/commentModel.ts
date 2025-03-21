@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const commentSchema = new mongoose.Schema({
   content: { type: String, required: true },
-  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  author: { type: String, required: true },
+  likes: [{ type: String }],
+  dislikes: [{ type: String }],
   postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post', required: true },
   parentCommentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' },
   replies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],

@@ -227,8 +227,8 @@ class CommentService {
         throw new Error('Comment not found');
       }
 
-      const userObjectId = new Types.ObjectId(userId);
-      const likeIndex = comment.likes.findIndex(like => like.equals(userObjectId));
+      const userObjectId = userId;
+      const likeIndex = comment.likes.findIndex(like => like === userObjectId);
       
       if (likeIndex === -1) {
         comment.likes.push(userObjectId);
@@ -256,8 +256,8 @@ class CommentService {
         throw new Error('Comment not found');
       }
 
-      const userObjectId = new Types.ObjectId(userId);
-      const dislikeIndex = comment.dislikes.findIndex(dislike => dislike.equals(userObjectId));
+      const userObjectId = userId;
+      const dislikeIndex = comment.dislikes.findIndex(dislike => dislike === userObjectId);
       
       if (dislikeIndex === -1) {
         comment.dislikes.push(userObjectId);

@@ -263,8 +263,8 @@ class CommentController {
         return;
       }
 
-      const userObjectId = new mongoose.Types.ObjectId(req.user?._id);
-      const likeIndex = comment.likes.findIndex(like => like.equals(userObjectId));
+      const userObjectId = req.user?._id || '';
+      const likeIndex = comment.likes.findIndex(like => like === userObjectId);
       
       if (likeIndex === -1) {
         comment.likes.push(userObjectId);
@@ -307,8 +307,8 @@ class CommentController {
         return;
       }
 
-      const userObjectId = new mongoose.Types.ObjectId(req.user?._id);
-      const dislikeIndex = comment.dislikes.findIndex(dislike => dislike.equals(userObjectId));
+      const userObjectId = req.user?._id || '';
+      const dislikeIndex = comment.dislikes.findIndex(dislike => dislike === userObjectId);
       
       if (dislikeIndex === -1) {
         comment.dislikes.push(userObjectId);

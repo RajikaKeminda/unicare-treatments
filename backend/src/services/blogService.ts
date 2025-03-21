@@ -30,7 +30,7 @@ class BlogService {
       // Create new post
       const post = new Post({
         ...validatedData,
-        author: new Types.ObjectId(userId),
+        author: userId,
       });
 
       await post.save();
@@ -128,7 +128,7 @@ class BlogService {
       }
 
       // Check if user is the author
-      if (post.author && post.author.toString() !== userId) {
+      if (post.author && post.author !== userId) {
         throw new Error('Unauthorized to update this post');
       }
 
@@ -188,8 +188,8 @@ class BlogService {
         throw new Error('Post not found');
       }
 
-      const userObjectId = new Types.ObjectId(userId);
-      const likeIndex = post.likes.findIndex(like => like.equals(userObjectId));
+      const userObjectId = userId;
+      const likeIndex = post.likes.findIndex(like => like === userObjectId);
       
       if (likeIndex === -1) {
         post.likes.push(userObjectId);
