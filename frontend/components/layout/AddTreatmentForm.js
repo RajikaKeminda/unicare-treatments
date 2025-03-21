@@ -57,10 +57,7 @@ export default function AddTreatmentForm({ onClose }) {
         toast.error('Diagnosis is required.');
         return false;
     }
-    if (!medicines.trim()) {
-        toast.error('Medicines are required.');
-        return false;
-    }
+    
     if (!startDate) {
         toast.error('Start Date is required.');
         return false;
@@ -200,19 +197,36 @@ export default function AddTreatmentForm({ onClose }) {
         </div>
 
         <div className="mb-4 flex items-center">
-          <label className="block text-gray-700 w-1/3">Treatment:</label>
-          <select
-            className="border px-3 py-2 rounded w-2/3"
-            value={treatment}
-            onChange={(e) => setTreatment(e.target.value)}
-          >
-            <option>Select Treatment</option>
-            <option>Physical Therapy</option>
-            <option>Massage</option>
-            <option>Acupuncture</option>
-            <option>Chiropractic</option>
-          </select>
-        </div>
+  <label className="block text-gray-700 w-1/3">Treatment:</label>
+  <select
+    className="border px-3 py-2 rounded w-1/3"
+    value={treatment}
+    onChange={(e) => setTreatment(e.target.value)}
+  >
+    <option>Select Treatment</option>
+    <option>Physical Therapy</option>
+    <option>Massage</option>
+    <option>Acupuncture</option>
+    <option>Chiropractic</option>
+  </select>
+
+        <button
+        onClick={(e) => {
+          e.preventDefault();  // Prevent form submission
+          toast.info('Coming Soon');  // Display toast message
+        }}
+        className="bg-[#D3D3D3] text-white py-1 px-3 rounded text-sm flex items-center ml-2 hover:cursor-pointer"
+        title="Coming Soon"
+      >
+        <img 
+          src="https://cdn-icons-png.flaticon.com/128/8915/8915520.png" 
+          alt="Search Icon"
+          className="w-4 h-4 mr-2" 
+        />
+        Treatment Suggestions
+      </button>
+
+     </div>
         <div className="mb-4 flex items-center">
           <label className="block text-gray-700 w-1/3">Medicines/Oils:</label>
           <textarea
