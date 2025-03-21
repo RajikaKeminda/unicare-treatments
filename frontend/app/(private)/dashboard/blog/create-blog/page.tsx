@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { BsEmojiSmile } from 'react-icons/bs';
 import { FiImage, FiLink } from 'react-icons/fi';
@@ -14,20 +14,31 @@ import { toast } from 'sonner';
 export default function CreateBlog() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [selectedSquad, setSelectedSquad] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
     const [thumbnail, setThumbnail] = useState<string | null>(null);
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-    const [showSquadDropdown, setShowSquadDropdown] = useState(false);
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [isPreview, setIsPreview] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [categories, setCategories] = useState<string[]>([]);
+    const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
-    const squads = [
-        'Engineering',
-        'Design',
-        'Marketing',
-        'Product',
-        'General'
-    ];
+    useEffect(() => {
+        const fetchCategories = async () => {
+            setIsLoadingCategories(true);
+            try {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/categories`);
+                setCategories(response.data.data?.map((category: { name: string }) => category.name) || []);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                toast.error('Failed to load categories');
+            } finally {
+                setIsLoadingCategories(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const getPresignedUrl = async (file: File) => {
         try {
@@ -68,7 +79,7 @@ export default function CreateBlog() {
                 title,
                 content,
                 thumbnail: s3Key,
-                category: selectedSquad,
+                category: selectedCategory,
                 isPublished: true,
             });
             toast.success('Blog post created successfully!');
@@ -77,7 +88,7 @@ export default function CreateBlog() {
             setContent('');
             setThumbnail(null);
             setThumbnailFile(null);
-            setSelectedSquad('');
+            setSelectedCategory('');
         } catch (error) {
             console.error('Error creating blog post:', error);
             toast.error('Failed to create blog post');
@@ -86,7 +97,7 @@ export default function CreateBlog() {
     };
 
     const handleSubmit = async () => {
-        if (!title || !content || !selectedSquad) {
+        if (!title || !content || !selectedCategory) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -140,29 +151,32 @@ export default function CreateBlog() {
                 </button>
             </div>
 
-            {/* Squad Selection */}
+            {/* Category Selection */}
             <div className="mb-6 relative">
                 <button
                     className="flex items-center gap-2 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 w-56"
-                    onClick={() => setShowSquadDropdown(!showSquadDropdown)}
+                    onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                    disabled={isLoadingCategories}
                 >
                     <HiUserGroup className="text-gray-500" />
-                    <span className="flex-1 text-left">{selectedSquad || 'Select Category'}</span>
+                    <span className="flex-1 text-left">
+                        {isLoadingCategories ? 'Loading categories...' : selectedCategory || 'Select Category'}
+                    </span>
                     <IoMdArrowDropdown className="text-gray-500" />
                 </button>
 
-                {showSquadDropdown && (
+                {showCategoryDropdown && (
                     <div className="absolute top-full left-0 mt-1 w-48 bg-white border rounded-lg shadow-lg z-10">
-                        {squads.map((squad) => (
+                        {categories.map((category) => (
                             <button
-                                key={squad}
+                                key={category}
                                 className="w-full px-4 py-2 text-left hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
                                 onClick={() => {
-                                    setSelectedSquad(squad);
-                                    setShowSquadDropdown(false);
+                                    setSelectedCategory(category);
+                                    setShowCategoryDropdown(false);
                                 }}
                             >
-                                {squad}
+                                {category}
                             </button>
                         ))}
                     </div>
