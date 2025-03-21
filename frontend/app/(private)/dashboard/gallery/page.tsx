@@ -115,7 +115,7 @@ export default function GalleryPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 w-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -204,10 +204,10 @@ export default function GalleryPage() {
                     />
                   ) : mediaType === 'video' ? (
                     <div className="relative w-full h-full">
-                      <img
-                        src="https://via.placeholder.com/400x300?text=Video+Thumbnail"
-                        alt={title}
+                      <video
+                        src={item.viewUrl}
                         className="w-full h-full object-cover"
+                        preload="metadata"
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
                         <FiVideo className="w-12 h-12 text-white" />
