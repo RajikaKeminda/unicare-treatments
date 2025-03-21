@@ -442,13 +442,24 @@ export default function InventoryManager() {
             />
             <h5>Expire date</h5>
             <input
-              type="date"
-              value={newItem.expiryDate}
-              onChange={(e) =>
-                setNewItem({ ...newItem, expiryDate: e.target.value })
-              }
-              className="border border-gray-300 rounded-md p-2 mb-4 w-full"
-            />
+  type="date"
+  value={newItem.expiryDate}
+  onChange={(e) => {
+    const selectedDate = e.target.value;
+    const today = new Date().toISOString().split("T")[0]; // Get today's date in yyyy-mm-dd format
+    
+    // Check if the selected date is before today's date
+    if (selectedDate < today) {
+      alert("Please set the expiry date to a date after today.");
+      return; // Prevent the state update if the date is invalid
+    }
+
+    // If valid, update the state with the selected expiry date
+    setNewItem({ ...newItem, expiryDate: selectedDate });
+  }}
+  className="border border-gray-300 rounded-md p-2 mb-4 w-full"
+/>
+
 
             <div className="flex justify-between mt-4">
               <button
@@ -510,7 +521,10 @@ export default function InventoryManager() {
                   <td className="border px-4 py-2">{item.quantity}</td>
                   <td className="border px-4 py-2">{item.unit}</td>
                   <td className="border px-4 py-2">{item.perItemPrice}</td>
-                  <td className="border px-4 py-2">{item.expiryDate}</td>
+                  <td className="border px-4 py-2">
+  {item.expiryDate} {isExpired(item.expiryDate) && "⚠️"}
+</td>
+
                   <td className="border px-4 py-2">
                     <button
                       className="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 mr-2"
