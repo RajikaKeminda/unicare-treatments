@@ -10,11 +10,13 @@ export default function ProductPage() {
   return (
     <div className="min-h-screen bg-white border-t-2">
       <div className="container mx-auto px-4 pt-4 pb-16">
+        {/* Hero Image */}
         <div className="relative flex align-center justify-center mb-4">
           <Image src={uniform} width="150" height="225" alt="uniform" />
           <div className="absolute left-0 bottom-0 w-full h-[50px] bg-gradient-to-t from-white to-transparent"></div>
         </div>
 
+        {/* Header */}
         <header className="mb-6 text-center">
           <h1 className="text-3xl md:text-4xl font-semibold text-gray-800">
             Welcome To Product Page
@@ -24,7 +26,9 @@ export default function ProductPage() {
           </p>
         </header>
 
-        <div className="grid grid-cols-4 gap-6">
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Product Card 1 */}
           <Link href="/products/product-view"> 
             <div className="rounded-lg border border-gray-300 shadow-md p-3 transition-all transform hover:scale-105 hover:shadow-xl hover:bg-gray-50 cursor-pointer">
               <div className="relative h-32">
@@ -40,6 +44,7 @@ export default function ProductPage() {
             </div>
           </Link>
 
+          {/* Product Card 2 */}
           <Link href="/products/product-ai">
             <div className="rounded-lg border border-gray-300 shadow-md p-3 transition-all transform hover:scale-105 hover:shadow-xl hover:bg-gray-50 cursor-pointer">
               <div className="relative h-32">
@@ -55,6 +60,7 @@ export default function ProductPage() {
             </div>
           </Link>
 
+          {/* Product Card 3 */}
           <Link href="/products/product-details">
             <div className="rounded-lg border border-gray-300 shadow-md p-3 transition-all transform hover:scale-105 hover:shadow-xl hover:bg-gray-50 cursor-pointer">
               <div className="relative h-32">
@@ -70,6 +76,7 @@ export default function ProductPage() {
             </div>
           </Link>
 
+          {/* Product Card 4 */}
           <Link href="/products/product-inquiry">
             <div className="rounded-lg border border-gray-300 shadow-md p-3 transition-all transform hover:scale-105 hover:shadow-xl hover:bg-gray-50 cursor-pointer">
               <div className="relative h-32">
