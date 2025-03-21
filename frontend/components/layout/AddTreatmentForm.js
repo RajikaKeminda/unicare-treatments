@@ -6,7 +6,7 @@ import axios from 'axios';
 export default function AddTreatmentForm({ onClose }) {
   const [patientID, setPatientID] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [age, setAge] = useState(0);
+  const [age, setAge] = useState(""); // Initialize age with an empty string
   const [gender, setGender] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [treatment, setTreatment] = useState("");
@@ -17,7 +17,39 @@ export default function AddTreatmentForm({ onClose }) {
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState("");
 
+  // Validation function
+  const validateForm = () => {
+    // Validate name (must not be empty)
+    if (!patientName.trim()) {
+      alert('Patient Name is required.');
+      return false;
+    }
+
+    // Validate age (must be a number greater than 0)
+    if (!age || age <= 0) {
+      alert('Please enter a valid age.');
+      return false;
+    }
+
+    // Validate that the start date is before or the same as the end date
+    if (new Date(startDate) > new Date(endDate)) {
+      alert('Start date cannot be later than End date.');
+      return false;
+    }
+
+    if (notes && notes.trim().length === 0) {
+      alert('Please enter Notes or leave it empty.');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      return; // Exit if validation fails
+    }
+
     const treatmentData = {
       patientID,
       patientName,
@@ -34,7 +66,7 @@ export default function AddTreatmentForm({ onClose }) {
     };
 
     try {
-      const response = await axios.post('http://localhost:8081/api/treatments', treatmentData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/treatments`, treatmentData);
 
       if (response.status === 200) {
         alert('Treatment form saved!');
@@ -77,7 +109,7 @@ export default function AddTreatmentForm({ onClose }) {
         <div className="mb-4 flex items-center">
           <label className="block text-gray-700 w-1/3">Age:</label>
           <input
-            type="number"
+            type="text"
             className="border px-3 py-2 rounded w-2/3"
             placeholder="Enter Age"
             value={age}

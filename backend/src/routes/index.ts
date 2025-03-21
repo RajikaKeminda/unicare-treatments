@@ -5,8 +5,10 @@ const router = express.Router();
 import { createProduct, getProducts, deleteProduct, updateProduct } from '../controllers/productContoller.ts';
 
 // Import inventory controller functions
-import { getInventory, addItem, updateQuantity, deleteItem } from "../controllers/inventoryController.ts";
-import { addTreatment } from '../controllers/treatmentController.ts';
+import { getInventory, addItem, updateQuantity, deleteItem, updateItem} from "../controllers/inventoryController.ts";
+
+// Import treatment controller
+import { addTreatment, deleteTreatment, getAllPatients, getPatientTreatment, updateTreatment } from '../controllers/treatmentController.ts'; 
 
 import appointmentRoute from "./appointmentRoute.ts";
 import {
@@ -29,6 +31,12 @@ router.delete('/products/:id', deleteProduct);
 // Update product route
 router.put('/products/:id', updateProduct);
 
+// api/treatments
+router.post('/treatments', addTreatment);
+router.get('/treatments', getAllPatients);
+router.get('/treatments/:id', getPatientTreatment);
+router.put('/treatments/:id', updateTreatment);
+router.delete('/treatments/:id', deleteTreatment);
 
 
 // api/inventory/
@@ -36,6 +44,7 @@ router.get("/inventory", getInventory); // Get all inventory items
 router.post("/inventory", addItem); // Add an item to the inventory
 router.put("/inventory/:id", updateQuantity); // Update the quantity of an inventory item
 router.delete("/inventory/:id", deleteItem); // Delete an inventory item
+router.put("/inventory-item/:id", updateItem); // Update this line
 
 
 router.post('/treatments', addTreatment);
