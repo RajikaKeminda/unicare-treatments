@@ -1,5 +1,3 @@
-
-
 export interface IVerification {
   email: string;
   username: string;
@@ -9,5 +7,4 @@ export interface IVerification {
 export interface IUserApiResponse {
   success: boolean;
   message: string;
-
 }

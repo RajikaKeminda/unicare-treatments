@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { FaSearch } from 'react-icons/fa';
-import { jsPDF } from 'jspdf';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { FaSearch } from "react-icons/fa";
+import { jsPDF } from "jspdf";
 
 interface Product {
   _id: string;
@@ -18,14 +18,14 @@ interface Product {
 const InstrumentTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [updatedProduct, setUpdatedProduct] = useState<Product>({
-    _id: '',
-    name: '',
-    description: '',
+    _id: "",
+    name: "",
+    description: "",
     price: 0,
-    category: '',
+    category: "",
     stock: 0,
     ratings: 0,
   });
@@ -34,11 +34,13 @@ const InstrumentTable: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/products`);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/products`
+        );
         setProducts(response.data.products);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
         setLoading(false);
       }
     };
@@ -50,9 +52,9 @@ const InstrumentTable: React.FC = () => {
     try {
       await axios.delete(`${process.env.NEXT_PUBLIC_BASE_URL}/products/${id}`);
       setProducts(products.filter((product) => product._id !== id));
-      console.log('Product deleted successfully');
+      console.log("Product deleted successfully");
     } catch (error) {
-      console.error('Error deleting product:', error);
+      console.error("Error deleting product:", error);
     }
   };
 
@@ -74,7 +76,8 @@ const InstrumentTable: React.FC = () => {
   // Update product on backend
   const handleSaveUpdate = async () => {
     try {
-      const { _id, name, description, price, category, stock, ratings } = updatedProduct;
+      const { _id, name, description, price, category, stock, ratings } =
+        updatedProduct;
       await axios.put(`${process.env.NEXT_PUBLIC_BASE_URL}/products/${_id}`, {
         name,
         description,
@@ -88,27 +91,28 @@ const InstrumentTable: React.FC = () => {
           product._id === _id ? { ...product, ...updatedProduct } : product
         )
       );
-      console.log('Product updated successfully');
+      console.log("Product updated successfully");
       setEditProduct(null); // Close edit form
     } catch (error) {
-      console.error('Error updating product:', error);
+      console.error("Error updating product:", error);
     }
   };
 
   // Filter products based on search query
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const generatePDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text('Available Products Report', 20, 20);
+    doc.text("Available Products Report", 20, 20);
 
     // Move this to generatePDF to ensure it's client-side only
-    const currentDate = new Date().toLocaleDateString(); 
+    const currentDate = new Date().toLocaleDateString();
 
     doc.setFontSize(12);
     doc.text(`Date: ${currentDate}`, 20, 30);
@@ -122,32 +126,66 @@ const InstrumentTable: React.FC = () => {
 
     doc.rect(20, yPosition, columnWidths[0], rowHeight);
     doc.rect(20 + columnWidths[0], yPosition, columnWidths[1], rowHeight);
-    doc.rect(20 + columnWidths[0] + columnWidths[1], yPosition, columnWidths[2], rowHeight);
-    doc.rect(20 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, columnWidths[3], rowHeight);
-    doc.text('Name', 25, yPosition + 6);
-    const descriptionX = 20 + columnWidths[0] + (columnWidths[1] - doc.getTextWidth('Description')) / 2;
-    doc.text('Description', descriptionX, yPosition + 6);
-    const priceX = 20 + columnWidths[0] + columnWidths[1] + (columnWidths[2] - doc.getTextWidth('Price')) / 2;
-    doc.text('Price', priceX, yPosition + 6);
-    doc.text('Category', 160, yPosition + 6);
+    doc.rect(
+      20 + columnWidths[0] + columnWidths[1],
+      yPosition,
+      columnWidths[2],
+      rowHeight
+    );
+    doc.rect(
+      20 + columnWidths[0] + columnWidths[1] + columnWidths[2],
+      yPosition,
+      columnWidths[3],
+      rowHeight
+    );
+    doc.text("Name", 25, yPosition + 6);
+    const descriptionX =
+      20 +
+      columnWidths[0] +
+      (columnWidths[1] - doc.getTextWidth("Description")) / 2;
+    doc.text("Description", descriptionX, yPosition + 6);
+    const priceX =
+      20 +
+      columnWidths[0] +
+      columnWidths[1] +
+      (columnWidths[2] - doc.getTextWidth("Price")) / 2;
+    doc.text("Price", priceX, yPosition + 6);
+    doc.text("Category", 160, yPosition + 6);
 
     yPosition += rowHeight;
 
     filteredProducts.forEach((product) => {
       doc.rect(20, yPosition, columnWidths[0], rowHeight);
       doc.rect(20 + columnWidths[0], yPosition, columnWidths[1], rowHeight);
-      doc.rect(20 + columnWidths[0] + columnWidths[1], yPosition, columnWidths[2], rowHeight);
-      doc.rect(20 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, columnWidths[3], rowHeight);
+      doc.rect(
+        20 + columnWidths[0] + columnWidths[1],
+        yPosition,
+        columnWidths[2],
+        rowHeight
+      );
+      doc.rect(
+        20 + columnWidths[0] + columnWidths[1] + columnWidths[2],
+        yPosition,
+        columnWidths[3],
+        rowHeight
+      );
       doc.text(product.name, 25, yPosition + 6);
-      const descriptionXData = 20 + columnWidths[0] + (columnWidths[1] - doc.getTextWidth(product.description)) / 2;
+      const descriptionXData =
+        20 +
+        columnWidths[0] +
+        (columnWidths[1] - doc.getTextWidth(product.description)) / 2;
       doc.text(product.description, descriptionXData, yPosition + 6);
-      const priceXData = 20 + columnWidths[0] + columnWidths[1] + (columnWidths[2] - doc.getTextWidth(`$${product.price.toFixed(2)}`)) / 2;
-      doc.text(`$${product.price.toFixed(2)}`, priceXData, yPosition + 6);
+      const priceXData =
+        20 +
+        columnWidths[0] +
+        columnWidths[1] +
+        (columnWidths[2] - doc.getTextWidth(`${product.price.toFixed(2)}`)) / 2;
+      doc.text(`${product.price.toFixed(2)}`, priceXData, yPosition + 6);
       doc.text(product.category, 160, yPosition + 6);
       yPosition += rowHeight;
     });
 
-    doc.save('products-report.pdf');
+    doc.save("products-report.pdf");
   };
 
   if (loading) return <div className="text-center p-5 text-xl">Loading...</div>;
@@ -163,7 +201,10 @@ const InstrumentTable: React.FC = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full p-3 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <FaSearch
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={20}
+          />
         </div>
 
         <button
@@ -178,7 +219,12 @@ const InstrumentTable: React.FC = () => {
       {editProduct && (
         <div className="mb-4 p-5 bg-white rounded shadow-md">
           <h3 className="text-xl font-semibold mb-4">Update Product</h3>
-          <form onSubmit={(e) => { e.preventDefault(); handleSaveUpdate(); }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSaveUpdate();
+            }}
+          >
             <div className="mb-4">
               <label>Name</label>
               <input

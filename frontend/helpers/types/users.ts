@@ -2,12 +2,15 @@ import { IAppointment } from ".";
 
 export interface IUser {
   id?: string;
-  name: string;
-  email: string;
-  password?: string;
-  verified: boolean;
-  isVerified: boolean;
+  name?: string;
+  username?: string;
+  email?: string;
+  profile_img?: string;
+  isVerified?: boolean;
+  role?: string;
 }
+
+export type userTypes = "doctor" | "admin" | "supplier" | "patient";
 
 export interface TApiResponse {
   success: boolean;

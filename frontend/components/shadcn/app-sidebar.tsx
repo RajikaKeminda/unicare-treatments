@@ -51,8 +51,8 @@ const data = {
         },
         {
           icon: BsGrid,
-          title: "Categories",
-          url: "/dashboard/blog/categories",
+          title: "Create Blog",
+          url: "/dashboard/blog/create-blog",
         },
       ],
     },

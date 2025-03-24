@@ -35,6 +35,7 @@
       "@/types/*": ["./helpers/types/*"],
       "@/hooks/*": ["./helpers/hooks/*"],
       "@/libs/*": ["./helpers/libs/*"],
+      "@/utils/*": ["./helpers/utils/*"],
 
       "@/channeling/*": ["./components/layout/channeling/*"],
 
@@ -42,6 +43,12 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/layout/AddTreatmentForm.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "components/layout/AddTreatmentForm.js"
+  ],
   "exclude": ["node_modules"]
 }

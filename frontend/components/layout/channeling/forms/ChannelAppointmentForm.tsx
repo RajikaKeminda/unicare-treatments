@@ -33,6 +33,7 @@ import { useSession } from "next-auth/react";
 
 export default function ChannelAppointmentForm() {
   const { data: session } = useSession();
+
   const user = session?.user;
 
   // form initializer
@@ -62,7 +63,7 @@ export default function ChannelAppointmentForm() {
         );
         if (response.success) {
           toast.success(
-            `Appointment successfully created ${response.appointment?.referenceNumber}`
+            `Appointment successfully created!. Ref:${response.appointment?.referenceNumber}`
           );
         }
         if (!response.success) {
