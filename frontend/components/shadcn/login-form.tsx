@@ -64,7 +64,7 @@ export function LoginForm({
     if (result?.ok) {
       const session = await getSession();
       if (session?.user?.role === "admin") {
-        router.replace("/dashboard");
+        router.replace("/treatment");
       } else {
         router.replace("/home");
       }
