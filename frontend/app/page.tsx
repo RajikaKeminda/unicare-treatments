@@ -110,7 +110,7 @@ export default function Home() {
               Discover the ancient wisdom of Ayurvedic healing
             </p>
             <Link
-              href="/appointments"
+              href="/sign-in"
               className="bg-white text-green-800 px-8 py-3 rounded-full font-semibold hover:bg-green-50 transition-colors"
             >
               Book Appointment
@@ -265,7 +265,7 @@ export default function Home() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/appointments" className="text-gray-400 hover:text-white transition-colors">
+                  <Link href="/sign-in" className="text-gray-400 hover:text-white transition-colors">
                     Book Appointment
                   </Link>
                 </li>
