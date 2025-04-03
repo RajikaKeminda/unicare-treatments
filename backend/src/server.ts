@@ -13,7 +13,7 @@ connectToMongoDB();
 
 // Middleware -->
 // Enable CORS for requests only from localhost:3000 (your Next.js frontend)
-app.use(cors({ origin: 'http://localhost:3000' })); // CORS for specific origin
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000' })); // CORS for specific origin
 app.use(express.json()); // Parse incoming JSON requests
 
 // Routes -->
