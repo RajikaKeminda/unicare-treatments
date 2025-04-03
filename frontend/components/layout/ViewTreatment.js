@@ -22,22 +22,55 @@ export default function ViewTreatment({ patient, onClose }) {
     }));
   };
 
+  const validateForm = () => {
+    // Validate date range (Start Date cannot be after End Date)
+    const startDate = new Date(editedPatient.startDate);
+    const endDate = new Date(editedPatient.endDate);
+    if (startDate > endDate) {
+      toast.error('End Date cannot be before start date');
+      return false;
+    }
+
+    let today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to 00:00:00
+    
+    let start = new Date(startDate);
+    start.setHours(0, 0, 0, 0); // Reset time to 00:00:00
+    
+    if (start < today) {
+        toast.error('Start date cannot be earlier than today.');
+        return false;
+    }
+
+    if (isNaN(editedPatient.age) || parseInt(editedPatient.age) <= 0) {
+      toast.error('Age must be a valid positive number.');
+      return false;
+    }
+    if (parseInt(editedPatient.age) > 120) {
+      toast.error('Age must be 120 or below.');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleUpdate = async () => {
     if (!_id) return;
 
     // Prevent updating patientID
     if (editedPatient.patientID !== patient.patientID) {
-      // alert("Patient ID cannot be changed!");
-      toast.error("Patient ID cannot be changed!");
+      toast.error('Patient ID cannot be changed!');
       return;
     }
+
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/treatments/${_id}`, {
-        method: "PUT",
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(editedPatient), // Send updated patient data
       });
@@ -45,12 +78,12 @@ export default function ViewTreatment({ patient, onClose }) {
       const data = await response.json();
 
       if (response.ok) {
-        // alert("Updated Successfully!");
-        toast.success("Updated Successfully!");
+        alert('Updated Successfully!');
         onClose(); // Close the modal after successful update
       } else {
-        console.error(data.message || "Error updating treatment.");
+        alert(data.message || 'Error updating treatment.');
       }
+      
     } finally {
       setLoading(false);
     }
@@ -71,12 +104,12 @@ export default function ViewTreatment({ patient, onClose }) {
       const data = await response.json();
 
       if (response.ok) {
-        // alert('Deleted Successfully!');
-        toast.success("Deleted Successfully!");
+        alert('Deleted Successfully!');
         onClose(); // Close the modal after successful delete
       } else {
-        console.error(data.message || 'Error deleting treatment.');
+        alert(data.message || 'Error deleting treatment.');
       }
+      
     } finally {
       setLoading(false);
     }
@@ -259,14 +292,14 @@ export default function ViewTreatment({ patient, onClose }) {
             <div className="flex justify-center gap-4 mt-4">
               <button
                 type="button"
-                className="px-4 py-2 bg-[#60adcb] rounded"
+                className="px-4 py-2 bg-[#3B82F6] rounded"
                 onClick={handleUpdate}
               >
                 Update
               </button>
               <button
                 type="button"
-                className="px-4 py-2 bg-red-500 text-white rounded"
+                className="px-4 py-2 bg-[#EF4444] text-white rounded"
                 onClick={handleDelete}
               >
                 Delete
