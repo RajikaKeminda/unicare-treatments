@@ -6,7 +6,7 @@
     "dev": "nodemon",
     "start": "nodemon",
     "build": "tsx build.ts",
-    "serve": "node --experimental-specifier-resolution=node dist/server.js"
+    "serve": "NODE_OPTIONS='--experimental-specifier-resolution=node --experimental-modules --experimental-json-modules' node dist/server.js"
   },
   "engines": {
     "node": ">=20.0.0"
