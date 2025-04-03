@@ -2,114 +2,72 @@
 
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FiArrowRight, FiCopy, FiEye, FiHeart, FiMessageCircle, FiSend, FiShare2, FiThumbsDown, FiThumbsUp } from 'react-icons/fi'
+import { useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import axios from 'axios'
+
+import { toast } from "sonner";
+
+interface SessionUser {
+  id: string;
+  name?: string;
+  email?: string;
+  image?: string;
+  role?: string;
+}
 
 interface Comment {
-  id: string
+  _id: string
   content: string
   createdAt: string
   author: {
+    _id: string
     name: string
-    avatar: string
+    email: string
   }
-  likes: number
-  dislikes: number
+  likes: string[]
+  dislikes: string[]
   replies: Comment[]
+  parentCommentId?: string
+  postId: string
 }
 
 interface Post {
-  id: string
+  _id: string
   title: string
   content: string
   thumbnail: string
+  thumbnailUrl?: string
   createdAt: string
   updatedAt: string
   category: string
   author: {
+    _id: string
     name: string
-    avatar: string
+    email: string
   }
-  stats: {
-    views: number
-    likes: number
-    comments: number
-  }
+  views: number
+  likes: string[]
+  comments: Comment[]
+  isPublished: boolean
 }
 
 export default function BlogViewPage() {
-  // const { id } = useParams()
+  const params = useParams()
+  const id = Array.isArray(params.id) ? params.id[0] : params.id
+  const { data: session } = useSession()
   
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [newComment, setNewComment] = useState('')
   const [replyTo, setReplyTo] = useState<string | null>(null)
-  const [post, setPost] = useState<Post>({
-    id: '2',
-    title: 'Getting Started with Next.js',
-    content: `
-      <p>Next.js is a powerful framework for building React applications. It provides a great developer experience with features like server-side rendering, static site generation, and API routes.</p>
-      
-      <h2>Why Choose Next.js?</h2>
-      <p>There are many reasons to choose Next.js for your next project:</p>
-      <ul>
-        <li>Server-side rendering for better performance</li>
-        <li>Static site generation for blazing fast pages</li>
-        <li>API routes for backend functionality</li>
-        <li>File-based routing</li>
-        <li>Built-in TypeScript support</li>
-      </ul>
-
-      <h2>Getting Started</h2>
-      <p>To create a new Next.js project, run:</p>
-      <pre><code>npx create-next-app@latest my-app</code></pre>
-      
-      <p>This will create a new Next.js project with all the necessary dependencies and configuration files.</p>
-    `,
-    thumbnail: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    createdAt: '2024-03-20T10:00:00Z',
-    updatedAt: '2024-03-20T10:00:00Z',
-    category: 'Technology',
-    author: {
-      name: 'John Doe',
-      avatar: 'https://ui-avatars.com/api/?name=John+Doe',
-    },
-    stats: {
-      views: 1234,
-      likes: 89,
-      comments: 23,
-    },
-  })
-
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: '1',
-      content: 'Great article! I learned a lot about Next.js.',
-      createdAt: '2024-03-20T11:00:00Z',
-      author: {
-        name: 'Alice Johnson',
-        avatar: 'https://ui-avatars.com/api/?name=Alice+Johnson',
-      },
-      likes: 5,
-      dislikes: 0,
-      replies: [
-        {
-          id: '2',
-          content: 'Agreed! The examples were very helpful.',
-          createdAt: '2024-03-20T11:30:00Z',
-          author: {
-            name: 'Bob Wilson',
-            avatar: 'https://ui-avatars.com/api/?name=Bob+Wilson',
-          },
-          likes: 2,
-          dislikes: 0,
-          replies: [],
-        },
-      ],
-    },
-  ])
-
+  const [post, setPost] = useState<Post | null>(null)
+  const [comments, setComments] = useState<Comment[]>([])
   const [suggestedPosts] = useState<Post[]>([
     {
-      id: '2',
+      _id: '2',
       title: 'Healthy Living Tips',
       content: 'Discover the best practices for maintaining a healthy lifestyle...',
       thumbnail: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
@@ -117,17 +75,17 @@ export default function BlogViewPage() {
       updatedAt: '2024-03-19T15:30:00Z',
       category: 'Health',
       author: {
-        name: 'Jane Smith',
-        avatar: 'https://ui-avatars.com/api/?name=Jane+Smith',
+        _id: '',
+        name: '',
+        email: ''
       },
-      stats: {
-        views: 856,
-        likes: 45,
-        comments: 12,
-      },
+      views: 0,
+      likes: [],
+      comments: [],
+      isPublished: false
     },
     {
-      id: '3',
+      _id: '3',
       title: 'The Future of Web Development',
       content: 'Explore the latest trends and technologies shaping the future of web development...',
       thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
@@ -135,17 +93,17 @@ export default function BlogViewPage() {
       updatedAt: '2024-03-18T09:15:00Z',
       category: 'Technology',
       author: {
-        name: 'Mike Johnson',
-        avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson',
+        _id: '',
+        name: '',
+        email: ''
       },
-      stats: {
-        views: 654,
-        likes: 32,
-        comments: 8,
-      },
+      views: 0,
+      likes: [],
+      comments: [],
+      isPublished: false
     },
     {
-      id: '4',
+      _id: '4',
       title: 'Business Strategy in 2024',
       content: 'Learn about the key business strategies that will drive success in 2024...',
       thumbnail: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
@@ -153,85 +111,264 @@ export default function BlogViewPage() {
       updatedAt: '2024-03-17T14:20:00Z',
       category: 'Business',
       author: {
-        name: 'Sarah Wilson',
-        avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson',
+        _id: '',
+        name: '',
+        email: ''
       },
-      stats: {
-        views: 432,
-        likes: 28,
-        comments: 15,
-      },
+      views: 0,
+      likes: [],
+      comments: [],
+      isPublished: false
     },
   ])
+  const [page, setPage] = useState(1)
+  const [commentSubmitting, setCommentSubmitting] = useState(false)
 
-  const handleLike = () => {
-    setPost(prev => ({
-      ...prev,
-      stats: { ...prev.stats, likes: prev.stats.likes + 1 }
-    }))
+  // Fetch post data
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        setLoading(true)
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/blog/${id}`)
+        const thumbnailUrl = await getThumbnailUrl(response.data.data.thumbnail)
+        setPost({ ...response.data.data, thumbnailUrl })
+        setError(null)
+      } catch (err) {
+        setError('Failed to load blog post')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (id) {
+      fetchPost()
+    }
+  }, [id])
+
+  const getThumbnailUrl = async (thumbnailPath: string): Promise<string> => {
+    if (thumbnailPath.startsWith('http')) {
+      return thumbnailPath
+    }
+    
+    try {
+      const key = thumbnailPath
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/media/view-url/${Buffer.from(key).toString('base64')}`)
+      return response.data.data.viewUrl
+    } catch (error) {
+      console.error('Error getting thumbnail URL:', error)
+      return 'https://via.placeholder.com/400x300?text=Image+Not+Available'
+    }
+  }
+
+  // Fetch comments
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/comments/post/${id}?page=${page}&limit=10`)
+        setComments(response.data.data.comments)
+      } catch (err) {
+        console.error('Failed to load comments:', err)
+      }
+    }
+
+    if (id) {
+      fetchComments()
+    }
+  }, [id, page])
+
+  // Fetch suggested posts
+  useEffect(() => {
+    // const fetchSuggestedPosts = async () => {
+    //   try {
+    //     // Get posts from the same category if available
+    //     const category = post?.category
+    //     const url = category 
+    //       ? `${process.env.NEXT_PUBLIC_BASE_URL}/blog?page=1&limit=3&category=${encodeURIComponent(category)}`
+    //       : `${process.env.NEXT_PUBLIC_BASE_URL}/blog?page=1&limit=3`
+        
+    //     const response = await axios.get(url)
+        
+    //     // Filter out the current post
+    //     const filtered = response.data.data.posts.filter((p: Post) => p._id !== id)
+    //     setSuggestedPosts(filtered.slice(0, 3))
+    //   } catch (err) {
+    //     console.error('Failed to load suggested posts:', err)
+    //   }
+    // }
+
+    if (post) {
+      // fetchSuggestedPosts()
+    }
+  }, [post, id])
+
+  const handleLike = async () => {
+    // if (!session) {
+    //   toast.error('Please sign in to like this post')
+    //   return
+    // }
+
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/blog/${id}/like`)
+      
+      // Update post in state with new likes
+      setPost(prev => {
+        if (!prev) return prev
+        return { ...prev, likes: response.data.data.likes }
+      })
+      
+      toast.success('Post like updated')
+    } catch (err) {
+      toast.error('Failed to like post')
+      console.error(err)
+    }
   }
 
   const handleCopyLink = async () => {
     const url = window.location.href
     await navigator.clipboard.writeText(url)
-    // You could add a toast notification here
+    toast.success('Link copied to clipboard')
   }
 
-  const handleCommentLike = (commentId: string) => {
-    setComments(prev => prev.map(comment => {
-      if (comment.id === commentId) {
-        return { ...comment, likes: comment.likes + 1 }
-      }
-      return comment
-    }))
+  const handleCommentLike = async (commentId: string) => {
+    // if (!session) {
+    //   toast.error('Please sign in to like this comment')
+    //   return
+    // }
+
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/comments/${commentId}/like`)
+      
+      // Update comments state with the updated comment
+      setComments(prev => {
+        return prev.map(comment => {
+          if (comment._id === commentId) {
+            return { ...comment, likes: response.data.data.likes }
+          }
+          
+          // Check if the comment is in replies
+          if (comment.replies && comment.replies.length > 0) {
+            const updatedReplies = comment.replies.map(reply => {
+              if (reply._id === commentId) {
+                return { ...reply, likes: response.data.data.likes }
+              }
+              return reply
+            })
+            
+            return { ...comment, replies: updatedReplies }
+          }
+          
+          return comment
+        })
+      })
+    } catch (err) {
+      toast.error('Failed to like comment')
+      console.error(err)
+    }
   }
 
-  const handleCommentDislike = (commentId: string) => {
-    setComments(prev => prev.map(comment => {
-      if (comment.id === commentId) {
-        return { ...comment, dislikes: comment.dislikes + 1 }
-      }
-      return comment
-    }))
+  const handleCommentDislike = async (commentId: string) => {
+    // if (!session) {
+    //   toast.error('Please sign in to dislike this comment')
+    //   return
+    // }
+
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/comments/${commentId}/dislike`)
+      
+      // Update comments state with the updated comment
+      setComments(prev => {
+        return prev.map(comment => {
+          if (comment._id === commentId) {
+            return { ...comment, dislikes: response.data.data.dislikes }
+          }
+          
+          // Check if the comment is in replies
+          if (comment.replies && comment.replies.length > 0) {
+            const updatedReplies = comment.replies.map(reply => {
+              if (reply._id === commentId) {
+                return { ...reply, dislikes: response.data.dislikes }
+              }
+              return reply
+            })
+            
+            return { ...comment, replies: updatedReplies }
+          }
+          
+          return comment
+        })
+      })
+    } catch (err) {
+      toast.error('Failed to dislike comment')
+      console.error(err)
+    }
   }
 
-  const handleSubmitComment = (e: React.FormEvent) => {
+  const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // if (!session) {
+    //   toast.error('Please sign in to comment')
+    //   return
+    // }
+    
     if (!newComment.trim()) return
 
-    const comment: Comment = {
-      id: Date.now().toString(),
-      content: newComment,
-      createdAt: new Date().toISOString(),
-      author: {
-        name: 'Current User',
-        avatar: 'https://ui-avatars.com/api/?name=Current+User',
-      },
-      likes: 0,
-      dislikes: 0,
-      replies: [],
-    }
-
-    if (replyTo) {
-      setComments(prev => prev.map(comment => {
-        if (comment.id === replyTo) {
-          return { ...comment, replies: [...comment.replies, comment] }
+    try {
+      setCommentSubmitting(true)
+      
+      const commentData = {
+        content: newComment,
+        postId: id,
+        parentCommentId: replyTo || undefined
+      }
+      
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/comments`, commentData)
+      const newCommentData = response.data.data
+      
+      // If it's a reply, add it to the parent comment's replies
+      if (replyTo) {
+        setComments(prev => {
+          return prev.map(comment => {
+            if (comment._id === replyTo) {
+              return {
+                ...comment,
+                replies: [...(comment.replies || []), newCommentData]
+              }
+            }
+            return comment
+          })
+        })
+      } else {
+        // If it's a top-level comment, add it to the comments list
+        setComments(prev => [newCommentData, ...prev])
+      }
+      
+      // Update post comment count in state
+      setPost(prev => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          comments: [...prev.comments, newCommentData._id]
         }
-        return comment
-      }))
-    } else {
-      setComments(prev => [...prev, comment])
+      })
+      
+      toast.success(replyTo ? 'Reply posted successfully' : 'Comment posted successfully')
+      setNewComment('')
+      setReplyTo(null)
+    } catch (err) {
+      toast.error('Failed to post comment')
+      console.error(err)
+    } finally {
+      setCommentSubmitting(false)
     }
-
-    setNewComment('')
-    setReplyTo(null)
   }
 
   const renderComment = (comment: Comment) => (
-    <div key={comment.id} className="space-y-4">
+    <div key={comment._id} className="space-y-4">
       <div className="flex gap-4">
         <img
-          src={comment.author.avatar}
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author.name || '')}`}
           alt={comment.author.name}
           className="w-10 h-10 rounded-full"
         />
@@ -246,28 +383,36 @@ export default function BlogViewPage() {
             <p className="text-gray-700">{comment.content}</p>
             <div className="flex items-center gap-4 mt-3">
               <button
-                onClick={() => handleCommentLike(comment.id)}
-                className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
+                onClick={() => handleCommentLike(comment._id)}
+                className={`flex items-center gap-1 transition-colors ${
+                  comment.likes.includes((session?.user as SessionUser)?.id)
+                    ? 'text-blue-600'
+                    : 'text-gray-600 hover:text-blue-600'
+                }`}
               >
                 <FiThumbsUp className="w-4 h-4" />
-                <span className="text-sm">{comment.likes}</span>
+                <span className="text-sm">{comment.likes.length}</span>
               </button>
               <button
-                onClick={() => handleCommentDislike(comment.id)}
-                className="flex items-center gap-1 text-gray-600 hover:text-red-600 transition-colors"
+                onClick={() => handleCommentDislike(comment._id)}
+                className={`flex items-center gap-1 transition-colors ${
+                  session && session.user && comment.dislikes.includes((session.user as SessionUser).id)
+                    ? 'text-red-600'
+                    : 'text-gray-600 hover:text-red-600'
+                }`}
               >
                 <FiThumbsDown className="w-4 h-4" />
-                <span className="text-sm">{comment.dislikes}</span>
+                <span className="text-sm">{comment.dislikes.length}</span>
               </button>
               <button
-                onClick={() => setReplyTo(comment.id)}
+                onClick={() => setReplyTo(comment._id)}
                 className="text-sm text-gray-600 hover:text-purple-600 transition-colors"
               >
                 Reply
               </button>
             </div>
           </div>
-          {comment.replies.length > 0 && (
+          {comment.replies && comment.replies.length > 0 && (
             <div className="ml-8 mt-4 space-y-4">
               {comment.replies.map(reply => renderComment(reply))}
             </div>
@@ -276,6 +421,22 @@ export default function BlogViewPage() {
       </div>
     </div>
   )
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+    </div>
+  }
+
+  if (error || !post) {
+    return <div className="max-w-4xl mx-auto p-6 text-center">
+      <h1 className="text-2xl font-bold text-red-500 mb-4">Error</h1>
+      <p className="text-gray-700">{error || 'Blog post not found'}</p>
+      <Link href="/instruction-blogs" className="mt-4 inline-block px-4 py-2 bg-purple-600 text-white rounded-lg">
+        Back to Blogs
+      </Link>
+    </div>
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -290,11 +451,11 @@ export default function BlogViewPage() {
         <div className="flex items-center gap-4 text-gray-600">
           <div className="flex items-center gap-2">
             <img
-              src={post.author.avatar}
-              alt={post.author.name}
+              src={`https://ui-avatars.com/api/?name=Avatar`}
+              alt={'Avatar'}
               className="w-6 h-6 rounded-full"
             />
-            <span>{post.author.name}</span>
+            <span>{'Avatar'}</span>
           </div>
           <span>•</span>
           <span>{format(new Date(post.createdAt), 'MMMM d, yyyy')}</span>
@@ -304,7 +465,7 @@ export default function BlogViewPage() {
       {/* Featured Image */}
       <div className="relative h-[400px] mb-8 rounded-xl overflow-hidden">
         <img
-          src={post.thumbnail}
+          src={post.thumbnailUrl || 'https://via.placeholder.com/1200x630?text=No+Image'}
           alt={post.title}
           className="w-full h-full object-cover"
         />
@@ -328,14 +489,18 @@ export default function BlogViewPage() {
       <div className="flex items-center gap-6 py-6 border-y border-gray-200 mb-12">
         <button
           onClick={handleLike}
-          className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors"
+          className={`flex items-center gap-2 transition-colors ${
+            session && session.user && post.likes.includes((session.user as SessionUser).id)
+              ? 'text-red-500'
+              : 'text-gray-600 hover:text-red-500'
+          }`}
         >
           <FiHeart className="w-5 h-5" />
-          <span>{post.stats.likes}</span>
+          <span>{post.likes.length}</span>
         </button>
         <div className="flex items-center gap-2 text-gray-600">
           <FiMessageCircle className="w-5 h-5" />
-          <span>{post.stats.comments}</span>
+          <span>{post.comments.length}</span>
         </div>
         <div className="flex items-center gap-2 text-gray-600">
           <FiShare2 className="w-5 h-5" />
@@ -349,17 +514,18 @@ export default function BlogViewPage() {
         {/* Comment Form */}
         <form onSubmit={handleSubmitComment} className="flex gap-4">
           <img
-            src="https://ui-avatars.com/api/?name=Current+User"
-            alt="Your avatar"
+            src={session && session.user ? `https://ui-avatars.com/api/?name=${encodeURIComponent((session.user as SessionUser).name || 'User')}` : 'https://ui-avatars.com/api/?name=Guest'}
+            alt={session && session.user ? (session.user as SessionUser).name || 'Your avatar' : 'Guest'}
             className="w-10 h-10 rounded-full"
           />
           <div className="flex-1">
             <textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder={replyTo ? "Write a reply..." : "Write a comment..."}
+              placeholder={"Write a reply..."}
               className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
               rows={3}
+              disabled={commentSubmitting}
             />
             <div className="flex justify-end mt-2">
               {replyTo && (
@@ -367,16 +533,29 @@ export default function BlogViewPage() {
                   type="button"
                   onClick={() => setReplyTo(null)}
                   className="text-sm text-gray-600 hover:text-gray-900 mr-2"
+                  disabled={commentSubmitting}
                 >
                   Cancel
                 </button>
               )}
               <button
                 type="submit"
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                className={`flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg transition-colors ${
+                  commentSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-700'
+                }`}
+                disabled={commentSubmitting}
               >
-                <FiSend className="w-4 h-4" />
-                {replyTo ? 'Reply' : 'Comment'}
+                {commentSubmitting ? (
+                  <>
+                    <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <FiSend className="w-4 h-4" />
+                    {replyTo ? 'Reply' : 'Comment'}
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -384,8 +563,24 @@ export default function BlogViewPage() {
 
         {/* Comments List */}
         <div className="space-y-8">
-          {comments.map(comment => renderComment(comment))}
+          {comments.length > 0 ? (
+            comments.map(comment => renderComment(comment))
+          ) : (
+            <p className="text-gray-500 text-center py-4">No comments yet. Be the first to comment!</p>
+          )}
         </div>
+        
+        {/* Load More Comments Button */}
+        {comments.length > 0 && (
+          <div className="flex justify-center">
+            <button
+              onClick={() => setPage(prev => prev + 1)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Load More Comments
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Suggested Posts */}
@@ -393,7 +588,7 @@ export default function BlogViewPage() {
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Suggested Posts</h2>
           <Link 
-            href="/blog"
+            href="/instruction-blogs"
             className="flex items-center gap-2 text-purple-600 hover:text-purple-700 transition-colors"
           >
             View All
@@ -402,47 +597,51 @@ export default function BlogViewPage() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {suggestedPosts.map((suggestedPost) => (
-            <Link 
-              key={suggestedPost.id} 
-              href={`/blog/${suggestedPost.id}`}
-              className="group"
-            >
-              <article className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <div className="relative h-40">
-                  <img
-                    src={suggestedPost.thumbnail}
-                    alt={suggestedPost.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
-                      {suggestedPost.category}
-                    </span>
+          {suggestedPosts.length > 0 ? (
+            suggestedPosts.map((suggestedPost) => (
+              <Link 
+                key={suggestedPost._id} 
+                href={`/instruction-blogs/${suggestedPost._id}`}
+                className="group"
+              >
+                <article className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="relative h-40">
+                    <img
+                      src={suggestedPost.thumbnail || 'https://via.placeholder.com/300x200?text=No+Image'}
+                      alt={suggestedPost.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
-                    {suggestedPost.title}
-                  </h3>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <FiHeart className="w-4 h-4" />
-                      <span>{suggestedPost.stats.likes}</span>
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+                        {suggestedPost.category}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <FiMessageCircle className="w-4 h-4" />
-                      <span>{suggestedPost.stats.comments}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <FiEye className="w-4 h-4" />
-                      <span>{suggestedPost.stats.views}</span>
+                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                      {suggestedPost.title}
+                    </h3>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <FiHeart className="w-4 h-4" />
+                        <span>{suggestedPost.likes.length}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FiMessageCircle className="w-4 h-4" />
+                        <span>{suggestedPost.comments.length}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FiEye className="w-4 h-4" />
+                        <span>{suggestedPost.views}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </article>
-            </Link>
-          ))}
+                </article>
+              </Link>
+            ))
+          ) : (
+            <p className="col-span-3 text-center text-gray-500 py-8">No suggested posts found</p>
+          )}
         </div>
       </div>
     </div>
