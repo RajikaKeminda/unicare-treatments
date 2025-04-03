@@ -11,8 +11,7 @@ import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import clsx from "clsx";
 
 interface GenericFormProps<T extends FieldValues> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  form: UseFormReturn<T, any, undefined>;
+  form: UseFormReturn<T>;
   name: Path<T>;
   label: string;
   isHidden?: boolean;
