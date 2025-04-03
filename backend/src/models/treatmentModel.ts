@@ -7,7 +7,7 @@ const treatmentSchema = new mongoose.Schema({
   gender: { type: String, required: true },
   diagnosis: { type: String, required: true },
   treatment: { type: String, required: false },
-  medicines: { type: String, required: true },
+  medicines: { type: String, required: false },
   yogaExercises: { type: String, required: false },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },

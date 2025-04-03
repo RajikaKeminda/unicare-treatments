@@ -7,14 +7,20 @@ export const createProduct = async (req: Request, res: Response) => {
 
   try {
     // Create a new product and save it to the database
-    const newProduct = new Product({
+    const productData: any = {
       name,
-      description,
       price,
       category,
       stock,
       ratings,
-    });
+    };
+
+    // Add description to the product data only if it's not an empty string
+    if (description && description.trim() !== '') {
+      productData.description = description;
+    }
+
+    const newProduct = new Product(productData);
 
     await newProduct.save();
 

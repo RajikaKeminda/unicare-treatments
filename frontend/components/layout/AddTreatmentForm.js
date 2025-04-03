@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 export default function AddTreatmentForm({ onClose }) {
   const [patientID, setPatientID] = useState("");
@@ -19,31 +20,77 @@ export default function AddTreatmentForm({ onClose }) {
 
   // Validation function
   const validateForm = () => {
-    // Validate name (must not be empty)
+    // Validate required fields
+    if (!patientID.trim()) {
+        toast.error('Patient ID is required.');
+        return false;
+    }
     if (!patientName.trim()) {
-      alert('Patient Name is required.');
-      return false;
+        toast.error('Patient Name is required.');
+        return false;
+    }
+    if (!age.trim()) {
+        toast.error('Age is required.');
+        return false;
     }
 
-    // Validate age (must be a number greater than 0)
-    if (!age || age <= 0) {
-      alert('Please enter a valid age.');
-      return false;
+    if (!age.trim()) {
+        toast.error('Age is required.');
+        return false;
+    }
+
+    if (isNaN(age) || parseInt(age) <= 0) {
+        toast.error('Age must be a valid positive number.');
+        return false;
+    }
+
+    if (parseInt(age) > 120) {
+        toast.error('Age must be 120 or below.');
+        return false;
+    }
+
+    if (!gender.trim()) {
+        toast.error('Gender is required.');
+        return false;
+    }
+    if (!diagnosis.trim()) {
+        toast.error('Diagnosis is required.');
+        return false;
+    }
+    
+    if (!startDate) {
+        toast.error('Start Date is required.');
+        return false;
+    }
+    if (!endDate) {
+        toast.error('End Date is required.');
+        return false;
+    }
+    if (!status.trim()) {
+        toast.error('Status is required.');
+        return false;
     }
 
     // Validate that the start date is before or the same as the end date
     if (new Date(startDate) > new Date(endDate)) {
-      alert('Start date cannot be later than End date.');
-      return false;
+        toast.error('End Date cannot be before start date');
+        return false;
     }
 
-    if (notes && notes.trim().length === 0) {
-      alert('Please enter Notes or leave it empty.');
-      return false;
+    let today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to 00:00:00
+
+    let start = new Date(startDate);
+    start.setHours(0, 0, 0, 0); // Reset time to 00:00:00
+
+    if (start < today) {
+        toast.error('Start date cannot be earlier than today.');
+        return false;
     }
 
     return true;
-  };
+};
+
 
   const handleSave = async () => {
     if (!validateForm()) {
@@ -150,19 +197,36 @@ export default function AddTreatmentForm({ onClose }) {
         </div>
 
         <div className="mb-4 flex items-center">
-          <label className="block text-gray-700 w-1/3">Treatment:</label>
-          <select
-            className="border px-3 py-2 rounded w-2/3"
-            value={treatment}
-            onChange={(e) => setTreatment(e.target.value)}
-          >
-            <option>Select Treatment</option>
-            <option>Physical Therapy</option>
-            <option>Massage</option>
-            <option>Acupuncture</option>
-            <option>Chiropractic</option>
-          </select>
-        </div>
+  <label className="block text-gray-700 w-1/3">Treatment:</label>
+  <select
+    className="border px-3 py-2 rounded w-1/3"
+    value={treatment}
+    onChange={(e) => setTreatment(e.target.value)}
+  >
+    <option>Select Treatment</option>
+    <option>Physical Therapy</option>
+    <option>Massage</option>
+    <option>Acupuncture</option>
+    <option>Chiropractic</option>
+  </select>
+
+        <button
+        onClick={(e) => {
+          e.preventDefault();  // Prevent form submission
+          toast.info('Coming Soon');  // Display toast message
+        }}
+        className="bg-[#D3D3D3] text-white py-1 px-3 rounded text-sm flex items-center ml-2 hover:cursor-pointer"
+        title="Coming Soon"
+      >
+        <img 
+          src="https://cdn-icons-png.flaticon.com/128/8915/8915520.png" 
+          alt="Search Icon"
+          className="w-4 h-4 mr-2" 
+        />
+        Treatment Suggestions
+      </button>
+
+     </div>
         <div className="mb-4 flex items-center">
           <label className="block text-gray-700 w-1/3">Medicines/Oils:</label>
           <textarea
@@ -236,7 +300,7 @@ export default function AddTreatmentForm({ onClose }) {
         <div className="flex justify-center gap-4 mt-4">
           <button
             type="button"
-            className="px-4 py-2 bg-[#69d369] rounded"
+            className="px-4 py-2 bg-[#00C853] rounded"
             onClick={handleSave}  // Call handleSave when saving
           >
             Save
