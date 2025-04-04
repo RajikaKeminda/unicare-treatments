@@ -4,6 +4,7 @@ import "@/app/globals.css";
 import { Toaster } from "@/shadcn/ui/sonner";
 import AuthProvider from "@/helpers/providers/auth-provider";
 import { ThemeProvider } from "@/helpers/providers/theme-provider";
+import { EdgeStoreProvider } from "@/libs/edgestore";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +38,7 @@ export default function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
           >
-            {children}
+            <EdgeStoreProvider>{children}</EdgeStoreProvider>
             <Toaster />
           </ThemeProvider>
         </body>

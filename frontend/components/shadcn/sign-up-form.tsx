@@ -175,7 +175,7 @@ export function SignUpForm({
                       Please wait
                     </>
                   ) : (
-                    "Login"
+                    "Sign in"
                   )}
                 </Button>
                 <div className="flex flex-col gap-2">
@@ -183,7 +183,7 @@ export function SignUpForm({
                     We will send you a verification code
                   </p>
                   <div className="text-center text-sm">
-                    Don&apos;t have an account?{" "}
+                    Do you already have an account?{" "}
                     <Link
                       href="/sign-in"
                       className="underline underline-offset-4"
