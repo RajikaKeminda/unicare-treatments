@@ -19,6 +19,7 @@ export interface IUser {
   verifyCodeExpiry: Date;
   isVerified: boolean;
   role: string;
+  reports?: string[];
 }
 
 export type UserDocument = Document<unknown, {}, IUser> &

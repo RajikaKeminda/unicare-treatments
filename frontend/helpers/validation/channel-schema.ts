@@ -31,3 +31,17 @@ export type channelSchema = z.infer<typeof channelAppointmentSchema>;
 export type channel = UseFormReturn<channelSchema>;
 
 export type channelKey = keyof channelSchema;
+
+export const onlyDateSchema = z.object({
+  _id: z.string(),
+  appointmentDate: z.preprocess(
+    (val) =>
+      typeof val === "string" && isValidDate(val) ? new Date(val) : val,
+    z.date()
+  ),
+  referenceNumber: z.string(),
+});
+
+export type dateSchema = z.infer<typeof onlyDateSchema>;
+
+export type dateSchemaExtended = UseFormReturn<dateSchema>;

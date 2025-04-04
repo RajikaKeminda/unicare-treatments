@@ -11,6 +11,7 @@ import {
   rescheduleAppointmentByRefNo,
   deleteAppointmentByRefNo,
   deleteAllAppointmentsByDate,
+  rescheduleAppointmentById,
 } from "../controllers/appointmentController.ts";
 
 const router = Router();
@@ -21,7 +22,7 @@ const router = Router();
 // /api/appointments/date/2023-12-25
 // /api/appointments/refNo/1504250001
 // /api/appointments/patientIdByRefNo/1504250001
-
+router.route("/reschedule/:id").post(rescheduleAppointmentById);
 router
   .route("/doctorAppointments")
   .post(createDoctorAppointment)

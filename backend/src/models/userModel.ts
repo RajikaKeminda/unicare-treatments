@@ -33,8 +33,15 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["doctor", "admin", "supplier", "user"],
-      default: "admin",
+      enum: ["doctor", "admin", "supplier", "patient"],
+      default: "patient",
+    },
+    reports: {
+      type: [
+        {
+          type: String,
+        },
+      ],
     },
   },
   {

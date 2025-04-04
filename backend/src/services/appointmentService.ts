@@ -149,6 +149,15 @@ async function getPatientIdByRefNo(referenceNumber: string) {
   return appointment?.patientId || "user not found";
 }
 
+async function rescheduleAppointmentById(id: string, appointmentDate: Date) {
+  const updatedAppointment = await AppointmentModel.findOneAndUpdate(
+    { _id: id },
+    { appointmentDate: appointmentDate },
+    { new: true }
+  );
+  return updatedAppointment;
+}
+
 /**
  ** /updatereschedule appointment by patient.
  *! login is not required
@@ -228,6 +237,7 @@ async function deleteAllByDate(date: string | Date) {
 ******************************************************************************/
 
 export default {
+  rescheduleAppointmentById,
   generateSequentialReference,
   createAppointmentByPatient,
   createAppointmentByDoctor,
