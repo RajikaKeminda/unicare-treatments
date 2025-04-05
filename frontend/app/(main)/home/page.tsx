@@ -1,25 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import Image from "next/image";
+import Link from "next/link";
 import {
+  FaHeartbeat,
   FaLeaf,
   FaSpa,
-  FaHeartbeat,
-  FaUserMd,
-  FaFacebook,
-  FaInstagram,
-  FaTwitter,
-  FaPhone,
-  FaEnvelope,
-  FaMapMarkerAlt,
+  FaUserMd
 } from "react-icons/fa";
 import "swiper/css";
-import "swiper/css/pagination";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 const services = [
   {
@@ -236,135 +230,6 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Company Info */}
-            <div>
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Unicare Ayurveda
-              </h3>
-              <p className="text-gray-400 mb-4">
-                Your journey to holistic wellness begins here. Experience the
-                ancient wisdom of Ayurveda.
-              </p>
-              <div className="flex space-x-4">
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <FaFacebook className="w-6 h-6" />
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <FaInstagram className="w-6 h-6" />
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <FaTwitter className="w-6 h-6" />
-                </a>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">
-                Quick Links
-              </h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/about"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/services"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Services
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/treatments"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Treatments
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/channeling"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Book Appointment
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">
-                Contact Us
-              </h4>
-              <ul className="space-y-3">
-                <li className="flex items-center space-x-3">
-                  <FaPhone className="text-green-500" />
-                  <span>+1 (555) 123-4567</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <FaEnvelope className="text-green-500" />
-                  <span>info@unicareayurveda.com</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <FaMapMarkerAlt className="text-green-500" />
-                  <span>123 Wellness Street, City, Country</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Opening Hours */}
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">
-                Opening Hours
-              </h4>
-              <ul className="space-y-2">
-                <li className="flex justify-between">
-                  <span>Monday - Friday</span>
-                  <span>9:00 AM - 7:00 PM</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Saturday</span>
-                  <span>10:00 AM - 5:00 PM</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Sunday</span>
-                  <span>Closed</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Copyright */}
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center">
-            <p className="text-gray-400">
-              © {new Date().getFullYear()} Unicare Ayurveda. All rights
-              reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
