@@ -52,7 +52,7 @@ export default function PatientList() {
     };
 
     fetchPatients(); // Call the function to fetch patients
-  }, [patients]);
+  }, []);
 
   const handleViewTreatmentClick = (patient) => {
     setSelectedPatient(patient); // Set the selected patient to show the treatment details
