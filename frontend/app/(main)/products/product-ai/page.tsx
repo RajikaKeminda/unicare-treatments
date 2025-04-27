@@ -19,7 +19,7 @@ const ChatbotPage: React.FC = () => {
   const messageIdRef = useRef(0);
 
   // API configuration
-  const API_URL = 'http://localhost:8001/api/chat'; // Replace with your backend URL
+  const API_URL = 'http://localhost:8001/chat'; // Replace with your backend URL
 
   // Scroll handling
   const handleScroll = () => {
