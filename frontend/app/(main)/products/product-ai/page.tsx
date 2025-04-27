@@ -1,9 +1,16 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react';
+import axios, { AxiosError } from 'axios';
+
+interface Message {
+  sender: 'user' | 'bot';
+  text: string;
+  id: number;
+}
 
 const ChatbotPage: React.FC = () => {
-  const [messages, setMessages] = useState<{ sender: string, text: string, id: number }[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -11,66 +18,109 @@ const ChatbotPage: React.FC = () => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messageIdRef = useRef(0);
 
-  // Track scroll position
+  // API configuration
+  const API_URL = 'http://localhost:8001/api/chat'; // Replace with your backend URL
+
+  // Scroll handling
   const handleScroll = () => {
     if (messagesContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
       const atBottom = scrollHeight - scrollTop <= clientHeight + 50;
       setIsAtBottom(atBottom);
       
-      // Hide new message indicator if user scrolls to bottom
       if (atBottom && newMessagesAvailable) {
         setNewMessagesAvailable(false);
       }
     }
   };
 
-  // Scroll to bottom when new messages arrive and user is at bottom
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTo({
-        top: messagesContainerRef.current.scrollHeight,
-        behavior
-      });
-    }
+    messagesContainerRef.current?.scrollTo({
+      top: messagesContainerRef.current.scrollHeight,
+      behavior
+    });
   };
 
-  // Initialize scroll position and add scroll listener
+  // Initialize scroll and load message history
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (container) {
       container.addEventListener('scroll', handleScroll);
-      scrollToBottom('auto'); // Initial scroll to bottom
+      scrollToBottom('auto');
+      
+      // Load message history from backend
+      const loadHistory = async () => {
+        try {
+          const response = await axios.get(`${API_URL}/history/user-123`); // Replace with actual user ID
+          setMessages(response.data.messages.map((msg: any) => ({
+            ...msg,
+            id: messageIdRef.current++
+          })));
+        } catch (error) {
+          console.error('Failed to load chat history:', error);
+        }
+      };
+      
+      loadHistory();
+      
       return () => container.removeEventListener('scroll', handleScroll);
     }
   }, []);
 
-  // Handle new messages
+  // Auto-scroll when new messages arrive
   useEffect(() => {
     if (isAtBottom) {
       scrollToBottom();
       setNewMessagesAvailable(false);
     } else if (messages.length > 0) {
-      // Only show new message indicator if not at bottom and not initial render
       setNewMessagesAvailable(true);
     }
   }, [messages]);
 
+  // Send message to backend
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage = { sender: 'user', text: input, id: messageIdRef.current++ };
+    const userMessage: Message = { 
+      sender: 'user', 
+      text: input, 
+      id: messageIdRef.current++ 
+    };
+    
+    // Optimistic UI update
     setMessages(prev => [...prev, userMessage]);
     setInput('');
-
     setIsTyping(true);
-    const botReply = await getBotReply(input);
-    setIsTyping(false);
 
-    setMessages(prev => [
-      ...prev,
-      { sender: 'bot', text: botReply, id: messageIdRef.current++ }
-    ]);
+    try {
+      const response = await axios.post(`${API_URL}/chat`, {
+        text: input,
+        userId: 'user-123' // Replace with actual user ID
+      });
+
+      const botMessage: Message = {
+        sender: 'bot',
+        text: response.data.reply,
+        id: messageIdRef.current++
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error('Chat error:', axiosError.response?.data || axiosError.message);
+      
+      // Show error message
+      setMessages(prev => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: "Sorry, I encountered an error. Please try again.",
+          id: messageIdRef.current++
+        }
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -83,20 +133,6 @@ const ChatbotPage: React.FC = () => {
   const scrollToNewMessages = () => {
     scrollToBottom();
     setNewMessagesAvailable(false);
-  };
-
-  const getBotReply = (message: string) => {
-    return new Promise<string>((resolve) => {
-      setTimeout(() => {
-        const responses = [
-          `I received your message: "${message}". I can now handle much longer responses without any problems. The chat interface has been widened to accommodate lengthy messages and maintain good readability.`,
-          `Thanks for your detailed message about "${message}". This wider chat window makes it easier to read comprehensive responses and maintain the conversation flow.`,
-          `Interesting point about "${message}". With this improved width, I can provide more thorough answers without worrying about text wrapping issues.`,
-          `I'm processing your query about "${message}". The wider design allows for better presentation of information and more natural conversation flow.`
-        ];
-        resolve(responses[Math.floor(Math.random() * responses.length)]);
-      }, 1000 + Math.random() * 1000);
-    });
   };
 
   return (
@@ -129,7 +165,7 @@ const ChatbotPage: React.FC = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <p className="text-center max-w-md">Ask me anything and I'll do my best to help! This wider chat interface makes it easier to have more natural conversations.</p>
+              <p className="text-center max-w-md">Ask me anything and I'll do my best to help!</p>
             </div>
           ) : (
             messages.map((msg) => (

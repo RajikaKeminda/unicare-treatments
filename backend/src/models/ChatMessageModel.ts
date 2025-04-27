@@ -1,7 +1,7 @@
 import { Document, model, Schema } from 'mongoose';
 
 // Interface
-export interface IChatMessage extends Document {
+export interface IChatMessage {
   sender: 'user' | 'bot';
   text: string;
   userId: string;

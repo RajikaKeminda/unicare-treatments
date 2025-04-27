@@ -57,3 +57,15 @@ export const processMessage = async (
     });
   }
 };
+
+export const getMessageHistory = async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.params;
+    try {
+      const messages = await ChatMessage.find({ userId }).sort({ timestamp: 1 });
+      res.json({ messages });
+    } catch (error) {
+      console.error('Error fetching chat history:', error);
+      res.status(500).json({ error: 'Failed to fetch chat history' });
+    }
+  };
+  
