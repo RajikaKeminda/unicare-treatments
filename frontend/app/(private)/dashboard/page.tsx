@@ -1,4 +1,4 @@
-import { FiUsers, FiCalendar, FiActivity, FiDroplet, FiHeart, FiTrendingUp, FiAlertCircle, FiPlusCircle, FiPlay } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiActivity, FiDroplet, FiHeart, FiTrendingUp, FiAlertCircle, FiPlusCircle, FiPlay, FiPackage, FiShoppingCart,FiTruck, FiRefreshCw } from 'react-icons/fi';
 import { FaLeaf, FaMedal, FaRegCalendarAlt, FaChartLine } from 'react-icons/fa';
 import { GiHerbsBundle } from 'react-icons/gi';
 
@@ -35,6 +35,13 @@ export default function DashboardPage() {
     { id: 4, name: 'Neem Soap', stock: 36, threshold: 20, price: '$9.99' },
     { id: 5, name: 'Turmeric Golden Milk', stock: 22, threshold: 15, price: '$14.99' }
   ];
+
+// Sample data that would be passed to these components
+const topProducts = [
+  { id: 1, name: 'Triphala Powder', category: 'Ayurveda', sales: 42, revenue: '1,029.00' },
+  { id: 2, name: 'Ashwagandha Capsules', category: 'Herbal', sales: 38, revenue: '1,139.00' },
+  { id: 3, name: 'Brahmi Oil', category: 'Ayurveda', sales: 25, revenue: '462.50' },
+];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
@@ -184,6 +191,34 @@ export default function DashboardPage() {
               </table>
             </div>
           </div>
+
+    {/* Ayurveda selling products */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <FiTrendingUp className="text-green-500 mr-2" /> Top Selling Products
+        </h2>
+        <div className="space-y-4">
+          {topProducts.map(product => (
+            <div key={product.id} className="flex items-center p-3 hover:bg-blue-50 rounded-lg transition">
+              <div className="bg-blue-100 p-2 rounded-full mr-3">
+                <FiPackage className="text-blue-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-800">{product.name}</h3>
+                <p className="text-sm text-gray-600">{product.category}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-800">{product.sales} sold</p>
+                <p className="text-xs text-gray-500">${product.revenue}</p>
+              </div>
+            </div>
+          ))}
+          <button className="w-full py-2 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition">
+            View All Products
+          </button>
+        </div>
+      </div>
+
         </div>
 
         {/* Right Column */}
@@ -204,12 +239,12 @@ export default function DashboardPage() {
                       style={{ width: `${(treatment.count / 40) * 100}%` }}
                     ></div>
                   </div>
+
+                  
                 </div>
               ))}
             </div>
           </div>
-
-          
 
           {/* Alerts & Notifications */}
           <div className="bg-white rounded-xl shadow-sm p-6">
@@ -242,44 +277,91 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
-  <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-    <FiPlay className="text-blue-500 mr-2" /> Video Instructions
-  </h2>
-  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-    <div className="flex">
-      <div className="flex-shrink-0">
-        <FiPlay className="h-5 w-5 text-blue-400" />
+      {/*video instructions */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <FiPlay className="text-blue-500 mr-2" /> Video Instructions
+        </h2>
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FiPlay className="h-5 w-5 text-blue-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-blue-700 font-medium mb-1">Getting Started Guide</p>
+              <p className="text-xs text-blue-600">5:32 min • Last updated 2 days ago</p>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 bg-purple-50 border-l-4 border-purple-400 p-4 rounded">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FiPlay className="h-5 w-5 text-purple-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-purple-700 font-medium mb-1">Inventory Management</p>
+              <p className="text-xs text-purple-600">12:15 min • Last updated 1 week ago</p>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 bg-green-50 border-l-4 border-green-400 p-4 rounded">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FiPlay className="h-5 w-5 text-green-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-green-700 font-medium mb-1">Patient Onboarding</p>
+              <p className="text-xs text-green-600">8:47 min • Last updated 3 days ago</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="ml-3">
-        <p className="text-sm text-blue-700 font-medium mb-1">Getting Started Guide</p>
-        <p className="text-xs text-blue-600">5:32 min • Last updated 2 days ago</p>
-      </div>
-    </div>
-  </div>
-  <div className="mt-4 bg-purple-50 border-l-4 border-purple-400 p-4 rounded">
-    <div className="flex">
-      <div className="flex-shrink-0">
-        <FiPlay className="h-5 w-5 text-purple-400" />
-      </div>
-      <div className="ml-3">
-        <p className="text-sm text-purple-700 font-medium mb-1">Inventory Management</p>
-        <p className="text-xs text-purple-600">12:15 min • Last updated 1 week ago</p>
-      </div>
-    </div>
-  </div>
-  <div className="mt-4 bg-green-50 border-l-4 border-green-400 p-4 rounded">
-    <div className="flex">
-      <div className="flex-shrink-0">
-        <FiPlay className="h-5 w-5 text-green-400" />
-      </div>
-      <div className="ml-3">
-        <p className="text-sm text-green-700 font-medium mb-1">Patient Onboarding</p>
-        <p className="text-xs text-green-600">8:47 min • Last updated 3 days ago</p>
-      </div>
-    </div>
-  </div>
-</div>
+
+        {/* Order management */}        
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <FiShoppingCart className="text-green-500 mr-2" /> Recent Orders
+          </h2>
+          
+          {/* New Order */}
+          <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <FiPlusCircle className="h-5 w-5 text-green-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-green-700 font-medium">New Order #UC-1004</p>
+                <p className="text-xs text-green-600">3 items • $87.45 • Just now</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Processing Order */}
+          <div className="mt-4 bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <FiRefreshCw className="h-5 w-5 text-blue-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-700 font-medium">Processing Order #UC-1003</p>
+                <p className="text-xs text-blue-600">5 items • $124.90 • 15 mins ago</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Shipped Order */}
+          <div className="mt-4 bg-purple-50 border-l-4 border-purple-400 p-4 rounded">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <FiTruck className="h-5 w-5 text-purple-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-purple-700 font-medium">Shipped Order #UC-1002</p>
+                <p className="text-xs text-purple-600">2 items • $49.98 • Yesterday</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
 
         </div>
