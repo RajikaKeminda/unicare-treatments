@@ -15,13 +15,28 @@ const ChatbotPage: React.FC = () => {
   const [typingText, setTypingText] = useState('');
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messageIdRef = useRef(0);
+  const [showThinking, setShowThinking] = useState(false);
+  const [thinkingDots, setThinkingDots] = useState('');
 
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (container) {
       container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
     }
-  }, [messages, typingText]);
+  }, [messages, typingText, showThinking]);
+
+  // Thinking animation effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (showThinking) {
+      let dotCount = 0;
+      interval = setInterval(() => {
+        dotCount = (dotCount + 1) % 4;
+        setThinkingDots('.'.repeat(dotCount));
+      }, 500);
+    }
+    return () => clearInterval(interval);
+  }, [showThinking]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -43,6 +58,7 @@ const ChatbotPage: React.FC = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setShowThinking(true);
 
     try {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -63,28 +79,29 @@ const ChatbotPage: React.FC = () => {
       const fullBotText = data.choices?.[0]?.message?.content || "I'm sorry, I didn't understand that.";
 
       await typeBotMessage(fullBotText);
-
     } catch (error) {
       console.error('API error:', error);
       const errorMessage: Message = {
         sender: 'bot',
         text: "Oops! Something went wrong. Please try again later.",
-        id: messageIdRef.current++
+        id: messageIdRef.current++,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
       setTypingText('');
+      setShowThinking(false);
     }
   };
 
   const typeBotMessage = async (fullText: string) => {
     setTypingText('');
+    setShowThinking(false); // Remove thinking animation when typing starts
     let currentText = '';
     for (let i = 0; i < fullText.length; i++) {
       currentText += fullText[i];
       setTypingText(currentText);
-      await new Promise((resolve) => setTimeout(resolve, 15)); // typing speed (lower = faster)
+      await new Promise((resolve) => setTimeout(resolve, 15));
     }
 
     const botMessage: Message = {
@@ -138,6 +155,13 @@ const ChatbotPage: React.FC = () => {
                   </div>
                 </div>
               ))}
+              {showThinking && (
+                <div className="flex mb-4 justify-start animate-fadeIn">
+                  <div className="max-w-2xl bg-gray-200 text-gray-800 rounded-lg rounded-bl-none px-4 py-2">
+                    <p className="whitespace-pre-wrap">Thinking{thinkingDots}</p>
+                  </div>
+                </div>
+              )}
               {typingText && (
                 <div className="flex mb-4 justify-start">
                   <div className="max-w-2xl bg-gray-200 text-gray-800 rounded-lg rounded-bl-none px-4 py-2">
