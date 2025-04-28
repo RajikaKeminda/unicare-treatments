@@ -1,5 +1,6 @@
-import { FiUsers, FiCalendar, FiActivity, FiDroplet, FiHeart, FiTrendingUp, FiAlertCircle } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiActivity, FiDroplet, FiHeart, FiTrendingUp, FiAlertCircle, FiPlusCircle, FiPlay } from 'react-icons/fi';
 import { FaLeaf, FaMedal, FaRegCalendarAlt, FaChartLine } from 'react-icons/fa';
+import { GiHerbsBundle } from 'react-icons/gi';
 
 export default function DashboardPage() {
   // Sample data - in a real app this would come from your backend
@@ -25,6 +26,14 @@ export default function DashboardPage() {
     { name: 'Reiki', count: 18 },
     { name: 'Nutrition', count: 24 },
     { name: 'Yoga Therapy', count: 15 }
+  ];
+
+  const ayurvedaProducts = [
+    { id: 1, name: 'Triphala Powder', stock: 42, threshold: 10, price: '$24.99' },
+    { id: 2, name: 'Ashwagandha Capsules', stock: 15, threshold: 15, price: '$29.99' },
+    { id: 3, name: 'Brahmi Oil', stock: 8, threshold: 5, price: '$18.50' },
+    { id: 4, name: 'Neem Soap', stock: 36, threshold: 20, price: '$9.99' },
+    { id: 5, name: 'Turmeric Golden Milk', stock: 22, threshold: 15, price: '$14.99' }
   ];
 
   return (
@@ -133,6 +142,48 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
+
+          {/* Ayurveda Products Inventory */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+                <GiHerbsBundle className="text-yellow-600 mr-2" /> Ayurveda Products Inventory
+              </h2>
+              <button className="flex items-center text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg">
+                <FiPlusCircle className="mr-1" /> Add Product
+              </button>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Threshold</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {ayurvedaProducts.map((product) => (
+                    <tr key={product.id} className="hover:bg-green-50">
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{product.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{product.stock}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{product.threshold}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{product.price}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${product.stock < product.threshold ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                          {product.stock < product.threshold ? 'Low Stock' : 'In Stock'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* Right Column */}
@@ -157,6 +208,8 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
+
+          
 
           {/* Alerts & Notifications */}
           <div className="bg-white rounded-xl shadow-sm p-6">
@@ -188,6 +241,47 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6">
+  <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+    <FiPlay className="text-blue-500 mr-2" /> Video Instructions
+  </h2>
+  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+    <div className="flex">
+      <div className="flex-shrink-0">
+        <FiPlay className="h-5 w-5 text-blue-400" />
+      </div>
+      <div className="ml-3">
+        <p className="text-sm text-blue-700 font-medium mb-1">Getting Started Guide</p>
+        <p className="text-xs text-blue-600">5:32 min • Last updated 2 days ago</p>
+      </div>
+    </div>
+  </div>
+  <div className="mt-4 bg-purple-50 border-l-4 border-purple-400 p-4 rounded">
+    <div className="flex">
+      <div className="flex-shrink-0">
+        <FiPlay className="h-5 w-5 text-purple-400" />
+      </div>
+      <div className="ml-3">
+        <p className="text-sm text-purple-700 font-medium mb-1">Inventory Management</p>
+        <p className="text-xs text-purple-600">12:15 min • Last updated 1 week ago</p>
+      </div>
+    </div>
+  </div>
+  <div className="mt-4 bg-green-50 border-l-4 border-green-400 p-4 rounded">
+    <div className="flex">
+      <div className="flex-shrink-0">
+        <FiPlay className="h-5 w-5 text-green-400" />
+      </div>
+      <div className="ml-3">
+        <p className="text-sm text-green-700 font-medium mb-1">Patient Onboarding</p>
+        <p className="text-xs text-green-600">8:47 min • Last updated 3 days ago</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
         </div>
       </div>
 
