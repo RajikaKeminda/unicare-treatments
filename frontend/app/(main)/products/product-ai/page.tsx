@@ -61,7 +61,7 @@ const ChatbotPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCTL1F3lFvRwLtOu3mbP8sohf0PoL2gVvc",
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
         {
           method: "POST",
           headers: {
