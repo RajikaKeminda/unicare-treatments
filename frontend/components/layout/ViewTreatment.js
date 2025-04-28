@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
-export default function ViewTreatment({ patient, onClose }) {
+export default function ViewTreatment({ patient, onClose, onTreatmentUpdated, onTreatmentDeleted }) {
   const [editedPatient, setEditedPatient] = useState(patient);
   const [loading, setLoading] = useState(false);
 
@@ -72,13 +72,14 @@ export default function ViewTreatment({ patient, onClose }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editedPatient), // Send updated patient data
+        body: JSON.stringify(editedPatient),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         alert('Updated Successfully!');
+        onTreatmentUpdated(); // Call the refresh function
         onClose(); // Close the modal after successful update
       } else {
         alert(data.message || 'Error updating treatment.');
@@ -105,6 +106,7 @@ export default function ViewTreatment({ patient, onClose }) {
 
       if (response.ok) {
         alert('Deleted Successfully!');
+        onTreatmentDeleted(); // Call the refresh function
         onClose(); // Close the modal after successful delete
       } else {
         alert(data.message || 'Error deleting treatment.');
@@ -169,6 +171,16 @@ export default function ViewTreatment({ patient, onClose }) {
                 value={editedPatient.age || ''}
                 onChange={handleChange}
                 placeholder="Enter Age"
+              />
+            </div>
+            <div className="mb-4 flex items-center">
+              <label className="block text-gray-700 w-1/3">Email:</label>
+              <input
+                type="email"
+                name="email"
+                className="border px-3 py-2 rounded w-2/3"
+                value={editedPatient.email || ''}
+                onChange={handleChange}
               />
             </div>
             <div className="mb-4 flex items-center">

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Treatment from '../models/treatmentModel.ts'; // Your treatment model
+import userModel from "../models/userModel.ts"; // Adjust the import path
 
 // Function to add treatment
 export const addTreatment = async (req: Request, res: Response) => {
@@ -64,8 +65,6 @@ export const getPatientTreatment = async (
   }
 };
 
-
-
 // Function to update treatment data by ID
 export const updateTreatment = async (
   req: Request,
@@ -76,6 +75,7 @@ export const updateTreatment = async (
     const {
       patientName,
       age,
+      email,
       gender,
       diagnosis,
       treatment,
@@ -100,6 +100,7 @@ export const updateTreatment = async (
     // Update the treatment fields
     existingTreatment.patientName = patientName || existingTreatment.patientName;
     existingTreatment.age = age || existingTreatment.age;
+    existingTreatment.email = email || existingTreatment.email;
     existingTreatment.gender = gender || existingTreatment.gender;
     existingTreatment.diagnosis = diagnosis || existingTreatment.diagnosis;
     existingTreatment.treatment = treatment || existingTreatment.treatment;
@@ -125,9 +126,7 @@ export const updateTreatment = async (
   }
 };
 
-
 // Function to delete treatment data by ID
-
 export const deleteTreatment = async (
   req: Request,
   res: Response
@@ -151,6 +150,28 @@ export const deleteTreatment = async (
     res.status(500).json({
       message: 'Error deleting treatment',
       error: error.message
+    });
+  }
+};
+
+export const getPatientTreatments = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.params;
+    console.log('Searching for treatments with email:', email); // Debug log
+
+    // Change this to search by email directly in treatments
+    const treatments = await Treatment.find({ email: email });
+    console.log('Found treatments:', treatments); // Debug log
+
+    res.status(200).json({ 
+      message: 'Treatments fetched successfully', 
+      data: treatments 
+    });
+  } catch (error: any) {
+    console.error('Error:', error); // Debug log
+    res.status(500).json({ 
+      message: 'Error fetching treatments', 
+      error: error.message 
     });
   }
 };

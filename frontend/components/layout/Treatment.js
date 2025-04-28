@@ -14,44 +14,35 @@ export default function PatientList() {
   const [ongoingCount, setOngoingCount] = useState(0); // State to hold ongoing patients count
   const [completedCount, setCompletedCount] = useState(0); // State to hold completed patients count
 
+  // Function to refresh treatments
+  const refreshTreatments = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/treatments`);
+      const data = await response.json();
+
+      if (data && Array.isArray(data.data)) {
+        setPatients(data.data);
+        
+        const ongoingPatients = data.data.filter(patient => patient.status === 'ongoing');
+        const completedPatients = data.data.filter(patient => patient.status === 'completed');
+
+        setOngoingCount(ongoingPatients.length);
+        setCompletedCount(completedPatients.length);
+      } else {
+        console.error('Invalid data format:', data);
+        setError('Error: Data format is incorrect.');
+        setPatients([]);
+      }
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+      setError('Error: Failed to fetch patients.');
+      setPatients([]);
+    }
+  };
+
   // Fetch patients from the API
   useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/treatments`); // Correct API endpoint
-        const data = await response.json();
-
-        console.log('API response:', data); // Log the response for debugging
-
-        // Check if the data contains a 'data' array
-        if (data && Array.isArray(data.data)) {
-          // Set patients data from the 'data' array
-          setPatients(data.data);
-
-          // Log the status values for debugging
-          data.data.forEach(patient => {
-            console.log('Patient Status:', patient.status); // Log the status of each patient
-          });
-
-          // Update ongoing and completed counts
-          const ongoingPatients = data.data.filter(patient => patient.status === 'ongoing');
-          const completedPatients = data.data.filter(patient => patient.status === 'completed');
-
-          setOngoingCount(ongoingPatients.length);
-          setCompletedCount(completedPatients.length);
-        } else {
-          console.error('Invalid data format:', data);
-          setError('Error: Data format is incorrect.'); // Set error state if data format is not as expected
-          setPatients([]); // Default to an empty array if the data is not as expected
-        }
-      } catch (error) {
-        console.error('Error fetching patients:', error);
-        setError('Error: Failed to fetch patients.'); // Set error state for fetch failure
-        setPatients([]); // Fallback to an empty array if there was an error
-      }
-    };
-
-    fetchPatients(); // Call the function to fetch patients
+    refreshTreatments();
   }, []);
 
   const handleViewTreatmentClick = (patient) => {
@@ -141,11 +132,13 @@ export default function PatientList() {
           </table>
         </div>
       ) : showAddTreatmentForm ? (
-        <AddTreatmentForm onClose={handleCloseModal} />
+        <AddTreatmentForm onClose={handleCloseModal} onTreatmentAdded={refreshTreatments} />
       ) : (
         <ViewTreatment 
           patient={selectedPatient} 
           onClose={handleCloseModal}
+          onTreatmentUpdated={refreshTreatments}
+          onTreatmentDeleted={refreshTreatments}
         />
       )}
     </div>
