@@ -64,7 +64,7 @@ const ChatbotPage: React.FC = () => {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer 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",
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_PRODUCT_APP_API_KEY}`,
           "HTTP-Referer": "<YOUR_SITE_URL>",
           "X-Title": "<YOUR_SITE_NAME>",
           "Content-Type": "application/json"
