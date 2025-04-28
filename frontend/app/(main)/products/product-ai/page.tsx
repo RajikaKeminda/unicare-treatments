@@ -12,6 +12,7 @@ const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [typingText, setTypingText] = useState('');
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messageIdRef = useRef(0);
 
@@ -20,7 +21,7 @@ const ChatbotPage: React.FC = () => {
     if (container) {
       container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, typingText]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -44,7 +45,6 @@ const ChatbotPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Make API call
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -60,13 +60,10 @@ const ChatbotPage: React.FC = () => {
       });
 
       const data = await response.json();
-      const botMessage: Message = {
-        sender: 'bot',
-        text: data.choices?.[0]?.message?.content || "I'm sorry, I didn't understand that.",
-        id: messageIdRef.current++
-      };
+      const fullBotText = data.choices?.[0]?.message?.content || "I'm sorry, I didn't understand that.";
 
-      setMessages((prev) => [...prev, botMessage]);
+      await typeBotMessage(fullBotText);
+
     } catch (error) {
       console.error('API error:', error);
       const errorMessage: Message = {
@@ -77,7 +74,26 @@ const ChatbotPage: React.FC = () => {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      setTypingText('');
     }
+  };
+
+  const typeBotMessage = async (fullText: string) => {
+    setTypingText('');
+    let currentText = '';
+    for (let i = 0; i < fullText.length; i++) {
+      currentText += fullText[i];
+      setTypingText(currentText);
+      await new Promise((resolve) => setTimeout(resolve, 15)); // typing speed (lower = faster)
+    }
+
+    const botMessage: Message = {
+      sender: 'bot',
+      text: fullText,
+      id: messageIdRef.current++,
+    };
+    setMessages((prev) => [...prev, botMessage]);
+    setTypingText('');
   };
 
   const handleButtonClick = () => {
@@ -114,20 +130,22 @@ const ChatbotPage: React.FC = () => {
               <p className="text-center max-w-md">Ask me anything and I'll do my best to help!</p>
             </div>
           ) : (
-            messages.map((msg) => (
-              <div key={msg.id} className={`flex mb-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-2xl rounded-lg px-4 py-2 ${msg.sender === 'user' ? 'bg-red-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`} style={{ wordBreak: 'break-word' }}>
-                  <p className="whitespace-pre-wrap">{msg.text}</p>
+            <>
+              {messages.map((msg) => (
+                <div key={msg.id} className={`flex mb-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-2xl rounded-lg px-4 py-2 ${msg.sender === 'user' ? 'bg-red-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`} style={{ wordBreak: 'break-word' }}>
+                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
-          {isLoading && (
-            <div className="flex mb-4 justify-start">
-              <div className="max-w-2xl bg-gray-200 text-gray-800 rounded-lg rounded-bl-none px-4 py-2">
-                <p>Thinking...</p>
-              </div>
-            </div>
+              ))}
+              {typingText && (
+                <div className="flex mb-4 justify-start">
+                  <div className="max-w-2xl bg-gray-200 text-gray-800 rounded-lg rounded-bl-none px-4 py-2">
+                    <p className="whitespace-pre-wrap">{typingText}</p>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
