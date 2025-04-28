@@ -1,7 +1,6 @@
-'use client'
+'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import axios, { AxiosError } from 'axios';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -12,127 +11,79 @@ interface Message {
 const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(true);
-  const [newMessagesAvailable, setNewMessagesAvailable] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messageIdRef = useRef(0);
 
-  // API configuration
-  const API_URL = 'http://localhost:8001/chat'; // Replace with your backend URL
-
-  // Scroll handling
-  const handleScroll = () => {
-    if (messagesContainerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-      const atBottom = scrollHeight - scrollTop <= clientHeight + 50;
-      setIsAtBottom(atBottom);
-      
-      if (atBottom && newMessagesAvailable) {
-        setNewMessagesAvailable(false);
-      }
-    }
-  };
-
-  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
-    messagesContainerRef.current?.scrollTo({
-      top: messagesContainerRef.current.scrollHeight,
-      behavior
-    });
-  };
-
-  // Initialize scroll and load message history
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (container) {
-      container.addEventListener('scroll', handleScroll);
-      scrollToBottom('auto');
-      
-      // Load message history from backend
-      const loadHistory = async () => {
-        try {
-          const response = await axios.get(`${API_URL}/history/user-123`); // Replace with actual user ID
-          setMessages(response.data.messages.map((msg: any) => ({
-            ...msg,
-            id: messageIdRef.current++
-          })));
-        } catch (error) {
-          console.error('Failed to load chat history:', error);
-        }
-      };
-      
-      loadHistory();
-      
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
-  }, []);
-
-  // Auto-scroll when new messages arrive
-  useEffect(() => {
-    if (isAtBottom) {
-      scrollToBottom();
-      setNewMessagesAvailable(false);
-    } else if (messages.length > 0) {
-      setNewMessagesAvailable(true);
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
     }
   }, [messages]);
-
-  // Send message to backend
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-
-    const userMessage: Message = { 
-      sender: 'user', 
-      text: input, 
-      id: messageIdRef.current++ 
-    };
-    
-    // Optimistic UI update
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsTyping(true);
-
-    try {
-      const response = await axios.post(`${API_URL}/chat`, {
-        text: input,
-        userId: 'user-123' // Replace with actual user ID
-      });
-
-      const botMessage: Message = {
-        sender: 'bot',
-        text: response.data.reply,
-        id: messageIdRef.current++
-      };
-
-      setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error('Chat error:', axiosError.response?.data || axiosError.message);
-      
-      // Show error message
-      setMessages(prev => [
-        ...prev,
-        {
-          sender: 'bot',
-          text: "Sorry, I encountered an error. Please try again.",
-          id: messageIdRef.current++
-        }
-      ]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      if (!isLoading) {
+        sendMessage(input);
+      }
     }
   };
 
-  const scrollToNewMessages = () => {
-    scrollToBottom();
-    setNewMessagesAvailable(false);
+  const sendMessage = async (userInput: string) => {
+    if (!userInput.trim()) return;
+
+    const userMessage: Message = {
+      sender: 'user',
+      text: userInput,
+      id: messageIdRef.current++,
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      // Make API call
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer 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",
+          "HTTP-Referer": "<YOUR_SITE_URL>",
+          "X-Title": "<YOUR_SITE_NAME>",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "deepseek/deepseek-r1:free",
+          messages: [{ role: "user", content: userInput }]
+        })
+      });
+
+      const data = await response.json();
+      const botMessage: Message = {
+        sender: 'bot',
+        text: data.choices?.[0]?.message?.content || "I'm sorry, I didn't understand that.",
+        id: messageIdRef.current++
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error('API error:', error);
+      const errorMessage: Message = {
+        sender: 'bot',
+        text: "Oops! Something went wrong. Please try again later.",
+        id: messageIdRef.current++
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (!isLoading) {
+      sendMessage(input);
+    }
   };
 
   return (
@@ -148,18 +99,13 @@ const ChatbotPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold">AI Product Assistant</h1>
-              <p className="text-xs opacity-80">
-                {isTyping ? 'Typing...' : 'Online'}
-              </p>
+              <p className="text-xs opacity-80">Online</p>
             </div>
           </div>
         </div>
 
-        {/* Chat area */}
-        <div 
-          ref={messagesContainerRef}
-          className="flex-1 p-6 overflow-y-auto bg-gray-50 relative"
-        >
+        {/* Messages */}
+        <div ref={messagesContainerRef} className="flex-1 p-6 overflow-y-auto bg-gray-50 relative">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-400">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -169,72 +115,40 @@ const ChatbotPage: React.FC = () => {
             </div>
           ) : (
             messages.map((msg) => (
-              <div 
-                key={msg.id}
-                className={`flex mb-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div 
-                  className={`max-w-2xl rounded-lg px-4 py-2 ${msg.sender === 'user' 
-                    ? 'bg-red-500 text-white rounded-br-none' 
-                    : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}
-                  style={{ wordBreak: 'break-word' }}
-                >
+              <div key={msg.id} className={`flex mb-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-2xl rounded-lg px-4 py-2 ${msg.sender === 'user' ? 'bg-red-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`} style={{ wordBreak: 'break-word' }}>
                   <p className="whitespace-pre-wrap">{msg.text}</p>
                 </div>
               </div>
             ))
           )}
-          {isTyping && (
-            <div className="flex justify-start mb-4">
-              <div className="bg-gray-200 text-gray-800 rounded-lg rounded-bl-none px-4 py-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
+          {isLoading && (
+            <div className="flex mb-4 justify-start">
+              <div className="max-w-2xl bg-gray-200 text-gray-800 rounded-lg rounded-bl-none px-4 py-2">
+                <p>Thinking...</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* New message indicator */}
-        {newMessagesAvailable && (
-          <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2">
-            <button 
-              onClick={scrollToNewMessages}
-              className="bg-red-500 text-white px-4 py-2 rounded-full shadow-md hover:bg-red-600 transition-colors flex items-center"
-            >
-              New messages
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </button>
-          </div>
-        )}
-
-        {/* Input area */}
-        <div className="p-4 border-t border-gray-200 bg-white">
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="flex-1 p-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              placeholder="Type your message..."
-            />
-            <button
-              onClick={sendMessage}
-              disabled={!input.trim()}
-              className={`p-3 rounded-full ${input.trim() 
-                ? 'bg-red-500 hover:bg-red-600 text-white' 
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'} transition-colors duration-200`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
+        {/* Input */}
+        <div className="flex items-center bg-gray-100 p-4">
+          <textarea
+            className="flex-1 p-2 border-2 border-gray-300 rounded-lg resize-none"
+            rows={2}
+            placeholder="Ask something..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
+            disabled={isLoading}
+          />
+          <button
+            className={`ml-4 p-2 ${isLoading ? 'bg-gray-400' : 'bg-blue-500'} text-white rounded-lg`}
+            onClick={handleButtonClick}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Sending...' : 'Send'}
+          </button>
         </div>
       </div>
     </div>
