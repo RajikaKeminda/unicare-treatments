@@ -25,7 +25,6 @@ const ChatbotPage: React.FC = () => {
     }
   }, [messages, typingText, showThinking]);
 
-  // Thinking animation effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (showThinking) {
@@ -61,32 +60,53 @@ const ChatbotPage: React.FC = () => {
     setShowThinking(true);
 
     try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_PRODUCT_APP_API_KEY}`,
-          "HTTP-Referer": "<YOUR_SITE_URL>",
-          "X-Title": "<YOUR_SITE_NAME>",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "deepseek/deepseek-r1:free",
-          messages: [{ role: "user", content: userInput }]
-        })
-      });
+      const response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCTL1F3lFvRwLtOu3mbP8sohf0PoL2gVvc",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: userInput }],
+              },
+            ],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Unknown error");
+      }
 
       const data = await response.json();
-      const fullBotText = data.choices?.[0]?.message?.content || "I'm sorry, I didn't understand that.";
 
-      await typeBotMessage(fullBotText);
+      // ✅ Correctly extract response
+      const botResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 
+                              "I'm sorry, I didn't understand that.";
+
+      await typeBotMessage(botResponseText);
     } catch (error) {
       console.error('API error:', error);
-      const errorMessage: Message = {
+      let errorMessage = "Oops! Something went wrong.";
+      if (error instanceof Error) {
+        if (error.message.includes("quota")) {
+          errorMessage = "You have exceeded your usage limit. Please try again later.";
+        } else if (error.message.includes("timeout")) {
+          errorMessage = "The request timed out. Please try again later.";
+        } else {
+          errorMessage = "There was an issue with the API. Please try again later.";
+        }
+      }
+      const errorBotMessage: Message = {
         sender: 'bot',
-        text: "Oops! Something went wrong. Please try again later.",
+        text: errorMessage,
         id: messageIdRef.current++,
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorBotMessage]);
     } finally {
       setIsLoading(false);
       setTypingText('');
@@ -96,7 +116,7 @@ const ChatbotPage: React.FC = () => {
 
   const typeBotMessage = async (fullText: string) => {
     setTypingText('');
-    setShowThinking(false); // Remove thinking animation when typing starts
+    setShowThinking(false);
     let currentText = '';
     for (let i = 0; i < fullText.length; i++) {
       currentText += fullText[i];
