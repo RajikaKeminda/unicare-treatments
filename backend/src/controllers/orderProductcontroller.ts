@@ -4,7 +4,7 @@ import Order from '../models/orderModelProduct.ts';
 
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId, name, address, quantity, paymentMethod, totalPrice } = req.body;
+    const { productId, name, address, quantity, paymentMethod, totalPrice, status } = req.body;
 
     const newOrder = new Order({
       productId,
@@ -12,7 +12,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       address,
       quantity,
       paymentMethod,
-      totalPrice
+      totalPrice,
+      status: status || 'pending' 
     });
 
     await newOrder.save();
@@ -50,5 +51,28 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
   } catch (err) {
     console.error('Error fetching order:', err);
     res.status(500).json({ message: 'Failed to fetch order' });
+  }
+};
+
+export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      res.status(404).json({ message: 'Order not found' });
+      return;
+    }
+
+    res.status(200).json({ message: 'Order status updated', order: updatedOrder });
+  } catch (err) {
+    console.error('Error updating order status:', err);
+    res.status(500).json({ message: 'Failed to update order status' });
   }
 };

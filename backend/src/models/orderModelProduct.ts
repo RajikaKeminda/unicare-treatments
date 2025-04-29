@@ -8,7 +8,12 @@ const orderSchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
   paymentMethod: { type: String, enum: ['credit_card', 'paypal', 'cash_on_delivery'], required: true },
   totalPrice: { type: Number, required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  status: {
+    type: String,
+    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+    default: 'pending'
+  }
 });
 
 const Order = mongoose.model('Order', orderSchema);

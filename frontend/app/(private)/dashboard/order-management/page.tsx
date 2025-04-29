@@ -24,15 +24,18 @@ interface Order {
   createdAt: string;
 }
 
+const statusOptions: Order['status'][] = ['pending', 'processing', 'shipped', 'delivered'];
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | Order['status']>('all');
   const [sortConfig, setSortConfig] = useState<{ key: keyof Order; direction: 'asc' | 'desc' } | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    setHasMounted(true); // Fix for hydration issues (e.g., locale-dependent rendering)
+    setHasMounted(true);
   }, []);
 
   useEffect(() => {
@@ -48,29 +51,6 @@ export default function AdminOrdersPage() {
     };
     fetchOrders();
   }, []);
-
-  const sortedOrders = [...orders].sort((a, b) => {
-    if (!sortConfig) return 0;
-
-    if (sortConfig.key === 'productId') {
-      const aName = a.productId?.name || '';
-      const bName = b.productId?.name || '';
-      return sortConfig.direction === 'asc' ? aName.localeCompare(bName) : bName.localeCompare(aName);
-    }
-
-    const aValue = a[sortConfig.key];
-    const bValue = b[sortConfig.key];
-
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  });
-
-  const filteredOrders = sortedOrders.filter(order =>
-    order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.productId?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const updateStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
@@ -89,6 +69,35 @@ export default function AdminOrdersPage() {
     setSortConfig({ key, direction });
   };
 
+  const sortedOrders = [...orders].sort((a, b) => {
+    if (!sortConfig) return 0;
+
+    if (sortConfig.key === 'productId') {
+      const aName = a.productId?.name || '';
+      const bName = b.productId?.name || '';
+      return sortConfig.direction === 'asc' ? aName.localeCompare(bName) : bName.localeCompare(aName);
+    }
+
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const filteredOrders = sortedOrders.filter(order => {
+    const matchesSearch = (
+      order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.productId?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
   if (!hasMounted || loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -101,27 +110,36 @@ export default function AdminOrdersPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Order Management</h1>
 
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search by customer, address, or product..."
-          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      {/* Search and Status Filters */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+        <div className="relative w-full md:w-1/2">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by customer, address, or product..."
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as 'all' | Order['status'])}
+          className="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+        >
+          <option value="all">All Statuses</option>
+          {statusOptions.map(status => (
+            <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
+          ))}
+        </select>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {[
-                { label: 'Date', key: 'createdAt' },
-                { label: 'Product', key: 'productId' },
-                { label: 'Total', key: 'totalPrice' },
-                { label: 'Status', key: 'status' }
-              ].map(col => (
+              {[{ label: 'Date', key: 'createdAt' }, { label: 'Product', key: 'productId' }, { label: 'Total', key: 'totalPrice' }, { label: 'Status', key: 'status' }].map(col => (
                 <th
                   key={col.key}
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
@@ -188,10 +206,9 @@ export default function AdminOrdersPage() {
                       onChange={(e) => updateStatus(order._id, e.target.value as Order['status'])}
                       className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                     >
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
+                      {statusOptions.map(status => (
+                        <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
+                      ))}
                     </select>
                   </td>
                 </tr>

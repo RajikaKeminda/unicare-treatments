@@ -71,7 +71,7 @@ export default function OrderPage() {
           <CheckCircle className="h-10 w-10 text-green-600" />
         </div>
         <h1 className="text-2xl font-bold mt-6 text-gray-900">Order Placed Successfully!</h1>
-        <p className="mt-2 text-gray-600">Thank you for your purchase. You'll receive a confirmation email shortly.</p>
+        <p className="mt-2 text-gray-600">Thank you for your purchase. You&apos;ll receive a confirmation email shortly.</p>
         <div className="mt-8 animate-pulse text-sm text-gray-500">
           Redirecting to homepage...
         </div>
