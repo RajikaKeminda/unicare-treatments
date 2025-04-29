@@ -7,6 +7,7 @@ import {
   deleteProduct,
   getProducts,
   updateProduct,
+  getProductById
 } from "../controllers/productContoller.ts";
 
 // Import inventory controller functions
@@ -62,6 +63,9 @@ router.get("/products", getProducts); // Route to get all products
 router.delete("/products/:id", deleteProduct);
 // Update product route
 router.put("/products/:id", updateProduct);
+// get specific product by id
+router.get('/products/:id', getProductById);
+
 
 // --------------------------------------------------------
 // api/treatments
