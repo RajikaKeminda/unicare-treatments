@@ -7,7 +7,7 @@ import Post from '../models/postModel.js';
 const createPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
   content: z.string().min(1, 'Content is required'),
-  thumbnail: z.string().url('Invalid thumbnail URL'),
+  thumbnail: z.string().optional(),
   category: z.string().min(1, 'Category is required'),
   isPublished: z.boolean().optional(),
 });
@@ -15,7 +15,7 @@ const createPostSchema = z.object({
 const updatePostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long').optional(),
   content: z.string().min(1, 'Content is required').optional(),
-  thumbnail: z.string().url('Invalid thumbnail URL').optional(),
+  thumbnail: z.string().optional(),
   category: z.string().min(1, 'Category is required').optional(),
   isPublished: z.boolean().optional(),
 });

@@ -52,7 +52,7 @@ const data = {
         {
           icon: BsGrid,
           title: "Categories",
-          url: "/dashboard/blog/categories",
+          url: "/dashboard/blog-category",
         },
       ],
     },

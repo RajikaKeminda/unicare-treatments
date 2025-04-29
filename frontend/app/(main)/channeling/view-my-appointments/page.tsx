@@ -2,33 +2,52 @@
 
 import { DataTable } from "@/components/layout/channeling/tables/my-appointments";
 import { IAppointment } from "@/types/index";
-import { columns } from "@/components/layout/channeling/tables/columns";
+import { getColumns } from "@/components/layout/channeling/tables/columns";
 import { useEffect, useState } from "react";
 import { Stethoscope } from "lucide-react";
 import { AppointmentResponse } from "@/types/users";
 import { apiService } from "@/libs/api";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function ViewAppointment() {
   const [data, setData] = useState<IAppointment[]>([]);
   const { data: session } = useSession();
+  const router = useRouter();
   const user = session?.user;
 
-  useEffect(() => {
-    const getData = async () => {
-      const response = await apiService.get<AppointmentResponse>(
-        `/appointments/patient/${user?.id}`
-      );
-      if (response.success) {
-        setData(response?.appointments || []);
-      }
-    };
+  const refreshPage = () => {
+    getData();
+  };
 
+  const getPaymentDone = async (data: IAppointment) => {
+    console.log("data: =-->", data);
+    router.push("/channeling-payment");
+
+    // const response = await apiService.get<AppointmentResponse>(
+    //   `/appointments/payment/${data.referenceNumber}`
+    // );
+    // if (response.success) {
+    //   setData(response?.appointments || []);
+    // }
+  };
+
+  const getData = async () => {
+    const response = await apiService.get<AppointmentResponse>(
+      `/appointments/patient/${user?.id}`
+    );
+    if (response.success) {
+      setData(response?.appointments || []);
+    }
+  };
+
+  const columns = getColumns(refreshPage, getPaymentDone);
+
+  useEffect(() => {
     if (user?.id) {
       getData();
     }
-
-    // setData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   return (

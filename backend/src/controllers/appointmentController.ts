@@ -175,15 +175,41 @@ export const getPatientIdByRefNo = async (
 /******************************************************************************
                                 UPDATE
 ******************************************************************************/
+export const rescheduleAppointmentById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const updatedAppointment =
+      await appointmentService.rescheduleAppointmentById(
+        id,
+        req.body.appointmentDate
+      );
+
+    if (!updatedAppointment) {
+      res.status(HttpStatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Appointment not found or could not be rescheduled.",
+      });
+      return;
+    }
+
+    res.status(HttpStatusCodes.OK).json({
+      success: true,
+      message: "Appointment successfully rescheduled.",
+      updatedAppointment,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
 
 export const rescheduleAppointmentByRefNo = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    //! Take patient Id from the session
-    //const patientId = req.user.id;
-
     const { referenceNumber } = req.params;
 
     const updatedAppointment =

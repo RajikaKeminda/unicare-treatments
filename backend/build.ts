@@ -14,5 +14,16 @@ await esbuild.build({
   format: 'esm',
   sourcemap: true,
   minify: false,
-  external: ['express', 'mongoose', 'cors', 'dotenv', 'bcryptjs', 'jsonwebtoken', 'multer'],
+  external: [
+    'express',
+    'mongoose',
+    'cors',
+    'dotenv',
+    'bcryptjs',
+    'jsonwebtoken',
+    'multer',
+    'buffer',
+    '@aws-sdk/*',
+    '@smithy/*'
+  ],
 }); 

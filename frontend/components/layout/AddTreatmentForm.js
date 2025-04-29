@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'sonner';
 
-export default function AddTreatmentForm({ onClose }) {
+export default function AddTreatmentForm({ onClose, onTreatmentAdded }) {
   const [patientID, setPatientID] = useState("");
   const [patientName, setPatientName] = useState("");
   const [age, setAge] = useState(""); // Initialize age with an empty string
+  const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [treatment, setTreatment] = useState("");
@@ -17,33 +19,96 @@ export default function AddTreatmentForm({ onClose }) {
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState("");
 
+  // Function to generate a unique patient ID
+  const generatePatientID = () => {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `PID${year}${month}${day}${random}`;
+  };
+
+  // Set the patient ID when the component mounts
+  useEffect(() => {
+    setPatientID(generatePatientID());
+  }, []);
+
   // Validation function
   const validateForm = () => {
-    // Validate name (must not be empty)
+    // Validate required fields
+    if (!patientID.trim()) {
+        toast.error('Patient ID is required.');
+        return false;
+    }
     if (!patientName.trim()) {
-      alert('Patient Name is required.');
-      return false;
+        toast.error('Patient Name is required.');
+        return false;
+    }
+    if (!age.trim()) {
+        toast.error('Age is required.');
+        return false;
     }
 
-    // Validate age (must be a number greater than 0)
-    if (!age || age <= 0) {
-      alert('Please enter a valid age.');
-      return false;
+    if (!age.trim()) {
+        toast.error('Age is required.');
+        return false;
+    }
+
+    if (isNaN(age) || parseInt(age) <= 0) {
+        toast.error('Age must be a valid positive number.');
+        return false;
+    }
+
+    if (parseInt(age) > 120) {
+        toast.error('Age must be 120 or below.');
+        return false;
+    }
+
+    if (!gender.trim()) {
+        toast.error('Gender is required.');
+        return false;
+    }
+    if (!diagnosis.trim()) {
+        toast.error('Diagnosis is required.');
+        return false;
+    }
+    
+    if (!startDate) {
+        toast.error('Start Date is required.');
+        return false;
+    }
+    if (!endDate) {
+        toast.error('End Date is required.');
+        return false;
+    }
+    if (!status.trim()) {
+        toast.error('Status is required.');
+        return false;
     }
 
     // Validate that the start date is before or the same as the end date
     if (new Date(startDate) > new Date(endDate)) {
-      alert('Start date cannot be later than End date.');
+        toast.error('End Date cannot be before start date');
+        return false;
+    }
+
+    // Add email validation
+    if (!email.trim()) {
+      toast.error('Email is required.');
       return false;
     }
 
-    if (notes && notes.trim().length === 0) {
-      alert('Please enter Notes or leave it empty.');
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address.');
       return false;
     }
 
     return true;
-  };
+};
+
 
   const handleSave = async () => {
     if (!validateForm()) {
@@ -54,6 +119,7 @@ export default function AddTreatmentForm({ onClose }) {
       patientID,
       patientName,
       age,
+      email,
       gender,
       diagnosis,
       treatment,
@@ -70,6 +136,7 @@ export default function AddTreatmentForm({ onClose }) {
 
       if (response.status === 200) {
         alert('Treatment form saved!');
+        onTreatmentAdded(); // Call the refresh function
         onClose(); // Close the form after saving
       } else {
         alert('Failed to save treatment form.');
@@ -86,13 +153,12 @@ export default function AddTreatmentForm({ onClose }) {
       <form>
         {/* Form Fields */}
         <div className="mb-4 flex items-center">
-          <label className="block text-gray-700 w-1/3">Patient ID:</label>
+          <label className="block text-gray-700 w-1/3">Treatment ID:</label>
           <input
             type="text"
-            className="border px-3 py-2 rounded w-2/3"
-            placeholder="Enter Patient ID"
+            className="border px-3 py-2 rounded w-2/3 bg-gray-100"
             value={patientID}
-            onChange={(e) => setPatientID(e.target.value)}
+            readOnly
           />
         </div>
 
@@ -114,6 +180,16 @@ export default function AddTreatmentForm({ onClose }) {
             placeholder="Enter Age"
             value={age}
             onChange={(e) => setAge(e.target.value)}
+          />
+        </div>
+        <div className="mb-4 flex items-center">
+          <label className="block text-gray-700 w-1/3">Email:</label>
+          <input
+            type="email"
+            className="border px-3 py-2 rounded w-2/3"
+            placeholder="Enter Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="mb-4 flex items-center">
@@ -150,19 +226,36 @@ export default function AddTreatmentForm({ onClose }) {
         </div>
 
         <div className="mb-4 flex items-center">
-          <label className="block text-gray-700 w-1/3">Treatment:</label>
-          <select
-            className="border px-3 py-2 rounded w-2/3"
-            value={treatment}
-            onChange={(e) => setTreatment(e.target.value)}
-          >
-            <option>Select Treatment</option>
-            <option>Physical Therapy</option>
-            <option>Massage</option>
-            <option>Acupuncture</option>
-            <option>Chiropractic</option>
-          </select>
-        </div>
+  <label className="block text-gray-700 w-1/3">Treatment:</label>
+  <select
+    className="border px-3 py-2 rounded w-1/3"
+    value={treatment}
+    onChange={(e) => setTreatment(e.target.value)}
+  >
+    <option>Select Treatment</option>
+    <option>Physical Therapy</option>
+    <option>Massage</option>
+    <option>Acupuncture</option>
+    <option>Chiropractic</option>
+  </select>
+
+        <button
+        onClick={(e) => {
+          e.preventDefault();  // Prevent form submission
+          toast.info('Coming Soon');  // Display toast message
+        }}
+        className="bg-[#D3D3D3] text-white py-1 px-3 rounded text-sm flex items-center ml-2 hover:cursor-pointer"
+        title="Coming Soon"
+      >
+        <img 
+          src="https://cdn-icons-png.flaticon.com/128/8915/8915520.png" 
+          alt="Search Icon"
+          className="w-4 h-4 mr-2" 
+        />
+        Treatment Suggestions
+      </button>
+
+     </div>
         <div className="mb-4 flex items-center">
           <label className="block text-gray-700 w-1/3">Medicines/Oils:</label>
           <textarea
@@ -236,7 +329,7 @@ export default function AddTreatmentForm({ onClose }) {
         <div className="flex justify-center gap-4 mt-4">
           <button
             type="button"
-            className="px-4 py-2 bg-[#69d369] rounded"
+            className="px-4 py-2 bg-[#00C853] rounded"
             onClick={handleSave}  // Call handleSave when saving
           >
             Save
