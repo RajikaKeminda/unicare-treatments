@@ -59,7 +59,7 @@ const ChatbotPage: React.FC = () => {
     setIsLoading(true);
     setShowThinking(true);
 
-    const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    const apiKey = typeof window !== "undefined" ? (process.env.NEXT_PUBLIC_OPENROUTER_API_KEY as string) : '';
 
     if (!apiKey) {
       const missingKeyMessage: Message = {
