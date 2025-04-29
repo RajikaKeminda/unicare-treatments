@@ -2,9 +2,9 @@ import "./polyfills.js";
 import express from "express";
 import "dotenv/config";
 import cors from "cors"; // Import CORS middleware
-import apiRouter from "./routes/index.ts"; // Your API routes
-import { connectToMongoDB } from "./util/dbConnector.ts"; // MongoDB connection utility
-import { handleOtherErrors, handleURIError } from "./util/individualErrors.ts"; // error handling
+import apiRouter from "./routes/index"; // Your API routes
+import { connectToMongoDB } from "./util/dbConnector"; // MongoDB connection utility
+import { handleOtherErrors, handleURIError } from "./util/individualErrors"; // error handling
 
 const app = express();
 const PORT = process.env.PORT || 8001; // Ensure a default port if not set

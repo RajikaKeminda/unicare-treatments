@@ -13,11 +13,15 @@ const authOptions: NextAuthOptions = {
       id: "credentials",
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        identifier: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any): Promise<any> {
         try {
+          if (!credentials?.identifier || !credentials?.password) {
+            throw new Error("Please enter both email and password");
+          }
+
           const response = await apiService.post<UserApiResponse>(
             `/user/sign-in`,
             {
@@ -26,8 +30,8 @@ const authOptions: NextAuthOptions = {
             }
           );
 
-          if (response.success === false) {
-            throw new Error(response.message);
+          if (!response.success) {
+            throw new Error(response.message || "Authentication failed");
           }
 
           const user = response.user;
@@ -35,12 +39,20 @@ const authOptions: NextAuthOptions = {
           if (!user) {
             throw new Error("No user found with this email");
           }
+
           if (!user.isVerified) {
             throw new Error("Please verify your account before logging in");
           }
-          return user;
+
+          return {
+            id: user._id,
+            email: user.email,
+            username: user.username,
+            isVerified: user.isVerified,
+            role: user.role,
+          };
         } catch (err: any) {
-          throw new Error(err);
+          throw new Error(err.message || "Authentication failed");
         }
       },
     }),
@@ -49,6 +61,7 @@ const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.email = user.email;
         token.isVerified = user.isVerified;
         token.username = user.username;
         token.role = user.role;
@@ -58,6 +71,7 @@ const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
+        session.user.email = token.email;
         session.user.isVerified = token.isVerified;
         session.user.username = token.username;
         session.user.role = token.role;
@@ -67,11 +81,14 @@ const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/sign-in",
+    error: "/auth/error",
   },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
 };
 
 const handler = NextAuth(authOptions);

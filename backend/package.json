@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon",
-    "start": "nodemon",
-    "build": "tsx build.ts",
-    "serve": "NODE_OPTIONS='--experimental-specifier-resolution=node --experimental-modules --experimental-json-modules' node dist/server.js"
+    "dev": "nodemon --exec tsx src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "clean": "rimraf dist"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -24,22 +24,19 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.0",
     "resend": "^4.1.2",
-    "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.13.10",
-    "esbuild": "^0.25.1",
     "nodemon": "^3.1.9",
-    "tsconfig-paths": "^4.2.0",
+    "rimraf": "^5.0.5",
     "typescript": "^5.8.2"
   }
 }

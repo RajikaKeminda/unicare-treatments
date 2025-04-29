@@ -45,6 +45,7 @@ import blogRoutes from "./blogRoutes.ts";
 import categoryRoutes from "./categoryRoutes.js";
 import commentRoutes from "./commentRoutes.ts";
 import mediaRoutes from "./mediaRoutes.ts";
+import supplierRoutes from "./supplierRoutes.ts";
 
 import {
   createReport,
@@ -98,6 +99,7 @@ router.use("/comments", commentRoutes);
 router.use("/blog", blogRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/media", mediaRoutes);
+router.use("/suppliers", supplierRoutes);
 router.post("/submit-advice-request", submitAdviceRequest);
 //fetch inquiries
 // Fetch all advice requests
