@@ -7,9 +7,23 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Star, ChevronLeft } from 'lucide-react';
 
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  image?: string;
+  description?: string;
+  category?: string;
+  stock?: number;
+  sku?: string;
+  rating?: number;
+  reviewCount?: number;
+  originalPrice?: number;
+}
+
 const ProductDetails = () => {
   const { id } = useParams();
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -20,7 +34,7 @@ const ProductDetails = () => {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/products/${id}`);
         setProduct(response.data.product);
       } catch (err) {
-        setError('Failed to load product details');
+        setError('Failed to load product details' + err);
       } finally {
         setLoading(false);
       }

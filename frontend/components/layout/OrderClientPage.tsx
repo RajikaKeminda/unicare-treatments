@@ -54,7 +54,7 @@ export default function OrderPage() {
       setOrderSuccess(true);
       setTimeout(() => router.push('/'), 3000);
     } catch (error) {
-      alert('Order failed! Please try again.');
+      alert('Order failed! Please try again.' + error);
     }
   };
 
