@@ -105,4 +105,8 @@ router.post("/submit-advice-request", submitAdviceRequest);
 // Fetch all advice requests
 router.get("/advice-requests", getAllAdviceRequests);
 
+//order
+import { createOrder } from '../controllers/orderProductcontroller.ts';
+router.post('/orders', createOrder);
+
 export default router;

@@ -3,12 +3,22 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { Loader2, CheckCircle, ChevronLeft } from 'lucide-react';
+import Link from 'next/link';
+
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  image?: string;
+  description?: string;
+  category?: string;
+}
 
 export default function OrderPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [formData, setFormData] = useState({
@@ -39,7 +49,7 @@ export default function OrderPage() {
       await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/orders`, {
         productId: id,
         ...formData,
-        totalPrice: product.price * formData.quantity
+        totalPrice: product ? product.price * formData.quantity : 0
       });
       setOrderSuccess(true);
       setTimeout(() => router.push('/'), 3000);
@@ -48,7 +58,11 @@ export default function OrderPage() {
     }
   };
 
-  if (loading) return <Loader2 className="animate-spin mx-auto mt-20" />;
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <Loader2 className="animate-spin h-8 w-8 text-red-500" />
+    </div>
+  );
 
   if (orderSuccess) return (
     <div className="text-center mt-20">
@@ -60,6 +74,11 @@ export default function OrderPage() {
 
   return (
     <div className="max-w-md mx-auto p-4">
+      <Link href={`/products/${id}`} className="flex items-center text-gray-600 mb-6">
+        <ChevronLeft className="w-5 h-5 mr-1" />
+        Back to Product
+      </Link>
+
       <h1 className="text-2xl font-bold mb-6">Order Processing</h1>
       
       {product && (
@@ -72,7 +91,10 @@ export default function OrderPage() {
               type="number"
               min="1"
               value={formData.quantity}
-              onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 1})}
+              onChange={(e) => setFormData({
+                ...formData, 
+                quantity: Math.max(1, parseInt(e.target.value) || 1)
+              })}
               className="border p-2 rounded w-20"
             />
           </div>
@@ -81,7 +103,7 @@ export default function OrderPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1">Full Name</label>
+          <label className="block mb-1">Full Name*</label>
           <input
             type="text"
             required
@@ -92,7 +114,7 @@ export default function OrderPage() {
         </div>
 
         <div>
-          <label className="block mb-1">Shipping Address</label>
+          <label className="block mb-1">Shipping Address*</label>
           <textarea
             required
             className="w-full border p-2 rounded"
@@ -102,7 +124,7 @@ export default function OrderPage() {
         </div>
 
         <div>
-          <label className="block mb-1">Payment Method</label>
+          <label className="block mb-1">Payment Method*</label>
           <select
             className="w-full border p-2 rounded"
             value={formData.paymentMethod}
@@ -116,9 +138,10 @@ export default function OrderPage() {
 
         <button
           type="submit"
-          className="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+          className="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 disabled:bg-gray-400"
+          disabled={!product}
         >
-          Confirm Order
+          {product ? 'Confirm Order' : 'Loading...'}
         </button>
       </form>
     </div>
