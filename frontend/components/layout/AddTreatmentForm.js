@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-export default function AddTreatmentForm({ onClose }) {
+export default function AddTreatmentForm({ onClose, onTreatmentAdded }) {
   const [patientID, setPatientID] = useState("");
   const [patientName, setPatientName] = useState("");
   const [age, setAge] = useState(""); // Initialize age with an empty string
+  const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [treatment, setTreatment] = useState("");
@@ -17,6 +18,21 @@ export default function AddTreatmentForm({ onClose }) {
   const [endDate, setEndDate] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState("");
+
+  // Function to generate a unique patient ID
+  const generatePatientID = () => {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `PID${year}${month}${day}${random}`;
+  };
+
+  // Set the patient ID when the component mounts
+  useEffect(() => {
+    setPatientID(generatePatientID());
+  }, []);
 
   // Validation function
   const validateForm = () => {
@@ -77,15 +93,17 @@ export default function AddTreatmentForm({ onClose }) {
         return false;
     }
 
-    let today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time to 00:00:00
+    // Add email validation
+    if (!email.trim()) {
+      toast.error('Email is required.');
+      return false;
+    }
 
-    let start = new Date(startDate);
-    start.setHours(0, 0, 0, 0); // Reset time to 00:00:00
-
-    if (start < today) {
-        toast.error('Start date cannot be earlier than today.');
-        return false;
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address.');
+      return false;
     }
 
     return true;
@@ -101,6 +119,7 @@ export default function AddTreatmentForm({ onClose }) {
       patientID,
       patientName,
       age,
+      email,
       gender,
       diagnosis,
       treatment,
@@ -117,6 +136,7 @@ export default function AddTreatmentForm({ onClose }) {
 
       if (response.status === 200) {
         alert('Treatment form saved!');
+        onTreatmentAdded(); // Call the refresh function
         onClose(); // Close the form after saving
       } else {
         alert('Failed to save treatment form.');
@@ -133,13 +153,12 @@ export default function AddTreatmentForm({ onClose }) {
       <form>
         {/* Form Fields */}
         <div className="mb-4 flex items-center">
-          <label className="block text-gray-700 w-1/3">Patient ID:</label>
+          <label className="block text-gray-700 w-1/3">Treatment ID:</label>
           <input
             type="text"
-            className="border px-3 py-2 rounded w-2/3"
-            placeholder="Enter Patient ID"
+            className="border px-3 py-2 rounded w-2/3 bg-gray-100"
             value={patientID}
-            onChange={(e) => setPatientID(e.target.value)}
+            readOnly
           />
         </div>
 
@@ -161,6 +180,16 @@ export default function AddTreatmentForm({ onClose }) {
             placeholder="Enter Age"
             value={age}
             onChange={(e) => setAge(e.target.value)}
+          />
+        </div>
+        <div className="mb-4 flex items-center">
+          <label className="block text-gray-700 w-1/3">Email:</label>
+          <input
+            type="email"
+            className="border px-3 py-2 rounded w-2/3"
+            placeholder="Enter Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="mb-4 flex items-center">

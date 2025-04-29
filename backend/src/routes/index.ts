@@ -25,6 +25,7 @@ import {
   getAllPatients,
   getPatientTreatment,
   updateTreatment,
+  getPatientTreatments,
 } from "../controllers/treatmentController.ts";
 
 //product-inquiry-pulindu
@@ -65,6 +66,7 @@ router.put("/products/:id", updateProduct);
 
 // --------------------------------------------------------
 // api/treatments
+router.get("/treatments/patient/:email", getPatientTreatments);
 router.post("/treatments", addTreatment);
 router.get("/treatments", getAllPatients);
 router.get("/treatments/:id", getPatientTreatment);

@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  env: {
+    EDGE_STORE_ACCESS_KEY: process.env.EDGE_STORE_ACCESS_KEY,
+    EDGE_STORE_SECRET_KEY: process.env.EDGE_STORE_SECRET_KEY,
+  },
   devIndicators: {
     position: "bottom-right",
   },
