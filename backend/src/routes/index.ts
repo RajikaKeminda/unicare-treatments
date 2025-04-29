@@ -106,7 +106,13 @@ router.post("/submit-advice-request", submitAdviceRequest);
 router.get("/advice-requests", getAllAdviceRequests);
 
 //order
-import { createOrder } from '../controllers/orderProductcontroller.ts';
+import { createOrder, getOrders, getOrderById } from '../controllers/orderProductcontroller.ts';
 router.post('/orders', createOrder);
+
+// Get all orders
+router.get('/', getOrders);
+
+// Get single order by ID
+router.get('/:id', getOrderById);
 
 export default router;
