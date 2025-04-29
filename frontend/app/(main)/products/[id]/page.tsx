@@ -63,7 +63,7 @@ const ProductDetails = () => {
       </Link>
 
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Product Image - Single */}
+        {/* Product Image */}
         <div className="w-full md:w-1/2 bg-gray-50 rounded-lg p-8 flex items-center justify-center">
           <Image
             src={product.image || "/product.jpg"}
@@ -132,12 +132,15 @@ const ProductDetails = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <button className="flex-1 bg-primary  hover:bg-red-900  text-white bg-red-500 py-3 px-6 rounded-lg font-medium transition-colors">
+            <button className="flex-1 bg-primary hover:bg-red-900 text-white bg-red-500 py-3 px-6 rounded-lg font-medium transition-colors">
               Add to Cart
             </button>
+
+            <Link href={`/products/order/${product._id}`} passHref>
             <button className="flex-1  hover:bg-blue-900 text-white  bg-blue-500 py-3 px-6 rounded-lg font-medium transition-colors">
               Buy Now
             </button>
+            </Link>
           </div>
         </div>
       </div>

@@ -152,13 +152,11 @@ const HeaderAndProducts = () => {
                       Add to Cart ${product.price}
                     </button>
                     
-                    
                       <Link href={`/products/${product._id}`} passHref>
                         <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-900 transform hover:scale-105 transition-all">
                           More Info
                         </button>
                       </Link>
-
                     
                   </div>
                 </div>
