@@ -12,8 +12,12 @@ const PORT = process.env.PORT || 8001; // Ensure a default port if not set
 connectToMongoDB();
 
 // Middleware -->
-// Enable CORS for requests only from localhost:3000 (your Next.js frontend)
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000' })); // CORS for specific origin
+// Enable CORS for both localhost:3000 and localhost:3001
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json()); // Parse incoming JSON requests
 
 // Routes -->

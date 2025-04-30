@@ -1,4 +1,4 @@
-import express from "express";
+import express, { RequestHandler } from "express";
 const router = express.Router();
 
 // Importing controllers for products
@@ -53,6 +53,8 @@ import {
   removeReport,
 } from "../controllers/reportController.ts";
 
+import inventoryActivityLogs from './inventory/activity-logs';
+
 // Middleware to parse JSON request bodies
 router.use(express.json());
 
@@ -76,11 +78,11 @@ router.delete("/treatments/:id", deleteTreatment);
 
 // --------------------------------------------------------
 // api/inventory/
-router.get("/inventory", getInventory); // Get all inventory items
-router.post("/inventory", addItem); // Add an item to the inventory
-router.put("/inventory/:id", updateQuantity); // Update the quantity of an inventory item
-router.delete("/inventory/:id", deleteItem); // Delete an inventory item
-router.put("/inventory-item/:id", updateItem); // Update this line
+router.get("/inventory", getInventory as RequestHandler); // Get all inventory items
+router.post("/inventory", addItem as RequestHandler); // Add an item to the inventory
+router.put("/inventory/:id", updateQuantity as RequestHandler); // Update the quantity of an inventory item
+router.delete("/inventory/:id", deleteItem as RequestHandler); // Delete an inventory item
+router.put("/inventory-item/:id", updateItem as RequestHandler); // Update this line
 
 // --------------------------------------------------------
 router.use("/appointments", appointmentRoute);
@@ -104,5 +106,8 @@ router.post("/submit-advice-request", submitAdviceRequest);
 //fetch inquiries
 // Fetch all advice requests
 router.get("/advice-requests", getAllAdviceRequests);
+
+// Register the activity logs route
+router.use('/inventory/activity-logs', inventoryActivityLogs);
 
 export default router;

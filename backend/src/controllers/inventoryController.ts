@@ -15,11 +15,34 @@ export const getInventory = async (req: Request, res: Response) => {
 export const addItem = async (req: Request, res: Response) => {
   try {
     const { name, quantity, unit, perItemPrice, expiryDate } = req.body;
-    const newItem = new Inventory({ name, quantity, unit, perItemPrice, expiryDate });
-    await newItem.save();
-    res.status(201).json(newItem);
+    
+    // Validate required fields
+    if (!name || !quantity || !unit || !perItemPrice || !expiryDate) {
+      return res.status(400).json({ 
+        error: "All fields are required.",
+        received: { name, quantity, unit, perItemPrice, expiryDate }
+      });
+    }
+
+    // Create new item
+    const newItem = new Inventory({ 
+      name, 
+      quantity: Number(quantity), 
+      unit, 
+      perItemPrice: Number(perItemPrice), 
+      expiryDate 
+    });
+
+    // Save to database
+    const savedItem = await newItem.save();
+    console.log("Item saved successfully:", savedItem);
+    res.status(201).json(savedItem);
   } catch (error) {
-    res.status(500).json({ error: "Failed to add item." });
+    console.error("Error adding item:", error);
+    res.status(500).json({ 
+      error: "Failed to add item.", 
+      details: error instanceof Error ? error.message : 'Unknown error occurred'
+    });
   }
 };
 

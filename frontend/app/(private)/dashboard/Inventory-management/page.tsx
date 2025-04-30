@@ -53,16 +53,16 @@ const InventoryManagementPage = () => {
               </div>
             </div>
 
-            {/* AI Query Section */}
+            {/* Supplier Management Section */}
             <div className="group cursor-pointer relative rounded-lg shadow-lg overflow-hidden border-2 border-gray-900 dark:border-gray-600 h-96">
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 text-center mb-4 mt-3">Ask AI</h2>
+              <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 text-center mb-4 mt-3">Supplier Management</h2>
               <div
-                onClick={() => handleNavigation("/dashboard/Inventory-management/ai-help")}
+                onClick={() => handleNavigation("/dashboard/Inventory-management/supplier")}
                 className="relative group h-64"
               >
                 <Image
-                  src="/ai-inventory.png" // Correct path to the public folder
-                  alt="AI Query"
+                  src="/supplier.png"
+                  alt="Supplier Management"
                   width={100}
                   height={100}
                   unoptimized
@@ -70,11 +70,11 @@ const InventoryManagementPage = () => {
                 />
                 {/* Hover Effect: Text appears when hovering over the image */}
                 <div className="absolute inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-white text-2xl font-bold">Ask AI</span>
+                  <span className="text-white text-2xl font-bold">Manage Suppliers</span>
                 </div>
               </div>
               <div className="mt-2 text-center text-gray-600 dark:text-gray-400">
-                <p>Get AI-powered insights and answers about your inventory. Click here to ask AI.</p>
+                <p>Manage your suppliers and their contact information. Click here to access supplier details.</p>
               </div>
             </div>
           </div>

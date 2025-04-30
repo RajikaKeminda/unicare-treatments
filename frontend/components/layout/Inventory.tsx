@@ -10,6 +10,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import ReportModal from "@/app/(private)/dashboard/Inventory-management/Inventory-see/components/ReportModal";
+import { generateGeneralReport, formatActivityLog } from "@/app/(private)/dashboard/Inventory-management/Inventory-see/services/reportService";
 
 // Register Chart.js components
 ChartJS.register(
@@ -21,7 +23,7 @@ ChartJS.register(
   Legend
 );
 
-const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/inventory`; // Backend API
+const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/inventory`; // Fixed API URL
 
 interface InventoryItem {
   _id: string;
@@ -56,6 +58,7 @@ export default function InventoryManager() {
   const [showExpiringSoon, setShowExpiringSoon] = useState<boolean>(false); // State to toggle expiring soon view
   const [showLowStock, setShowLowStock] = useState<boolean>(false); // State to toggle low stock view
   const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // 📌 Fetch inventory from backend on component mount
   useEffect(() => {
@@ -352,6 +355,195 @@ export default function InventoryManager() {
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleGenerateGeneralReport = async () => {
+    try {
+      setLoading(true);
+      const htmlContent = await generateGeneralReport();
+      
+      // Create a blob with HTML content
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `inventory-report-${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      setIsReportModalOpen(false);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert('Failed to generate report. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateSmartReport = async (fromDate: string, toDate: string) => {
+    try {
+      setLoading(true);
+      
+      // Filter inventory items based on date range
+      const filteredInventory = inventory.filter(item => {
+        const itemDate = new Date(item.expiryDate);
+        const from = new Date(fromDate);
+        const to = new Date(toDate);
+        return itemDate >= from && itemDate <= to;
+      });
+
+      // Generate HTML report for filtered items
+      const reportContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Smart Inventory Report - ${fromDate} to ${toDate}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              margin: 40px;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              color: #2c3e50;
+            }
+            .report-title {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            .report-date {
+              color: #7f8c8d;
+              margin-bottom: 20px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+              background-color: #fff;
+            }
+            th, td {
+              padding: 12px;
+              text-align: left;
+              border: 1px solid #ddd;
+            }
+            th {
+              background-color: #3498db;
+              color: white;
+            }
+            tr:nth-child(even) {
+              background-color: #f2f2f2;
+            }
+            tr:hover {
+              background-color: #e9e9e9;
+            }
+            .warning {
+              color: #e74c3c;
+              font-weight: bold;
+            }
+            .summary {
+              margin-top: 30px;
+              padding: 20px;
+              background-color: #f8f9fa;
+              border-radius: 5px;
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              color: #7f8c8d;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="report-title">Smart Inventory Report</div>
+            <div class="report-date">Date Range: ${fromDate} to ${toDate}</div>
+          </div>
+
+          <div class="summary">
+            <h3>Report Summary</h3>
+            <p>Total Items in Range: ${filteredInventory.length}</p>
+            <p>Total Value: Rs ${filteredInventory.reduce((total, item) => total + (item.quantity * item.perItemPrice), 0).toFixed(2)}</p>
+            <p>Items Expiring Soon: ${filteredInventory.filter(item => isExpiringSoon(item.expiryDate)).length}</p>
+            <p>Low Stock Items: ${filteredInventory.filter(item => isLowStock(item.quantity)).length}</p>
+          </div>
+
+          <h3>Filtered Inventory</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Price per Item (Rs)</th>
+                <th>Total Value (Rs)</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredInventory.map(item => {
+                const expiryDate = new Date(item.expiryDate);
+                const today = new Date();
+                const daysUntilExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                
+                let status = '';
+                if (daysUntilExpiry < 0) {
+                  status = '<span class="warning">Expired</span>';
+                } else if (daysUntilExpiry <= 7) {
+                  status = '<span class="warning">Expiring Soon</span>';
+                } else if (item.quantity <= 5) {
+                  status = '<span class="warning">Low Stock</span>';
+                } else {
+                  status = 'Good';
+                }
+
+                return `
+                  <tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.unit}</td>
+                    <td>${item.perItemPrice}</td>
+                    <td>${(item.quantity * item.perItemPrice).toFixed(2)}</td>
+                    <td>${new Date(item.expiryDate).toLocaleDateString()}</td>
+                    <td>${status}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>This is an automatically generated report. Please verify all information.</p>
+            <p>© ${new Date().getFullYear()} Unicare Treatments - Inventory Management System</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Create a blob with HTML content
+      const blob = new Blob([reportContent], { type: 'text/html;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `smart-inventory-report-${fromDate}-to-${toDate}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      setIsReportModalOpen(false);
+    } catch (error) {
+      console.error('Error generating smart report:', error);
+      alert('Failed to generate smart report. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h2 className="text-3xl font-bold mb-4">Products</h2>
@@ -367,7 +559,7 @@ export default function InventoryManager() {
         />
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-4 mb-6">
         <button
           className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
           onClick={() => setShowModal(true)}
@@ -376,7 +568,7 @@ export default function InventoryManager() {
         </button>
         <button
           className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600"
-          onClick={generateHTMLReport}
+          onClick={() => setIsReportModalOpen(true)}
         >
           Generate Report
         </button>
@@ -442,24 +634,21 @@ export default function InventoryManager() {
             />
             <h5>Expire date</h5>
             <input
-  type="date"
-  value={newItem.expiryDate}
-  onChange={(e) => {
-    const selectedDate = e.target.value;
-    const today = new Date().toISOString().split("T")[0]; // Get today's date in yyyy-mm-dd format
-    
-    // Check if the selected date is before today's date
-    if (selectedDate < today) {
-      alert("Please set the expiry date to a date after today.");
-      return; // Prevent the state update if the date is invalid
-    }
+              type="date"
+              value={newItem.expiryDate}
+              onChange={(e) => {
+                const selectedDate = e.target.value;
+                const today = new Date().toISOString().split("T")[0];
+                
+                if (selectedDate < today) {
+                  alert("Please set the expiry date to a date after today.");
+                  return;
+                }
 
-    // If valid, update the state with the selected expiry date
-    setNewItem({ ...newItem, expiryDate: selectedDate });
-  }}
-  className="border border-gray-300 rounded-md p-2 mb-4 w-full"
-/>
-
+                setNewItem({ ...newItem, expiryDate: selectedDate });
+              }}
+              className="border border-gray-300 rounded-md p-2 mb-4 w-full"
+            />
 
             <div className="flex justify-between mt-4">
               <button
@@ -505,7 +694,7 @@ export default function InventoryManager() {
                 ? expiringSoonItems
                 : showLowStock
                 ? lowStockItems
-                : filteredInventory // Use filtered inventory based on search query
+                : filteredInventory
               ).map((item) => (
                 <tr
                   key={item._id}
@@ -522,9 +711,8 @@ export default function InventoryManager() {
                   <td className="border px-4 py-2">{item.unit}</td>
                   <td className="border px-4 py-2">{item.perItemPrice}</td>
                   <td className="border px-4 py-2">
-  {item.expiryDate} {isExpired(item.expiryDate) && "⚠️"}
-</td>
-
+                    {item.expiryDate} {isExpired(item.expiryDate) && "⚠️"}
+                  </td>
                   <td className="border px-4 py-2">
                     <button
                       className="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 mr-2"
@@ -551,6 +739,13 @@ export default function InventoryManager() {
           </table>
         </div>
       )}
+
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onGenerateGeneralReport={handleGenerateGeneralReport}
+        onGenerateSmartReport={handleGenerateSmartReport}
+      />
     </div>
   );
 }

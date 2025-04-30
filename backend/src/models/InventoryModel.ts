@@ -5,7 +5,7 @@ const InventorySchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
   unit: { type: String, required: true },
   perItemPrice: { type: Number, required: true },
-  expiryDate: { type: Date, required: true },
+  expiryDate: { type: String, required: true },
 });
 
 const Inventory = mongoose.model("Inventory", InventorySchema);
