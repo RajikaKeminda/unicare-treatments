@@ -226,36 +226,39 @@ export default function AddTreatmentForm({ onClose, onTreatmentAdded }) {
         </div>
 
         <div className="mb-4 flex items-center">
-  <label className="block text-gray-700 w-1/3">Treatment:</label>
-  <select
-    className="border px-3 py-2 rounded w-1/3"
-    value={treatment}
-    onChange={(e) => setTreatment(e.target.value)}
-  >
-    <option>Select Treatment</option>
-    <option>Physical Therapy</option>
-    <option>Massage</option>
-    <option>Acupuncture</option>
-    <option>Chiropractic</option>
-  </select>
+          <label className="block text-gray-700 w-1/3">Treatment:</label>
+          <select
+            className="border px-3 py-2 rounded w-1/3"
+            value={treatment}
+            onChange={(e) => setTreatment(e.target.value)}
+          >
+            <option value="">Select Treatment</option>
+            <option value="Abhyanga">Abhyanga (Ayurvedic Massage)</option>
+            <option value="Shirodhara">Shirodhara</option>
+            <option value="Panchakarma">Panchakarma</option>
+            <option value="Nasya">Nasya</option>
+            <option value="Kati Basti">Kati Basti</option>
+            <option value="Udvartana">Udvartana</option>
+            <option value="Padabhyanga">Padabhyanga (Foot Massage)</option>
+            <option value="Marma Therapy">Marma Therapy</option>
+          </select>
 
-        <button
-        onClick={(e) => {
-          e.preventDefault();  // Prevent form submission
-          toast.info('Coming Soon');  // Display toast message
-        }}
-        className="bg-[#D3D3D3] text-white py-1 px-3 rounded text-sm flex items-center ml-2 hover:cursor-pointer"
-        title="Coming Soon"
-      >
-        <img 
-          src="https://cdn-icons-png.flaticon.com/128/8915/8915520.png" 
-          alt="Search Icon"
-          className="w-4 h-4 mr-2" 
-        />
-        Treatment Suggestions
-      </button>
-
-     </div>
+          <button
+            onClick={(e) => {
+              e.preventDefault();  // Prevent form submission
+              toast.info('Coming Soon');  // Display toast message
+            }}
+            className="bg-[#D3D3D3] text-white py-1 px-3 rounded text-sm flex items-center ml-2 hover:cursor-pointer"
+            title="Coming Soon"
+          >
+            <img 
+              src="https://cdn-icons-png.flaticon.com/128/8915/8915520.png" 
+              alt="Search Icon"
+              className="w-4 h-4 mr-2" 
+            />
+            Treatment Suggestions
+          </button>
+        </div>
         <div className="mb-4 flex items-center">
           <label className="block text-gray-700 w-1/3">Medicines/Oils:</label>
           <textarea
