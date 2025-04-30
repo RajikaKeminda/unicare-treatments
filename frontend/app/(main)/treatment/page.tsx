@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { FaLeaf, FaSpa, FaHeartbeat, FaUserMd } from "react-icons/fa";
 import Image from 'next/image';
 
 interface Treatment {
