@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FaPlus, FaTrash } from "react-icons/fa";
 import axios from "axios";
 import { z } from "zod";
 
@@ -22,13 +21,6 @@ const supplierSchema = z.object({
   address: z.string()
     .min(5, 'Address must be at least 5 characters')
     .max(200, 'Address must be less than 200 characters'),
-  products: z.array(
-    z.object({
-      value: z.string()
-        .min(1, 'Product name cannot be empty')
-        .max(100, 'Product name must be less than 100 characters')
-    })
-  ),
   notes: z.string()
     .max(500, 'Notes must be less than 500 characters')
     .optional()
@@ -44,7 +36,6 @@ const AddSupplierPage = () => {
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
   } = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
@@ -53,14 +44,8 @@ const AddSupplierPage = () => {
       email: "",
       phone: "",
       address: "",
-      products: [{ value: "" }],
       notes: "",
     },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "products",
   });
 
   const onSubmit = async (data: SupplierFormData) => {
@@ -68,17 +53,42 @@ const AddSupplierPage = () => {
     setError("");
 
     try {
-      // Transform the products array to match backend expectations
+      // Validate required fields
+      if (!data.name.trim() || !data.email.trim() || !data.phone.trim() || !data.address.trim()) {
+        setError("Please fill in all required fields");
+        setLoading(false);
+        return;
+      }
+
+      // Transform the data to match backend expectations
       const transformedData = {
-        ...data,
-        products: data.products.map(p => p.value)
+        name: data.name.trim(),
+        email: data.email.trim(),
+        phone: data.phone.trim(),
+        address: data.address.trim(),
+        notes: data.notes?.trim() || ""
       };
+
+      console.log("Data being sent to API:", transformedData);
       
-      await axios.post("http://localhost:8001/api/suppliers", transformedData);
-      router.push("/dashboard/Inventory-management/supplier");
-    } catch (err) {
+      const response = await axios.post("/api/suppliers", transformedData);
+      
+      console.log("API Response data:", response.data);
+      
+      if (response.data.success) {
+        router.push("/dashboard/Inventory-management/supplier");
+      } else {
+        setError(response.data.message || "Failed to create supplier. Please try again.");
+      }
+    } catch (err: any) {
       console.error("Error creating supplier:", err);
-      setError("Failed to create supplier. Please try again.");
+      console.error("Error response data:", err.response?.data);
+      
+      if (err.response?.data?.error?.includes('duplicate key error') && err.response?.data?.error?.includes('email')) {
+        setError("A supplier with this email address already exists. Please use a different email.");
+      } else {
+        setError(err.response?.data?.message || err.message || "Failed to create supplier. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -162,42 +172,6 @@ const AddSupplierPage = () => {
                     <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>
                   )}
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Products
-                </label>
-                <div className="space-y-3">
-                  {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-center gap-3">
-                      <input
-                        {...register(`products.${index}.value`)}
-                        className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm"
-                        placeholder="Enter product name"
-                      />
-                      {index > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => remove(index)}
-                          className="p-3 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          <FaTrash className="w-5 h-5" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  {errors.products && (
-                    <p className="mt-1 text-sm text-red-600">{errors.products.message}</p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => append({ value: "" })}
-                  className="mt-3 inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  <FaPlus className="mr-2" /> Add Product
-                </button>
               </div>
 
               <div>

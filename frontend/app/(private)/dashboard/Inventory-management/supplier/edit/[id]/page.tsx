@@ -11,7 +11,6 @@ interface Supplier {
   email: string;
   phone: string;
   address: string;
-  products: string[];
   notes: string;
 }
 
@@ -28,10 +27,7 @@ const EditSupplierPage = ({ params }: { params: Promise<{ id: string }> }) => {
       try {
         const response = await axios.get(`/api/suppliers/${id}`);
         if (response.data && response.data.data) {
-          setFormData({
-            ...response.data.data,
-            products: response.data.data.products || []
-          });
+          setFormData(response.data.data);
         } else {
           setError("Supplier not found");
         }
@@ -52,24 +48,6 @@ const EditSupplierPage = ({ params }: { params: Promise<{ id: string }> }) => {
     setFormData((prev) => prev ? { ...prev, [name]: value } : null);
   };
 
-  const handleProductChange = (index: number, value: string) => {
-    if (!formData) return;
-    const newProducts = [...(formData.products || [])];
-    newProducts[index] = value;
-    setFormData((prev) => prev ? { ...prev, products: newProducts } : null);
-  };
-
-  const addProductField = () => {
-    if (!formData) return;
-    setFormData((prev) => prev ? { ...prev, products: [...(prev.products || []), ""] } : null);
-  };
-
-  const removeProductField = (index: number) => {
-    if (!formData) return;
-    const newProducts = (formData.products || []).filter((_, i) => i !== index);
-    setFormData((prev) => prev ? { ...prev, products: newProducts } : null);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData) return;
@@ -78,10 +56,15 @@ const EditSupplierPage = ({ params }: { params: Promise<{ id: string }> }) => {
     setError("");
 
     try {
-      await axios.put(`/api/suppliers/${id}`, formData);
-      router.push("/dashboard/Inventory-management/supplier");
-    } catch (err) {
-      setError("Failed to update supplier");
+      const response = await axios.put(`/api/suppliers/${id}`, formData);
+      if (response.data.success) {
+        router.push("/dashboard/Inventory-management/supplier");
+      } else {
+        setError(response.data.message || "Failed to update supplier");
+      }
+    } catch (err: any) {
+      console.error('Error updating supplier:', err);
+      setError(err.response?.data?.message || "Failed to update supplier");
     } finally {
       setLoading(false);
     }
@@ -184,46 +167,6 @@ const EditSupplierPage = ({ params }: { params: Promise<{ id: string }> }) => {
                     />
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-8">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Products
-                </label>
-                <div className="space-y-3">
-                  {formData.products.map((product, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <input
-                        type="text"
-                        value={product}
-                        onChange={(e) => handleProductChange(index, e.target.value)}
-                        className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm"
-                        placeholder="Enter product name"
-                      />
-                      {index > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => removeProductField(index)}
-                          className="p-3 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={addProductField}
-                  className="mt-3 inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  Add Product
-                </button>
               </div>
 
               <div>

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const SupplierSchema = new mongoose.Schema({
+const supplierSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Supplier name is required'],
@@ -9,7 +9,6 @@ const SupplierSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'Email is required'],
-    unique: true,
     trim: true,
     lowercase: true
   },
@@ -22,17 +21,6 @@ const SupplierSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Address is required'],
     trim: true
-  },
-  category: {
-    type: String,
-    required: [true, 'Category is required'],
-    enum: ['Medicine', 'Equipment', 'General Supplies', 'Other'],
-    default: 'Other'
-  },
-  status: {
-    type: String,
-    enum: ['Active', 'Inactive'],
-    default: 'Active'
   },
   notes: {
     type: String,
@@ -49,10 +37,9 @@ const SupplierSchema = new mongoose.Schema({
 });
 
 // Update the updatedAt field before saving
-SupplierSchema.pre('save', function(next) {
+supplierSchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();
 });
 
-const Supplier = mongoose.model('Supplier', SupplierSchema);
-export default Supplier; 
+export default mongoose.model('Supplier', supplierSchema); 

@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('Received request body:', body);
+
     const response = await fetch(`${BACKEND_URL}/api/suppliers`, {
       method: 'POST',
       headers: {
@@ -37,16 +39,23 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
+    const data = await response.json();
+    console.log('Backend response:', data);
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error('Backend error:', data);
+      return NextResponse.json(data, { status: response.status });
     }
 
-    const data = await response.json();
     return NextResponse.json(data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating supplier:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to create supplier' },
+      { 
+        success: false, 
+        message: 'Failed to create supplier',
+        error: error.message 
+      },
       { status: 500 }
     );
   }

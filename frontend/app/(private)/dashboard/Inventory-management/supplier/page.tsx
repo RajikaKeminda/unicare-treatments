@@ -11,7 +11,6 @@ interface Supplier {
   email: string;
   phone: string;
   address: string;
-  products: string[];
   notes: string;
 }
 
@@ -28,12 +27,7 @@ const SupplierPage = () => {
   const fetchSuppliers = async () => {
     try {
       const response = await axios.get("/api/suppliers");
-      // Ensure products array exists for each supplier
-      const suppliersWithProducts = response.data.data.map((supplier: any) => ({
-        ...supplier,
-        products: supplier.products || []
-      }));
-      setSuppliers(suppliersWithProducts);
+      setSuppliers(response.data.data);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching suppliers:', err);
@@ -97,7 +91,7 @@ const SupplierPage = () => {
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Phone</th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Address</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Products</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Notes</th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -108,8 +102,16 @@ const SupplierPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{supplier.email}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{supplier.phone}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{supplier.address}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                        {(supplier.products || []).join(", ")}
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                        {supplier.notes ? (
+                          <div className="max-w-xs overflow-hidden">
+                            <p className="truncate" title={supplier.notes}>
+                              {supplier.notes}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 dark:text-gray-500">No notes</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
                         <button
