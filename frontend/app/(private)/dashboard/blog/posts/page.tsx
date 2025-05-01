@@ -254,7 +254,7 @@ export default function PostsPage() {
                 />
                 <div className="absolute top-2 right-2 flex gap-2">
                   <button
-                    onClick={() => router.push(`/admin/app/blog/edit/${post._id}`)}
+                    onClick={() => router.push(`/dashboard/blog/edit/${post._id}`)}
                     className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
                   >
                     <FiEdit2 className="w-4 h-4 text-gray-600" />

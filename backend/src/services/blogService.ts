@@ -17,7 +17,7 @@ const createPostSchema = z.object({
 const updatePostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long').optional(),
   content: z.string().min(1, 'Content is required').optional(),
-  thumbnail: z.string().optional(),
+  thumbnail: z.string().optional().nullable(),
   category: z.string().min(1, 'Category is required').optional(),
   isPublished: z.boolean().optional(),
 });
@@ -28,6 +28,11 @@ class BlogService {
     try {
       // Validate input data
       const validatedData = createPostSchema.parse(postData);
+
+      //remove thumbnail if it is null
+      if (validatedData.thumbnail === null) {
+        delete validatedData.thumbnail;
+      }
 
       // Create new post
       const post = new Post({
@@ -112,6 +117,7 @@ class BlogService {
 
   // Update a post
   async updatePost(postId: string, updateData: any, userId: string) {
+    console.log(updateData, postId, userId)
     try {
       if (!mongoose.Types.ObjectId.isValid(postId)) {
         throw new Error('Invalid post ID');
@@ -132,7 +138,21 @@ class BlogService {
       }
 
       // Update post
-      Object.assign(post, validatedData);
+      if (validatedData.title) {
+        post.title = validatedData.title;
+      }
+      if (validatedData.content) {
+        post.content = validatedData.content;
+      }
+      if (validatedData.category) {
+        post.category = validatedData.category;
+      }
+      if (validatedData.thumbnail) {
+        post.thumbnail = validatedData.thumbnail;
+      }
+      if (validatedData.isPublished) {
+        post.isPublished = validatedData.isPublished;
+      }
       await post.save();
 
       return post;
@@ -140,6 +160,7 @@ class BlogService {
       if (error instanceof z.ZodError) {
         throw new Error(`Validation error: ${error.errors[0].message}`);
       }
+      console.log(error)
       throw new Error('Failed to update post');
     }
   }
