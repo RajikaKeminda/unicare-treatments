@@ -115,6 +115,9 @@ export default function CreateBlog() {
             console.error('Error in form submission:', error);
         } finally {
             setIsSubmitting(false);
+            setTimeout(() => {
+                location.reload();
+            }, 1000)
         }
     };
 

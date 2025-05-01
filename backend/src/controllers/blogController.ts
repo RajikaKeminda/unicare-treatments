@@ -115,6 +115,36 @@ class BlogController {
       });
     }
   }
+
+  async getSimilarPosts(req: Request, res: Response): Promise<void> {
+    try {
+      const similarPosts = await blogService.getSimilarPosts(req.params.id);
+      res.status(200).json({
+        success: true,
+        data: similarPosts,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
+  async getPostRecommendations(req: Request, res: Response): Promise<void> {
+    try {
+      const postRecommendations = await blogService.getPostRecommendations(req.params.id);
+      res.status(200).json({
+        success: true,
+        data: postRecommendations,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default new BlogController();

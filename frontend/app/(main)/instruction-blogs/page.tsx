@@ -315,6 +315,7 @@ export default function BlogPage() {
         </div>
       )}
 
+
       {/* Pagination */}
       {!loading && !error && totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-12">

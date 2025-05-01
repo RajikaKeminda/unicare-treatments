@@ -2,6 +2,8 @@ import mongoose, { Types } from 'mongoose';
 import { z } from 'zod';
 import Media from '../models/mediaModel.js';
 import Post from '../models/postModel.js';
+import contentSimilarityService from './contentSimilarityService.ts';
+import Product from '../models/productModel.ts';
 
 // Validation schemas
 const createPostSchema = z.object({
@@ -47,7 +49,7 @@ class BlogService {
   async getAllPosts(page: number = 1, limit: number = 10, filters: any = {}) {
     try {
       const query: any = {};
-      
+
       // Apply filters
       if (filters.category) {
         query.category = filters.category;
@@ -190,7 +192,7 @@ class BlogService {
 
       const userObjectId = userId;
       const likeIndex = post.likes.findIndex(like => like === userObjectId);
-      
+
       if (likeIndex === -1) {
         post.likes.push(userObjectId);
       } else {
@@ -201,6 +203,53 @@ class BlogService {
       return post;
     } catch (error) {
       throw new Error('Failed to toggle like');
+    }
+  }
+
+  async getSimilarPosts(postId: string) {
+    try {
+      const post = await Post.findById(postId);
+      if (!post) {
+        throw new Error('Post not found');
+      }
+
+      const allPosts = await Post.find({});
+
+      const similarPosts = await contentSimilarityService.findSimilarPosts({ id: post._id.toString(), title: post.title, content: post.content }, allPosts.map(p => ({ id: p._id.toString(), title: p.title, content: p.content })));
+      
+      const data = [];
+      for (const post of similarPosts) {
+        const p = await Post.findById(post.post.id);
+        if (p) {
+          data.push(p);
+        }
+      }
+      return data;
+    } catch (error) {
+      throw new Error('Failed to get similar posts');
+    }
+  }
+
+  async getPostRecommendations(postId: string) {
+    try {
+      const post = await Post.findById(postId);
+      if (!post) {
+        throw new Error('Post not found');
+      }
+
+      const allProducts = await Product.find({});
+      const similarProducts = await contentSimilarityService.findSimilarPosts({ id: post._id.toString(), title: post.title, content: post.content }, allProducts.map(p => ({ id: p._id.toString(), title: p.name, content: p.description })));
+      
+      const data = [];
+      for (const post of similarProducts) {
+        const p = await Product.findById(post.post.id);
+        if (p) {
+          data.push(p);
+        }
+      }
+      return data;
+    } catch (error) {
+      throw new Error('Failed to get post recommendations');
     }
   }
 }

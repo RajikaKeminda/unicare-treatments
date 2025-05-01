@@ -54,6 +54,12 @@ interface Post {
   isPublished: boolean
 }
 
+interface Product {
+  _id: string
+  name: string
+  description: string
+}
+
 export default function BlogViewPage() {
   const params = useParams()
   const id = Array.isArray(params.id) ? params.id[0] : params.id
@@ -65,62 +71,8 @@ export default function BlogViewPage() {
   const [replyTo, setReplyTo] = useState<string | null>(null)
   const [post, setPost] = useState<Post | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
-  const [suggestedPosts] = useState<Post[]>([
-    {
-      _id: '2',
-      title: 'Healthy Living Tips',
-      content: 'Discover the best practices for maintaining a healthy lifestyle...',
-      thumbnail: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-      createdAt: '2024-03-19T15:30:00Z',
-      updatedAt: '2024-03-19T15:30:00Z',
-      category: 'Health',
-      author: {
-        _id: '',
-        name: '',
-        email: ''
-      },
-      views: 0,
-      likes: [],
-      comments: [],
-      isPublished: false
-    },
-    {
-      _id: '3',
-      title: 'The Future of Web Development',
-      content: 'Explore the latest trends and technologies shaping the future of web development...',
-      thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-      createdAt: '2024-03-18T09:15:00Z',
-      updatedAt: '2024-03-18T09:15:00Z',
-      category: 'Technology',
-      author: {
-        _id: '',
-        name: '',
-        email: ''
-      },
-      views: 0,
-      likes: [],
-      comments: [],
-      isPublished: false
-    },
-    {
-      _id: '4',
-      title: 'Business Strategy in 2024',
-      content: 'Learn about the key business strategies that will drive success in 2024...',
-      thumbnail: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-      createdAt: '2024-03-17T14:20:00Z',
-      updatedAt: '2024-03-17T14:20:00Z',
-      category: 'Business',
-      author: {
-        _id: '',
-        name: '',
-        email: ''
-      },
-      views: 0,
-      likes: [],
-      comments: [],
-      isPublished: false
-    },
-  ])
+  const [suggestedPosts, setSuggestedPosts] = useState<Post[]>([])
+  const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([])
   const [page, setPage] = useState(1)
   const [commentSubmitting, setCommentSubmitting] = useState(false)
 
@@ -143,8 +95,22 @@ export default function BlogViewPage() {
 
     if (id) {
       fetchPost()
+      fetchSimilarPosts()
+      fetchPostRecommendations()
     }
   }, [id])
+
+  const fetchSimilarPosts = async () => {
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/blog/${id}/similar`)
+    const thumbnailUrls = await Promise.all(response.data.data.map(async (post: Post) => await getThumbnailUrl(post.thumbnail)))
+    console.log(thumbnailUrls)
+    setSuggestedPosts(response.data.data.map((post: Post, index: number) => ({ ...post, thumbnail: thumbnailUrls[index] })))
+  }
+
+  const fetchPostRecommendations = async () => {
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/blog/${id}/recommendations`)
+    setSuggestedProducts(response.data.data)
+  }
 
   const getThumbnailUrl = async (thumbnailPath: string): Promise<string> => {
     if (thumbnailPath.startsWith('http')) {
@@ -176,31 +142,6 @@ export default function BlogViewPage() {
       fetchComments()
     }
   }, [id, page])
-
-  // Fetch suggested posts
-  useEffect(() => {
-    // const fetchSuggestedPosts = async () => {
-    //   try {
-    //     // Get posts from the same category if available
-    //     const category = post?.category
-    //     const url = category 
-    //       ? `${process.env.NEXT_PUBLIC_BASE_URL}/blog?page=1&limit=3&category=${encodeURIComponent(category)}`
-    //       : `${process.env.NEXT_PUBLIC_BASE_URL}/blog?page=1&limit=3`
-        
-    //     const response = await axios.get(url)
-        
-    //     // Filter out the current post
-    //     const filtered = response.data.data.posts.filter((p: Post) => p._id !== id)
-    //     setSuggestedPosts(filtered.slice(0, 3))
-    //   } catch (err) {
-    //     console.error('Failed to load suggested posts:', err)
-    //   }
-    // }
-
-    if (post) {
-      // fetchSuggestedPosts()
-    }
-  }, [post, id])
 
   const handleLike = async () => {
     // if (!session) {
@@ -643,6 +584,53 @@ export default function BlogViewPage() {
             <p className="col-span-3 text-center text-gray-500 py-8">No suggested posts found</p>
           )}
         </div>
+
+      {/* Recommended Products Section */}
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Recommended Products</h2>
+          <Link href="/products" className="flex items-center text-purple-600 hover:text-purple-800 transition-colors">
+            View all products <FiArrowRight className="ml-2" />
+          </Link>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {suggestedProducts.length > 0 ? (
+            suggestedProducts.map((product) => (
+              <Link 
+                key={product._id} 
+                href={`/products/${product._id}`}
+                className="group"
+              >
+                <article className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="relative h-40">
+                    <img
+                      src={`https://via.placeholder.com/300x200?text=${encodeURIComponent(product.name)}`}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm line-clamp-3">
+                      {product.description}
+                    </p>
+                    <div className="mt-4 flex justify-end">
+                      <span className="inline-flex items-center text-sm font-medium text-purple-600 group-hover:text-purple-800">
+                        Learn more <FiArrowRight className="ml-1 w-4 h-4" />
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </Link>
+            ))
+          ) : (
+            <p className="col-span-3 text-center text-gray-500 py-8">No recommended products found</p>
+          )}
+        </div>
+      </div>
       </div>
     </div>
   )
