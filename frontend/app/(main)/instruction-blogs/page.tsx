@@ -33,17 +33,6 @@ interface ApiResponse {
   }
 }
 
-const categories = [
-  'All',
-  'Technology',
-  'Health',
-  'Lifestyle',
-  'Business',
-  'Education',
-  'Entertainment',
-  'Sports'
-]
-
 export default function BlogPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
@@ -55,6 +44,7 @@ export default function BlogPage() {
   const [totalPages, setTotalPages] = useState(1)
   const filterRef = useRef<HTMLDivElement>(null)
   const [posts, setPosts] = useState<Post[]>([])
+  const [categories, setCategories] = useState<string[]>(['All'])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -66,6 +56,24 @@ export default function BlogPage() {
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Fetch categories from API
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/categories`)
+        if (response.data.success) {
+          setCategories(['All', ...response.data.data?.map((category: { name: string }) => category.name) || []])
+        } else {
+          console.error('Failed to fetch categories')
+        }
+      } catch (err) {
+        console.error('Error fetching categories:', err)
+      }
+    }
+
+    fetchCategories()
   }, [])
 
   // Fetch posts from API
