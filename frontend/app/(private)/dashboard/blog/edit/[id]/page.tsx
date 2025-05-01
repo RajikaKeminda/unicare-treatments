@@ -1,17 +1,21 @@
 'use client'
 
-import Image from 'next/image';
 import { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { BsEmojiSmile } from 'react-icons/bs';
-import { FiImage, FiLink } from 'react-icons/fi';
+import { FiImage, FiLink, FiCheck } from 'react-icons/fi';
 import { HiUserGroup } from 'react-icons/hi';
 import { IoMdArrowDropdown } from 'react-icons/io';
-import TiptapEditor from '../components/TiptapEditor';
+import TiptapEditor from '../../components/TiptapEditor';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useParams, useRouter } from 'next/navigation';
 
-export default function CreateBlog() {
+export default function EditBlog() {
+    const params = useParams();
+    const router = useRouter();
+    const postId = Array.isArray(params.id) ? params.id[0] : params.id;
+
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -22,8 +26,31 @@ export default function CreateBlog() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState<string[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        const fetchPost = async () => {
+            try {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/blog/${postId}`);
+                const post = response.data.data;
+                setTitle(post.title);
+                setContent(post.content);
+                setSelectedCategory(post.category);
+                
+                // Get thumbnail URL
+                if (post.thumbnail) {
+                    const thumbnailUrl = await getThumbnailUrl(post.thumbnail);
+                    setThumbnail(thumbnailUrl);
+                }
+            } catch (error) {
+                console.error('Error fetching post:', error);
+                toast.error('Failed to load post');
+                router.push('/dashboard/blog/posts');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         const fetchCategories = async () => {
             setIsLoadingCategories(true);
             try {
@@ -37,8 +64,26 @@ export default function CreateBlog() {
             }
         };
 
-        fetchCategories();
-    }, []);
+        if (postId) {
+            fetchPost();
+            fetchCategories();
+        }
+    }, [postId, router]);
+
+    const getThumbnailUrl = async (thumbnailPath: string): Promise<string> => {
+        if (thumbnailPath.startsWith('http')) {
+            return thumbnailPath;
+        }
+        
+        try {
+            const key = thumbnailPath;
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/media/view-url/${Buffer.from(key).toString('base64')}`);
+            return response.data.data.viewUrl;
+        } catch (error) {
+            console.error('Error getting thumbnail URL:', error);
+            return 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+        }
+    };
 
     const getPresignedUrl = async (file: File) => {
         try {
@@ -64,7 +109,6 @@ export default function CreateBlog() {
                     'Content-Type': file.type,
                 },
             });
-            // Extract the URL from the presigned URL (remove query parameters)
             return presignedUrl.split('?')[0];
         } catch (error) {
             console.error('Error uploading to S3:', error);
@@ -73,25 +117,20 @@ export default function CreateBlog() {
         }
     };
 
-    const createBlogPost = async (s3Key: string) => {
+    const updateBlogPost = async (s3Key: string | null) => {
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/blog`, {
+            await axios.put(`${process.env.NEXT_PUBLIC_BASE_URL}/blog/${postId}`, {
                 title,
                 content,
                 thumbnail: s3Key,
                 category: selectedCategory,
                 isPublished: true,
             });
-            toast.success('Blog post created successfully!');
-            // Reset form or redirect
-            setTitle('');
-            setContent('');
-            setThumbnail(null);
-            setThumbnailFile(null);
-            setSelectedCategory('');
+            toast.success('Blog post updated successfully!');
+            router.push('/dashboard/blog/posts');
         } catch (error) {
-            console.error('Error creating blog post:', error);
-            toast.error('Failed to create blog post');
+            console.error('Error updating blog post:', error);
+            toast.error('Failed to update blog post');
             throw error;
         }
     };
@@ -104,20 +143,17 @@ export default function CreateBlog() {
 
         setIsSubmitting(true);
         try {
-            let s3Key = '';
+            let s3Key = null;
             if (thumbnailFile) {
                 const { presignedUrl, key } = await getPresignedUrl(thumbnailFile);
                 await uploadToS3(thumbnailFile, presignedUrl);
                 s3Key = key;
             }
-            await createBlogPost(s3Key);
+            await updateBlogPost(s3Key);
         } catch (error) {
             console.error('Error in form submission:', error);
         } finally {
             setIsSubmitting(false);
-            setTimeout(() => {
-                location.reload();
-            }, 1000)
         }
     };
 
@@ -142,15 +178,24 @@ export default function CreateBlog() {
         maxSize: 5 * 1024 * 1024 // 5MB
     });
 
+    if (isLoading) {
+        return (
+            <div className="max-w-4xl w-2/3 mx-auto p-6">
+                <div className="animate-pulse">
+                    <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+                    <div className="h-64 bg-gray-200 rounded mb-6"></div>
+                    <div className="h-32 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-4xl w-2/3 mx-auto p-6">
             {/* Header */}
             <div className="flex gap-4 mb-6 border-b pb-4">
                 <button className="px-4 py-2 bg-gray-100 rounded-full font-medium text-gray-700 hover:bg-gray-200">
-                    New post
-                </button>
-                <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-full">
-                    Share a link
+                    Edit post
                 </button>
             </div>
 
@@ -169,17 +214,20 @@ export default function CreateBlog() {
                 </button>
 
                 {showCategoryDropdown && (
-                    <div className="absolute top-full left-0 mt-1 w-48 bg-white border rounded-lg shadow-lg z-10">
+                    <div className="absolute z-10 mt-2 w-56 bg-white rounded-lg shadow-lg border">
                         {categories.map((category) => (
                             <button
                                 key={category}
-                                className="w-full px-4 py-2 text-left hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+                                className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
                                 onClick={() => {
                                     setSelectedCategory(category);
                                     setShowCategoryDropdown(false);
                                 }}
                             >
-                                {category}
+                                {selectedCategory === category && (
+                                    <FiCheck className="text-purple-600" />
+                                )}
+                                <span>{category}</span>
                             </button>
                         ))}
                     </div>
@@ -189,29 +237,30 @@ export default function CreateBlog() {
             {/* Thumbnail Upload */}
             <div className="mb-6">
                 {thumbnail ? (
-                    <div className="relative h-48 w-full rounded-lg overflow-hidden group">
-                        <Image
+                    <div className="relative">
+                        <img
                             src={thumbnail}
-                            alt="Thumbnail"
-                            fill
-                            className="object-cover"
+                            alt="Thumbnail preview"
+                            className="w-full h-64 object-cover rounded-lg"
                         />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200">
-                            <button
-                                onClick={() => setThumbnail(null)}
-                                className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                            >
-                                ×
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => {
+                                setThumbnail(null);
+                                setThumbnailFile(null);
+                            }}
+                            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
+                        >
+                            Remove
+                        </button>
                     </div>
                 ) : (
                     <div
                         {...getRootProps()}
-                        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
+                        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${
+                            isDragActive
                                 ? 'border-purple-500 bg-purple-50'
                                 : 'hover:bg-gray-50 border-gray-300'
-                            }`}
+                        }`}
                     >
                         <input {...getInputProps()} />
                         <div className="space-y-2">
@@ -255,9 +304,6 @@ export default function CreateBlog() {
                         >
                             Preview
                         </button>
-                        <div className="ml-auto">
-                            <span className="text-gray-400">Saved</span>
-                        </div>
                     </div>
 
                     <div className="min-h-[300px]">
@@ -291,7 +337,7 @@ export default function CreateBlog() {
                             disabled={isSubmitting}
                             className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isSubmitting ? 'Posting...' : 'Post'}
+                            {isSubmitting ? 'Updating...' : 'Update Post'}
                         </button>
                     </div>
                 </div>
