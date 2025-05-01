@@ -24,6 +24,10 @@ await esbuild.build({
     'multer',
     'buffer',
     '@aws-sdk/*',
-    '@smithy/*'
+    '@smithy/*',
+    'natural',
+    'fs',
+    'path',
+    'url'
   ],
 }); 
