@@ -52,16 +52,16 @@ export function LoginForm({
     });
 
     if (result?.error) {
-      if (result.error === "CredentialsSignin") {
+      if (result.error === "Configuration") {
         toast.error("Incorrect username or password");
       } else {
-        toast.error(result.error);
+        toast.error("Something went wrong. Please try again later.");
       }
     }
 
     setLoading(false);
 
-    if (result?.ok) {
+    if (!result?.error && result?.ok) {
       const session = await getSession();
       if (session?.user?.role === "admin") {
         router.replace("/dashboard");

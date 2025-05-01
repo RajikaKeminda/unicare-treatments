@@ -1,85 +1,54 @@
 import { Schema, model, Types } from "mongoose";
 
-/******************************************************************************
-                                Schemas
-******************************************************************************/
-
 const AppointmentSchema = new Schema(
   {
     patientId: {
-      type: String, //! Temp: this is type.ObjectId until Stores the patient's _id
-      ref: "Patient", // References the Patient model
-      required: false, // Changed to false to make it optional
-    },
-    referenceNumber: {
-      type: String,
-      unique: true,
+      type: Types.ObjectId,
+      ref: "user",
       required: true,
     },
-    firstName: {
+    channelingDate: {
       type: String,
       required: true,
-      trim: true,
     },
-    lastName: {
-      type: String,
-      required: false,
-      trim: true,
+    sessionNumber: {
+      type: Number,
+      required: true,
     },
-    dateOfBirth: {
-      type: Date,
-      required: false,
-    },
-    gender: {
-      type: String,
-      required: false,
-      enum: ["male", "female", "other"],
-    },
-    maritalState: {
-      type: String,
-      required: false,
-      enum: ["married", "single", "widowed"],
-    },
-    phoneNumber: {
+    startingTime: {
       type: String,
       required: true,
-      minlength: 10,
     },
-    alternativePhoneNumber: {
+    endingTime: {
       type: String,
-      required: false,
-    },
-    email: {
-      type: String,
-      required: false,
-      trim: true,
-      lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
-    },
-    address: {
-      type: String,
-      required: false,
-      minlength: 5,
-    },
-    appointmentDate: {
-      type: Date,
       required: true,
+    },
+    paymentId: {
+      type: String,
+      default: "",
     },
     paymentStatus: {
       type: String,
-      required: true,
-      enum: ["pay now", "pay later"],
-      default: "pay later",
+      enum: ["pending", "completed", "confirmed"],
+      default: "pending",
+    },
+    paymentAmount: {
+      type: Number,
+    },
+    doctorName: {
+      type: String,
+      default: "Dumitha Govindapala",
+    },
+    appointmentStatus: {
+      type: String,
+      enum: ["waiting", "attending", "completed", "canceled", "no-show"],
+      default: "waiting",
     },
   },
   {
     timestamps: true,
   }
 );
-
-/******************************************************************************
-                                Export default
-******************************************************************************/
 
 const AppointmentModel = model("appointment", AppointmentSchema);
 export default AppointmentModel;

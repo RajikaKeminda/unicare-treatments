@@ -1,32 +1,32 @@
-import { IAppointment } from ".";
+import { TApiResponse } from "./common";
 
 export interface IUser {
-  id?: string;
-  name?: string;
-  username?: string;
-  email?: string;
-  profile_img?: string;
-  isVerified?: boolean;
-  role?: string;
+  _id?: string;
+  username: string;
+  email: string;
+  password: string;
+  verifyCode: string;
+  verifyCodeExpiry: Date;
+  isVerified: boolean;
+  role: string;
+  reports?: string[];
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: Date;
+  phoneNumber?: string;
+  address?: string;
+  maritalState?: "single" | "married" | "divorced" | "widowed";
+  gender?: "male" | "female" | "other";
 }
 
-export type userTypes = "doctor" | "admin" | "supplier" | "patient";
-
-export interface TApiResponse {
-  success: boolean;
-  message: string;
-  code?: number;
-}
+export type userTypes = "doctor" | "admin" | "supplier" | "user";
 
 export interface UserApiResponse extends TApiResponse {
   user?: IUser;
+  users?: IUser[];
 }
 
-export interface AppointmentResponse extends TApiResponse {
-  appointments?: IAppointment[];
-  appointment?: IAppointment;
-}
-
-export interface ReportResponse extends TApiResponse {
-  reports: string[];
+export interface GetTokenResponse extends TApiResponse {
+  accessToken: string;
+  refreshToken: string;
 }

@@ -2,23 +2,9 @@
 
 import * as React from "react";
 
-import { BsFilePost, BsGrid } from "react-icons/bs";
-import { MdInventory } from "react-icons/md";
-import { FaShoppingCart } from "react-icons/fa";
-import { MdQueue } from "react-icons/md";
-import { FaHistory } from "react-icons/fa";
-import { FaUsers } from "react-icons/fa";
-import { FiSettings } from "react-icons/fi";
-import { IoMdPhotos } from "react-icons/io";
-import { FaBlog } from "react-icons/fa";
-import { BiSolidDashboard } from "react-icons/bi";
-import { FaBoxOpen } from "react-icons/fa";
-import { MdAdd } from "react-icons/md";
-import { IoIosList } from "react-icons/io";
-
 import { NavMain } from "@/components/shadcn/nav-main";
 import { NavUser } from "@/components/shadcn/nav-user";
-import { MdOutlineContactSupport } from "react-icons/md";
+
 import { useSession } from "next-auth/react";
 import {
   Sidebar,
@@ -29,98 +15,29 @@ import {
 } from "@/components/shadcn/ui/sidebar";
 import Image from "next/image";
 import Link from "next/link";
+import { ComponentProps, useEffect, useState } from "react";
+import { adminNavMenu, doctorNavMenu } from "@/helpers/data/side.menu.data";
+import { NavMenu } from "@/types/common";
 
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: BiSolidDashboard,
-      items: [],
-    },
-    {
-      title: "Blog",
-      url: "/dashboard/blog",
-      icon: FaBlog,
-      isActive: true,
-      items: [
-        {
-          icon: BsFilePost,
-          title: "Posts",
-          url: "/dashboard/blog/posts",
-        },
-        {
-          icon: BsGrid,
-          title: "Categories",
-          url: "/dashboard/blog-category",
-        },
-      ],
-    },
-    {
-      title: "Gallery",
-      url: "/dashboard/gallery",
-      icon: IoMdPhotos,
-    },
-    {
-      title: "Inquiries",
-      url: "/dashboard/inquiry-management",
-      icon: MdOutlineContactSupport,
-    },
-    {
-      title: "Products",
-      url: "/dashboard/product-management",
-      icon: FaBoxOpen,
-      isActive: true,
-      items: [
-        {
-          icon: MdAdd,
-          title: "Add Product",
-          url: "/dashboard/product-management/product-add",
-        },
-        {
-          icon: IoIosList,
-          title: "All Products",
-          url: "/dashboard/product-management/product-see",
-        },
-      ],
-    },
-    {
-      title: "Inventory",
-      url: "/dashboard/Inventory-management",
-      icon: MdInventory,
-    },
-    {
-      title: "Orders",
-      url: "/dashboard/order-management",
-      icon: FaShoppingCart,
-    },
-    {
-      title: "Appointments",
-      url: "/dashboard/appointment-management",
-      icon: MdQueue,
-    },
-    {
-      title: "Treatment History",
-      url: "/dashboard/treatment-history-management",
-      icon: FaHistory,
-    },
-    {
-      title: "Users",
-      url: "/dashboard/user-management",
-      icon: FaUsers,
-    },
-    {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: FiSettings,
-    },
-  ],
-};
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
+  const [navMenu, setNavMenu] = useState<NavMenu[]>([]);
 
   const user = session?.user;
+  const role = user?.role;
+
+  useEffect(() => {
+    const isAdmin = role === "admin";
+    const isDoctor = role === "doctor";
+    if (isAdmin) {
+      setNavMenu(adminNavMenu);
+    } else if (isDoctor) {
+      setNavMenu(doctorNavMenu);
+    } else {
+      setNavMenu([]);
+    }
+  }, [role]);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -136,13 +53,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMenu} />
       </SidebarContent>
       {user && (
         <SidebarFooter>
           <NavUser user={user} />
         </SidebarFooter>
       )}
+
       <SidebarRail />
     </Sidebar>
   );
