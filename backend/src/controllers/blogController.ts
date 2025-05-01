@@ -32,8 +32,11 @@ class BlogController {
       if (req.query.category) {
         filters.category = req.query.category;
       }
-      if (req.query.search) {
-        filters.search = { $regex: req.query.search, $options: 'i' };
+      if (req.query.isPublished !== undefined) {
+        filters.isPublished = req.query.isPublished === 'true';
+      }
+      if (req.query.author) {
+        filters.author = req.query.author;
       }
 
       const result = await blogService.getAllPosts(page, limit, filters);
@@ -104,36 +107,6 @@ class BlogController {
       res.status(200).json({
         success: true,
         data: post,
-      });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        error: error.message,
-      });
-    }
-  }
-
-  async getSimilarPosts(req: Request, res: Response): Promise<void> {
-    try {
-      const similarPosts = await blogService.getSimilarPosts(req.params.id);
-      res.status(200).json({
-        success: true,
-        data: similarPosts,
-      });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        error: error.message,
-      });
-    }
-  }
-
-  async getPostRecommendations(req: Request, res: Response): Promise<void> {
-    try {
-      const postRecommendations = await blogService.getPostRecommendations(req.params.id);
-      res.status(200).json({
-        success: true,
-        data: postRecommendations,
       });
     } catch (error: any) {
       res.status(400).json({

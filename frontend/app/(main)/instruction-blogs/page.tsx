@@ -5,8 +5,6 @@ import { FiSearch, FiFilter, FiCheck, FiHeart, FiMessageCircle, FiShare2, FiEye,
 import { format } from 'date-fns'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import _ from 'lodash'
-
 interface Post {
   _id: string
   title: string
@@ -35,8 +33,20 @@ interface ApiResponse {
   }
 }
 
+const categories = [
+  'All',
+  'Technology',
+  'Health',
+  'Lifestyle',
+  'Business',
+  'Education',
+  'Entertainment',
+  'Sports'
+]
+
 export default function BlogPage() {
   const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -45,8 +55,6 @@ export default function BlogPage() {
   const [totalPages, setTotalPages] = useState(1)
   const filterRef = useRef<HTMLDivElement>(null)
   const [posts, setPosts] = useState<Post[]>([])
-  const [categories, setCategories] = useState<string[]>(['All'])
-  const [searchQuery, setSearchQuery] = useState('')
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -60,54 +68,36 @@ export default function BlogPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Fetch categories from API
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/categories`)
-        if (response.data.success) {
-          setCategories(['All', ...response.data.data?.map((category: { name: string }) => category.name) || []])
-        } else {
-          console.error('Failed to fetch categories')
-        }
-      } catch (err) {
-        console.error('Error fetching categories:', err)
-      }
-    }
-
-    fetchCategories()
-  }, [])
-
   // Fetch posts from API
   useEffect(() => {
-    fetchPosts({search: searchQuery, category: selectedCategory === 'All' ? '' : selectedCategory})
-  }, [selectedCategory])
-
-  async function fetchPosts(filters: { search?: string, category?: string } = {}) {
-    try {
-      setLoading(true)
-      const response = await axios.get<ApiResponse>(`${process.env.NEXT_PUBLIC_BASE_URL}/blog?search=${filters?.search}&category=${filters?.category}`)
-      if (response.data.success) {
-        const data = [];
-        for (const post of response.data.data.posts) {
-          const thumbnailUrl = await getThumbnailUrl(post.thumbnail)
-          data.push({
-            ...post,
-            thumbnailUrl
-          })
+    async function fetchPosts() {
+      try {
+        setLoading(true)
+        const response = await axios.get<ApiResponse>(`${process.env.NEXT_PUBLIC_BASE_URL}/blog`)
+        if (response.data.success) {
+          const data = [];
+          for (const post of response.data.data.posts) {
+            const thumbnailUrl = await getThumbnailUrl(post.thumbnail)
+            data.push({
+              ...post,
+              thumbnailUrl
+            })
+          }
+          setPosts(data)
+          setTotalPages(response.data.data.pagination.pages)
+        } else {
+          setError('Failed to fetch posts')
         }
-        setPosts(data)
-        setTotalPages(response.data.data.pagination.pages)
-      } else {
-        setError('Failed to fetch posts')
+      } catch (err) {
+        setError('Error connecting to the server')
+        console.error(err)
+      } finally {
+        setLoading(false)
       }
-    } catch (err) {
-      setError('Error connecting to the server')
-      console.error(err)
-    } finally {
-      setLoading(false)
     }
-  }
+
+    fetchPosts()
+  }, [])
 
   // Get thumbnail URL
   const getThumbnailUrl = async (thumbnailPath: string): Promise<string> => {
@@ -125,7 +115,12 @@ export default function BlogPage() {
     }
   }
 
-  const filteredPosts = posts
+  const filteredPosts = posts.filter(post => {
+    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
 
   const postsPerPage = 9
   const paginatedPosts = filteredPosts.slice(
@@ -152,12 +147,6 @@ export default function BlogPage() {
     }
   }
 
-
-  const searchHandler = _.debounce((value: string) => {
-    setSearchQuery(value)
-    fetchPosts({ search: value, category: selectedCategory === 'All' ? '' : selectedCategory })
-  }, 1000)
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
@@ -175,7 +164,8 @@ export default function BlogPage() {
           <input
             type="text"
             placeholder="Search articles..."
-            onChange={(e) => searchHandler(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
         </div>
@@ -325,7 +315,6 @@ export default function BlogPage() {
         </div>
       )}
 
-
       {/* Pagination */}
       {!loading && !error && totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-12">
@@ -357,7 +346,7 @@ export default function BlogPage() {
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No posts found</h3>
           <p className="text-gray-500">
-            {selectedCategory !== 'All'
+            {searchQuery || selectedCategory !== 'All'
               ? 'Try adjusting your search query or filters'
               : 'Check back later for new posts'}
           </p>

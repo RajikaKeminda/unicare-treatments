@@ -47,26 +47,22 @@ class MediaService {
 
   // Generate presigned URL for viewing/downloading
   async generateViewUrl(key: string) {
+
     // Decode key from base64 if encoded
     try {
       key = Buffer.from(key, 'base64').toString();
     } catch (error) {
       throw new Error('Invalid media key format');
     }
-    
     try {
       const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
       });
 
-      // Set a much longer expiration time (1 year in seconds)
-      // AWS S3 signature v4 URLs have a maximum expiration of 7 days (604800 seconds)
-      const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 600000 });
-      console.log(presignedUrl)
+      const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
       return presignedUrl;
     } catch (error) {
-      console.error(error)
       throw new Error('Failed to generate view URL');
     }
   }
