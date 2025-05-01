@@ -32,11 +32,8 @@ class BlogController {
       if (req.query.category) {
         filters.category = req.query.category;
       }
-      if (req.query.isPublished !== undefined) {
-        filters.isPublished = req.query.isPublished === 'true';
-      }
-      if (req.query.author) {
-        filters.author = req.query.author;
+      if (req.query.search) {
+        filters.search = { $regex: req.query.search, $options: 'i' };
       }
 
       const result = await blogService.getAllPosts(page, limit, filters);

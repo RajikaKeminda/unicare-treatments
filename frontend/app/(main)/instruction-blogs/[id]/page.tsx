@@ -178,7 +178,9 @@ export default function BlogViewPage() {
     // }
 
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/comments/${commentId}/like`)
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/comments/${commentId}/like`, {}, {headers: {
+        'Authorization': `Bearer ${session?.user?.id}`
+      }})
       
       // Update comments state with the updated comment
       setComments(prev => {

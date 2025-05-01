@@ -54,11 +54,8 @@ class BlogService {
       if (filters.category) {
         query.category = filters.category;
       }
-      if (filters.isPublished !== undefined) {
-        query.isPublished = filters.isPublished;
-      }
-      if (filters.author) {
-        query.author = new Types.ObjectId(filters.author);
+      if(filters.search) {
+        query.title = filters.search;
       }
 
       const posts = await Post.find(query)

@@ -6,6 +6,7 @@ import { FiSearch, FiPlus, FiTrash2, FiEdit2, FiEye, FiFilter, FiCheck } from 'r
 import { format } from 'date-fns'
 import axios from 'axios'
 import Image from 'next/image'
+import _ from 'lodash'
 
 interface Post {
   _id: string
@@ -81,34 +82,34 @@ export default function PostsPage() {
   
   // Fetch posts from API
   useEffect(() => {
-    async function fetchPosts() {
-      try {
-        setLoading(true)
-        const response = await axios.get<ApiResponse>(`${process.env.NEXT_PUBLIC_BASE_URL}/blog`)
-        if (response.data.success) {
-          const data = [];
-          for (const post of response.data.data.posts) {
-            const thumbnailUrl = await getThumbnailUrl(post.thumbnail)
-            data.push({
-              ...post,
-              thumbnailUrl
-            })
-          }
-          setPosts(data)
-          setTotalPages(response.data.data.pagination.pages)
-        } else {
-          setError('Failed to fetch posts')
-        }
-      } catch (err) {
-        setError('Error connecting to the server')
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
+    fetchPosts({search: searchQuery, category: selectedCategory === 'All' ? '' : selectedCategory})
+  }, [selectedCategory])
 
-    fetchPosts()
-  }, [])
+  async function fetchPosts(filters: { search?: string, category?: string } = {}) {
+    try {
+      setLoading(true)
+      const response = await axios.get<ApiResponse>(`${process.env.NEXT_PUBLIC_BASE_URL}/blog?search=${filters?.search}&category=${filters?.category}`)
+      if (response.data.success) {
+        const data = [];
+        for (const post of response.data.data.posts) {
+          const thumbnailUrl = await getThumbnailUrl(post.thumbnail)
+          data.push({
+            ...post,
+            thumbnailUrl
+          })
+        }
+        setPosts(data)
+        setTotalPages(response.data.data.pagination.pages)
+      } else {
+        setError('Failed to fetch posts')
+      }
+    } catch (err) {
+      setError('Error connecting to the server')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Get thumbnail URL
   const getThumbnailUrl = async (thumbnailPath: string): Promise<string> => {
@@ -126,15 +127,13 @@ export default function PostsPage() {
     }
   }
 
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+  const searchHandler = _.debounce((value: string) => {
+    setSearchQuery(value)
+    fetchPosts({ search: value, category: selectedCategory === 'All' ? '' : selectedCategory })
+  }, 1000)
 
   const postsPerPage = 10
-  const paginatedPosts = filteredPosts.slice(
+  const paginatedPosts = posts.slice(
     (currentPage - 1) * postsPerPage,
     currentPage * postsPerPage
   )
@@ -172,8 +171,7 @@ export default function PostsPage() {
           <input
             type="text"
             placeholder="Search posts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => searchHandler(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
         </div>
@@ -332,7 +330,7 @@ export default function PostsPage() {
       )}
 
       {/* Empty State */}
-      {!loading && !error && filteredPosts.length === 0 && (
+      {!loading && !error && posts.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
             <FiSearch className="w-12 h-12 mx-auto" />
