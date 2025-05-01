@@ -31,7 +31,7 @@ export default function VerifyAccount() {
   const onSubmit = async (data: z.infer<typeof verifySchema>) => {
     try {
       const response = await apiService.post<UserApiResponse>(
-        `/user/verify-code`,
+        `/users/profile/verify-user`,
         {
           username: params.username,
           code: data.code,

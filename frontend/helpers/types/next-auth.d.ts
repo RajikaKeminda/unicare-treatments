@@ -1,38 +1,60 @@
 // next-auth.d.ts
 import "next-auth";
 import { DefaultSession } from "next-auth";
-
 declare module "next-auth" {
   interface User {
-    id?: string;
-    name?: string;
-    username?: string;
-    email?: string;
-    profile_img?: string;
-    isVerified?: boolean;
-    role?: string;
+    id?: string | null;
+    name?: string | null;
+    username?: string | null;
+    email?: string | null;
+    profile_img?: string | null;
+    isVerified?: boolean | null;
+    role?: string | null;
+    accessToken?: string | null;
+    refreshToken?: string | null;
+    accessTokenExpires?: number | null;
+    refreshTokenExpires?: number | null;
+    accessExpires?: string | null;
+    refreshExpires?: string | null;
+    error?: string | null;
   }
   interface Session {
     user: {
-      id?: string;
-      name?: string;
-      username?: string;
-      email?: string;
-      profile_img?: string;
-      isVerified?: boolean;
-      role?: string;
+      id?: string | null;
+      name?: string | null;
+      username?: string | null;
+      email?: string | null;
+      profile_img?: string | null;
+      isVerified?: boolean | null;
+      role?: string | null;
+      accessToken?: string | null;
+      refreshToken?: string | null;
+      accessTokenExpires?: number | null;
+      refreshTokenExpires?: number | null;
+      accessExpires?: string | null;
+      refreshExpires?: string | null;
+      error?: string | null;
     } & DefaultSession["user"];
   }
 }
 
-declare module "next-auth/jwt" {
+// import { JWT } from "next-auth/jwt"
+
+declare module "@auth/core/jwt" {
   interface JWT {
-    id?: string;
-    name?: string;
-    username?: string;
-    email?: string;
-    profile_img?: string;
-    isVerified?: boolean;
-    role?: string;
+    id?: string | null;
+    name?: string | null;
+    username?: string | null;
+    email?: string | null;
+    profile_img?: string | null;
+    isVerified?: boolean | null;
+    role?: string | null;
+    accessToken?: string | null;
+    refreshToken?: string | null;
+    accessTokenExpires?: number | null;
+    refreshTokenExpires?: number | null;
+    accessExpires?: string | null;
+    refreshExpires?: string | null;
+    error?: string | null;
   }
 }

@@ -30,21 +30,9 @@ import {
 } from "@/components/shadcn/ui/sidebar";
 import { useState } from "react";
 import ThemSwitch from "./them-switch";
+import { User } from "next-auth";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    id?: string;
-    isVerified?: boolean;
-    isAcceptingMessages?: boolean;
-    username?: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    role?: string;
-  };
-}) {
+export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
   const [isLoading, setIsLoading] = useState(false);
 

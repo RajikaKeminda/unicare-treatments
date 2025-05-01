@@ -32,6 +32,16 @@ const LinkComponent = ({
   );
 };
 
+const getUrl = (role: string) => {
+  if (role === "admin") {
+    return "/dashboard";
+  } else if (role === "doctor") {
+    return "/dashboard/appointment-list";
+  } else {
+    return "/home";
+  }
+};
+
 export default function HeaderNavigator() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -113,7 +123,7 @@ export default function HeaderNavigator() {
 
         {user ? (
           <div className="flex items-center gap-2">
-            <Link href="/dashboard">
+            <Link href={getUrl(user.role || "user")}>
               <span className="font-semibold">Hi, {user.username} </span>
             </Link>
             <span
