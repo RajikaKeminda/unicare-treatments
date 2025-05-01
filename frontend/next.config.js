@@ -7,7 +7,9 @@ const nextConfig = {
     domains: ['localhost'],
   },
   experimental: {
-    serverActions: true,
+    serverActions: {
+      enabled: true
+    }
   }
 }
 
