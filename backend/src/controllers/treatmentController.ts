@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import Treatment from '../models/treatmentModel.ts'; // Your treatment model
-import userModel from "../models/userModel.ts"; // Adjust the import path
+import Treatment from '../models/treatmentModel.ts';
+import TreatmentMapping from '../models/treatmentMapping.ts';
 
 // Function to add treatment
 export const addTreatment = async (req: Request, res: Response) => {
@@ -19,12 +19,10 @@ export const addTreatment = async (req: Request, res: Response) => {
   }
 };
 
-//Function to get all treatments 
+// Function to get all treatments
 export const getAllPatients = async (req: Request, res: Response) => {
   try {
-   
-    const treatments = await Treatment.find(); 
-
+    const treatments = await Treatment.find();
     res.status(200).json({
       message: 'Patients fetched successfully',
       data: treatments
@@ -37,19 +35,14 @@ export const getAllPatients = async (req: Request, res: Response) => {
   }
 };
 
-//Function to get patient treatments
-export const getPatientTreatment = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+// Function to get a specific patient treatment by ID
+export const getPatientTreatment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params; // Get patient ID from the route params
-    const treatment = await Treatment.findById(id); // Find treatment by _id (patient ID)
+    const { id } = req.params;
+    const treatment = await Treatment.findById(id);
 
     if (!treatment) {
-      res.status(404).json({
-        message: 'Patient treatment not found'
-      });
+      res.status(404).json({ message: 'Patient treatment not found' });
       return;
     }
 
@@ -65,13 +58,10 @@ export const getPatientTreatment = async (
   }
 };
 
-// Function to update treatment data by ID
-export const updateTreatment = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+// Function to update treatment by ID
+export const updateTreatment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params; // Get treatment ID from the route params
+    const { id } = req.params;
     const {
       patientName,
       age,
@@ -85,19 +75,15 @@ export const updateTreatment = async (
       endDate,
       notes,
       status,
-    } = req.body; // Get updated data from request body
+    } = req.body;
 
-    // Find the treatment by ID
     const existingTreatment = await Treatment.findById(id);
 
     if (!existingTreatment) {
-      res.status(404).json({
-        message: 'Treatment not found'
-      });
+      res.status(404).json({ message: 'Treatment not found' });
       return;
     }
 
-    // Update the treatment fields
     existingTreatment.patientName = patientName || existingTreatment.patientName;
     existingTreatment.age = age || existingTreatment.age;
     existingTreatment.email = email || existingTreatment.email;
@@ -111,7 +97,6 @@ export const updateTreatment = async (
     existingTreatment.notes = notes || existingTreatment.notes;
     existingTreatment.status = status || existingTreatment.status;
 
-    // Save the updated treatment data to the database
     await existingTreatment.save();
 
     res.status(200).json({
@@ -126,26 +111,19 @@ export const updateTreatment = async (
   }
 };
 
-// Function to delete treatment data by ID
-export const deleteTreatment = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+// Function to delete treatment by ID
+export const deleteTreatment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params; // Get treatment ID from the route params
+    const { id } = req.params;
 
-    const treatment = await Treatment.findByIdAndDelete(id); // Delete the treatment record by ID
+    const treatment = await Treatment.findByIdAndDelete(id);
 
     if (!treatment) {
-      res.status(404).json({
-        message: 'Treatment not found or already deleted'
-      });
+      res.status(404).json({ message: 'Treatment not found or already deleted' });
       return;
     }
 
-    res.status(200).json({
-      message: 'Treatment deleted successfully'
-    });
+    res.status(200).json({ message: 'Treatment deleted successfully' });
   } catch (error: any) {
     res.status(500).json({
       message: 'Error deleting treatment',
@@ -154,24 +132,102 @@ export const deleteTreatment = async (
   }
 };
 
+// Function to get treatments for a specific patient by email
 export const getPatientTreatments = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.params;
-    console.log('Searching for treatments with email:', email); // Debug log
+    const treatments = await Treatment.find({ email });
 
-    // Change this to search by email directly in treatments
-    const treatments = await Treatment.find({ email: email });
-    console.log('Found treatments:', treatments); // Debug log
-
-    res.status(200).json({ 
-      message: 'Treatments fetched successfully', 
-      data: treatments 
+    res.status(200).json({
+      message: 'Treatments fetched successfully',
+      data: treatments
     });
   } catch (error: any) {
-    console.error('Error:', error); // Debug log
-    res.status(500).json({ 
-      message: 'Error fetching treatments', 
-      error: error.message 
+    res.status(500).json({
+      message: 'Error fetching treatments',
+      error: error.message
+    });
+  }
+};
+
+// Function to add treatment mapping
+export const addTreatmentMapping = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { diagnosis, keywords, treatment, medicines } = req.body;
+
+    const newMapping = new TreatmentMapping({
+      diagnosis,
+      keywords,
+      treatment,
+      medicines
+    });
+
+    await newMapping.save();
+
+    res.status(201).json({
+      message: 'Treatment mapping added successfully',
+      data: newMapping
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: 'Error adding treatment mapping',
+      error: error.message
+    });
+  }
+};
+
+// Function to get all treatment mappings
+export const getAllTreatmentMappings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const mappings = await TreatmentMapping.find();
+    res.status(200).json({
+      message: 'Treatment mappings fetched successfully',
+      data: mappings
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: 'Error fetching treatment mappings',
+      error: error.message
+    });
+  }
+};
+
+/// ✅ Function to get suggestion by keyword (case-insensitive match)
+export const getSuggestion = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { diagnosis } = req.params; // Now using params instead of query
+    
+    if (!diagnosis) {
+      res.status(400).json({ message: 'Diagnosis is required' });
+      return;
+    }
+
+    const diagnosisStr = String(diagnosis).toLowerCase();
+    console.log('Searching for diagnosis:', diagnosisStr);
+
+    const suggestion = await TreatmentMapping.findOne({
+      $or: [
+        { diagnosis: { $regex: diagnosisStr, $options: 'i' } },
+        { keywords: { $in: [diagnosisStr] } }
+      ]
+    });
+
+    if (!suggestion) {
+      res.status(404).json({ message: 'No suggestion found' });
+      return;
+    }
+
+    res.status(200).json({
+      message: 'Suggestion found',
+      data: {
+        treatment: suggestion.treatment,
+        medicines: suggestion.medicines
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: 'Error fetching suggestion',
+      error: error.message
     });
   }
 };

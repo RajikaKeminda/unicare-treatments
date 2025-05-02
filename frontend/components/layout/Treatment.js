@@ -57,6 +57,7 @@ export default function PatientList() {
   const handleCloseModal = () => {
     setShowTreatmentForm(false);  // Close the view treatment form/modal
     setShowAddTreatmentForm(false); // Close the add treatment form
+    setSelectedPatient(null); // Reset selected patient
   };
 
   const handleSearchChange = (event) => {
@@ -70,76 +71,90 @@ export default function PatientList() {
   return (
     <div>
       {!showAddTreatmentForm && !showTreatmentForm ? (
-        <div className="p-6 max-w-4xl mx-auto text-center">
-          <h1 className="text-black text-xl font-bold">👨‍⚕️ Welcome, Dr. John Doe</h1><br />
-          <div className="flex justify-center gap-6 text-gray-700 mb-4">
-            <span>&#128203; Total Patients: <strong>{patients.length}</strong></span> |
-            <span>&#x267B; Ongoing: <strong>{ongoingCount}</strong></span> |
-            <span>&#128203; Completed: <strong>{completedCount}</strong></span>
-          </div><br /><br />
+        <div className="p-8 max-w-5xl mx-auto bg-white rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">👨‍⚕️ Welcome, Dr. John Doe</h1>
           
-          <div className="flex justify-center gap-4 mb-4">
+          <div className="bg-gray-50 p-6 rounded-lg mb-8">
+            <div className="flex justify-center gap-8 text-gray-700">
+              <span className="flex items-center gap-2 text-lg">&#128203; Total Patients: <strong>{patients.length}</strong></span>
+              <span className="flex items-center gap-2 text-lg">&#x267B; Ongoing: <strong>{ongoingCount}</strong></span>
+              <span className="flex items-center gap-2 text-lg">&#128203; Completed: <strong>{completedCount}</strong></span>
+            </div>
+          </div>
+          
+          <div className="flex justify-center gap-4 mb-6">
             <input
               type="text"
               placeholder="🔍 Search Patient ID or Name"
-              className="border px-3 py-2 rounded"
+              className="border px-4 py-2 rounded w-64 focus:outline-none focus:ring-1 focus:ring-gray-400"
               value={searchQuery}
               onChange={handleSearchChange}
             />
             <button
-              className="border px-4 py-2 rounded bg-gray-200"
+              className="px-6 py-2 rounded-md bg-[#FB923C] text-white hover:bg-[#F97316] transition-colors duration-200 flex items-center gap-2"
               onClick={handleAddTreatmentClick}
             >
-              ➕ Add Treatment
+              <span className="text-xl">+</span> Add Treatment
             </button>
-          </div><br />
+          </div>
 
-          {/* Error Handling Display */}
-          {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
-          <table className="w-full border-collapse border text-center">
-            <thead className="bg-[#374151] text-white">
-              <tr>
-                <th className="p-2 border">Patient ID</th>
-                <th className="p-2 border">Name</th>
-                <th className="p-2 border">View Treatment</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPatients.length > 0 ? (
-                filteredPatients.map((patient, index) => (
-                  <tr key={index} className="bg-gray-100 text-sm">
-                    <td className="p-2 border text-center">{patient.patientID}</td>
-                    <td className="p-2 border text-center">{patient.patientName}</td>
-                    <td className="p-2 border text-center">
-                      <button
-                        className="px-4 py-1 bg-gray-500 text-white rounded"
-                        onClick={() => handleViewTreatmentClick(patient)}
-                      >
-                        View
-                      </button>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#334155] text-white">
+                  <th className="p-3 text-left font-semibold border-r border-gray-400">Patient ID</th>
+                  <th className="p-3 text-left font-semibold border-r border-gray-400">Name</th>
+                  <th className="p-3 text-center font-semibold">View Treatment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPatients.length > 0 ? (
+                  filteredPatients.map((patient, index) => (
+                    <tr key={index} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="p-3 border text-gray-700">{patient.patientID}</td>
+                      <td className="p-3 border text-gray-700">{patient.patientName}</td>
+                      <td className="p-3 border text-center">
+                        <button
+                          className="px-8 py-2 bg-[#4B91F1] text-white rounded hover:bg-[#3B82F6] transition-colors duration-200 min-w-[120px]"
+                          onClick={() => handleViewTreatmentClick(patient)}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="p-4 text-center text-gray-500">
+                      No patients found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="3" className="p-4 text-center text-gray-500">
-                    No patients found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : showAddTreatmentForm ? (
         <AddTreatmentForm onClose={handleCloseModal} onTreatmentAdded={refreshTreatments} />
-      ) : (
+      ) : selectedPatient ? (
         <ViewTreatment 
           patient={selectedPatient} 
           onClose={handleCloseModal}
           onTreatmentUpdated={refreshTreatments}
           onTreatmentDeleted={refreshTreatments}
         />
+      ) : (
+        <div className="text-center p-8">
+          <p className="text-gray-700">No patient selected</p>
+          <button
+            onClick={handleCloseModal}
+            className="mt-4 px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors duration-200"
+          >
+            Back to List
+          </button>
+        </div>
       )}
     </div>
   );
