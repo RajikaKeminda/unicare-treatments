@@ -58,6 +58,7 @@ interface Product {
   _id: string
   name: string
   description: string
+  s3Key?: string
 }
 
 export default function BlogViewPage() {
@@ -331,7 +332,7 @@ export default function BlogViewPage() {
                 <article className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
                   <div className="relative h-40">
                     <img
-                      src={`https://via.placeholder.com/300x200?text=${encodeURIComponent(product.name)}`}
+                      src={product?.s3Key || `https://via.placeholder.com/300x200?text=${encodeURIComponent(product.name)}`}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />

@@ -4,6 +4,7 @@ import Media from '../models/mediaModel.js';
 import Post from '../models/postModel.js';
 import contentSimilarityService from './contentSimilarityService.ts';
 import Product from '../models/productModel.ts';
+import mediaService from './mediaService.ts';
 
 // Validation schemas
 const createPostSchema = z.object({
@@ -261,6 +262,10 @@ class BlogService {
       const data = [];
       for (const post of similarProducts) {
         const p = await Product.findById(post.post.id);
+        if(p?.s3Key) {
+          const url = await mediaService.generateViewUrl(Buffer.from(p.s3Key).toString('base64'));
+          p.s3Key = url;
+        }
         if (p) {
           data.push(p);
         }
