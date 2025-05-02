@@ -106,13 +106,14 @@ const updateStatus = async (orderId: string, newStatus: Order['status']) => {
     return matchesSearch && matchesStatus;
   });
 
-  if (!hasMounted || loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="animate-spin h-12 w-12 text-gray-500" />
-      </div>
-    );
-  }
+  if (!hasMounted) return null;
+if (loading) {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <Loader2 className="animate-spin h-12 w-12 text-gray-500" />
+    </div>
+  );
+}
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -171,7 +172,7 @@ const updateStatus = async (orderId: string, newStatus: Order['status']) => {
               filteredOrders.map((order) => (
                 <tr key={order._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                  {hasMounted ? new Date(order.createdAt).toLocaleDateString() : ''}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
