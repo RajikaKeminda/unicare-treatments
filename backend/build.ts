@@ -28,6 +28,17 @@ await esbuild.build({
     'natural',
     'fs',
     'path',
-    'url'
+    'url',
+    'nodemailer',
+    'pdfkit',
+    'resend',
+    'stopword',
+    'uuid',
+    'zod',
+    'axios',
+    'jwt-decode'
   ],
+  banner: {
+    js: 'import { createRequire } from "module"; const require = createRequire(import.meta.url);',
+  },
 }); 
