@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { GrSearch } from "react-icons/gr";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { FaShoppingCart } from "react-icons/fa";
+import { FiPackage } from "react-icons/fi";
 import Link from 'next/link';
 import axios from 'axios';
 
@@ -111,6 +112,12 @@ const HeaderAndProducts = () => {
                   {cartCount}
                 </div>
               </div>
+            </Link>
+
+              {/* Add this new Orders button */}
+              <Link href="/products/order-see" passHref className="text-2xl relative">
+              <span><FiPackage /></span>
+              <span className="sr-only">View Orders</span>
             </Link>
 
             <Link href={"/login"} className='px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700 hidden sm:block'>
