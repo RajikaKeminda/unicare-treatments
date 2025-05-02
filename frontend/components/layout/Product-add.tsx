@@ -1,9 +1,13 @@
 "use client";
 
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import { productSchema } from "@/schemas/product-add-schema";
+
+import React, { useState } from "react";
 import axios from "axios";
-import { FaBoxOpen, FaTag, FaDollarSign, FaFileAlt, FaCogs, FaCube, FaStar, FaImage } from "react-icons/fa"; // Import the icons
+import { FaBoxOpen, FaTag, FaDollarSign, FaFileAlt, FaCogs, FaCube, FaStar, FaImage } from "react-icons/fa";
 import { uploadToS3 } from "@/helpers/s3/s3";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 interface ProductFormData {
   name: string;
@@ -15,63 +19,37 @@ interface ProductFormData {
 }
 
 const AdminProductForm = () => {
-  const [formData, setFormData] = useState<ProductFormData>({
-    name: "",
-    description: "",
-    price: "",
-    category: "",
-    stock: "",
-    ratings: 0,
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      price: "",
+      category: "",
+      stock: "",
+      ratings: 0,
+    }
   });
-  const [file, setFile] = useState<File | null>(null);
 
+  const [file, setFile] = useState<File | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    // Validate name and ratings before sending
-    if (!formData.name || formData.name.trim() === "") {
-      alert("Product name is required!");
-      return;
-    }
-    if (isNaN(formData.ratings) || formData.ratings < 0 || formData.ratings > 5) {
-      alert("Ratings should be between 0 and 5!");
-      return;
-    }
-
+  const onSubmit = async (data: ProductFormData) => {
     try {
       let s3Key = null;
       if (file) {
         const r = await uploadToS3(file);
         s3Key = r;
       }
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/product/add`, { ...formData, s3Key }, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/product/add`, { ...data, s3Key }, {
         headers: {
           "Content-Type": "application/json", 
         },
       });
       console.log("Product added successfully", response.data);
-      setFormData({
-        name: "",
-        description: "",
-        price: "",
-        category: "",
-        stock: "",
-        ratings: 0,
-      });
+      reset();
       setSuccessMessage("Product submitted successfully! 🎉");
-      setTimeout(() => setSuccessMessage(""), 3000);  // Hide the message after 3 seconds
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response) {
@@ -97,7 +75,6 @@ const AdminProductForm = () => {
         <FaBoxOpen className="inline mr-2" /> Add New Product
       </h1>
 
-      {/* Styled Success Message Modal */}
       {successMessage && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
           <div className="bg-green-100 p-6 rounded-lg text-center w-96">
@@ -106,7 +83,7 @@ const AdminProductForm = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Product Name and Price */}
         <div className="flex space-x-4">
           <div className="flex-1">
@@ -116,27 +93,22 @@ const AdminProductForm = () => {
             <input
               type="text"
               id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
+              {...register("name")}
               className="w-full p-2 border border-gray-300 rounded-md"
             />
+            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
           </div>
           <div className="flex-1">
             <label htmlFor="price" className="block text-sm font-medium text-gray-700">
               <FaDollarSign className="inline mr-2" /> Price
             </label>
             <input
-              type="number"
+              type="text"
               id="price"
-              name="price"
-              value={formData.price}
-              onChange={handleInputChange}
-              required
-              min="0"
+              {...register("price")}
               className="w-full p-2 border border-gray-300 rounded-md"
             />
+            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>}
           </div>
         </div>
 
@@ -148,13 +120,11 @@ const AdminProductForm = () => {
             </label>
             <textarea
               id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              required
+              {...register("description")}
               className="w-full p-2 border border-gray-300 rounded-md"
               rows={5}
             />
+            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
           </div>
           <div className="flex-1">
             <label htmlFor="category" className="block text-sm font-medium text-gray-700">
@@ -162,10 +132,7 @@ const AdminProductForm = () => {
             </label>
             <select
               id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleInputChange}
-              required
+              {...register("category")}
               className="w-full p-2 border border-gray-300 rounded-md"
             >
               <option value="">Select Category</option>
@@ -174,8 +141,9 @@ const AdminProductForm = () => {
               <option value="Hair Care">Hair Care</option>
               <option value="Digestive Health">Digestive Health</option>
               <option value="Massage & Body Oils">Massage & Body Oils</option>
-              <option value="therapeutic devices and equipment">therapeutic devices and equipment </option>
+              <option value="therapeutic devices and equipment">therapeutic devices and equipment</option>
             </select>
+            {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
           </div>
         </div>
 
@@ -186,15 +154,12 @@ const AdminProductForm = () => {
               <FaCube className="inline mr-2" /> Stock Quantity
             </label>
             <input
-              type="number"
+              type="text"
               id="stock"
-              name="stock"
-              value={formData.stock}
-              onChange={handleInputChange}
-              required
-              min="0"
+              {...register("stock")}
               className="w-full p-2 border border-gray-300 rounded-md"
             />
+            {errors.stock && <p className="text-red-500 text-sm mt-1">{errors.stock.message}</p>}
           </div>
           <div className="flex-1">
             <label htmlFor="ratings" className="block text-sm font-medium text-gray-700">
@@ -203,22 +168,12 @@ const AdminProductForm = () => {
             <input
               type="number"
               id="ratings"
-              name="ratings"
-              value={isNaN(formData.ratings) ? 0 : formData.ratings} // Ensure a valid number is displayed
-              onChange={(e) => {
-                const rating = parseFloat(e.target.value);
-                if (!isNaN(rating) && rating >= 0 && rating <= 5) {
-                  setFormData({
-                    ...formData,
-                    ratings: rating,
-                  });
-                }
-              }}
-              required
+              {...register("ratings", { valueAsNumber: true })}
+              className="w-full p-2 border border-gray-300 rounded-md"
               min="0"
               max="5"
-              className="w-full p-2 border border-gray-300 rounded-md"
             />
+            {errors.ratings && <p className="text-red-500 text-sm mt-1">{errors.ratings.message}</p>}
           </div>
         </div>
 
