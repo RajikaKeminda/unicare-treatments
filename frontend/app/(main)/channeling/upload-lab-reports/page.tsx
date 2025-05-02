@@ -3,10 +3,9 @@
 import {
   MultiFileDropzone,
   type FileState,
-} from "@/channeling/uploads/multi-file-dropzone";
+} from "@/channeling/widgets/multi-file-dropzone";
 import { apiService } from "@/libs/api";
 import { useEdgeStore } from "@/libs/edgestore";
-import { ReportResponse } from "@/types/users";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -16,6 +15,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { IoMdCloseCircle } from "react-icons/io";
 import { ImImages } from "react-icons/im";
+import { ReportResponse } from "@/types/reports";
 
 export default function UploadLabReports() {
   const [fileStates, setFileStates] = useState<FileState[]>([]);
@@ -99,7 +99,7 @@ export default function UploadLabReports() {
 
   return (
     <>
-      <div className="bg-white py-5 px-10 min-h-svh">
+      <div className="bg-white py-5 px-10 min-h-svh border-t-2 border-black border-dashed">
         <div className="w-full">
           <Link href="/channeling" className="flex items-center gap-2">
             <ArrowLeft className="h-5 w-5 text-gray-600" />
@@ -117,6 +117,15 @@ export default function UploadLabReports() {
             If your image size is bigger, please compress it <br />
           </p>
           <MultiFileDropzone
+            dropzoneOptions={{
+              accept: {
+                "image/jpeg": [],
+                "image/png": [],
+                "image/webp": [],
+                "image/heic": [],
+                "image/jfif": [],
+              },
+            }}
             value={fileStates}
             onChange={(files) => {
               setFileStates(files);

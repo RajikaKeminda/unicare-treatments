@@ -4,10 +4,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export async function POST(request: NextRequest) {
   try {
-    const { amount, currency } = await request.json();
+    const { amount, currency, appointmentId } = await request.json();
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount, // Amount in cents
       currency: currency,
+      description: `${appointmentId}`,
       automatic_payment_methods: {
         enabled: true,
       },

@@ -4,6 +4,7 @@ const treatmentSchema = new mongoose.Schema({
   patientID: { type: String, required: true },
   patientName: { type: String, required: true },
   age: { type: String, required: true },
+  email: { type: String, required: true },
   gender: { type: String, required: true },
   diagnosis: { type: String, required: true },
   treatment: { type: String, required: false },

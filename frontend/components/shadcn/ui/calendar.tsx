@@ -1,24 +1,84 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import * as React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DayPicker } from "react-day-picker";
 
-import { cn } from "@/libs/utils"
-import { buttonVariants } from "@/shadcn/ui/button"
+import { cn } from "@/libs/utils";
+import { buttonVariants } from "@/shadcn/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  holidays?: Date[];
+};
 
 function Calendar({
   className,
   classNames,
+  holidays = [],
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  // Create a modifier for holidays
+  const modifiers = React.useMemo(() => {
+    // Function to check if a date is both a holiday and selected
+    const isHolidayAndSelected = (date: Date) => {
+      const isHoliday = holidays.some(
+        (holiday) =>
+          holiday.getDate() === date.getDate() &&
+          holiday.getMonth() === date.getMonth() &&
+          holiday.getFullYear() === date.getFullYear()
+      );
+
+      let isSelected = false;
+
+      if (props.selected) {
+        if (Array.isArray(props.selected)) {
+          isSelected = props.selected.some(
+            (selectedDate) =>
+              selectedDate instanceof Date &&
+              selectedDate.getDate() === date.getDate() &&
+              selectedDate.getMonth() === date.getMonth() &&
+              selectedDate.getFullYear() === date.getFullYear()
+          );
+        } else if (props.selected instanceof Date) {
+          isSelected =
+            props.selected.getDate() === date.getDate() &&
+            props.selected.getMonth() === date.getMonth() &&
+            props.selected.getFullYear() === date.getFullYear();
+        }
+      }
+      return isHoliday && isSelected;
+    };
+    return {
+      holiday: holidays,
+      holidaySelected: isHolidayAndSelected,
+      ...props.modifiers,
+    };
+  }, [holidays, props.modifiers, props.selected]);
+
+  const modifiersStyles = React.useMemo(
+    () => ({
+      holiday: {
+        fontWeight: "bold",
+        textDecoration: "underline",
+        textUnderlineOffset: "2px",
+      },
+      holidaySelected: {
+        backgroundColor: "black",
+        fontWeight: "bold",
+        textDecoration: "underline",
+        textUnderlineOffset: "2px",
+      },
+      ...props.modifiersStyles,
+    }),
+    [props.modifiersStyles]
+  );
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
+      modifiers={modifiers}
+      modifiersStyles={modifiersStyles}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
@@ -44,7 +104,8 @@ function Calendar({
         day_range_end: "day-range-end",
         day_selected:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
+        day_today:
+          "bg-accent text-accent-foreground border-dashed border border-black",
         day_outside:
           "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
         day_disabled: "text-muted-foreground opacity-50",
@@ -63,8 +124,8 @@ function Calendar({
       }}
       {...props}
     />
-  )
+  );
 }
-Calendar.displayName = "Calendar"
+Calendar.displayName = "Calendar";
 
-export { Calendar }
+export { Calendar };

@@ -20,6 +20,7 @@
       }
     ],
     "paths": {
+      "@/channeling/*": ["./components/layout/channeling/*"],
       "@/icons/*": ["./public/assets/icons/*"],
       "@/images/*": ["./public/assets/images/*"],
       "@/shadcn/*": ["./components/shadcn/*"],
@@ -36,8 +37,6 @@
       "@/hooks/*": ["./helpers/hooks/*"],
       "@/libs/*": ["./helpers/libs/*"],
       "@/utils/*": ["./helpers/utils/*"],
-
-      "@/channeling/*": ["./components/layout/channeling/*"],
 
       "@/helpers/*": ["./helpers/*"],
       "@/*": ["./*"]
