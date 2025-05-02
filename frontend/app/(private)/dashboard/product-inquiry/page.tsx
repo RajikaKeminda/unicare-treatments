@@ -2,16 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
-// Define the interface for advice requests
-interface AdviceRequest {
-  _id: string;
-  name: string;
-  email: string;
-  concern: string;
-  message: string;
-  createdAt: string; // or Date if you parse it
-}
+import { AdviceRequest, adviceRequestSchema } from '@/schemas/adviceSchema';
 
 const AdviceRequestsTable = () => {
   const [requests, setRequests] = useState<AdviceRequest[]>([]);
@@ -22,8 +13,19 @@ const AdviceRequestsTable = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await axios.get<AdviceRequest[]>(`${process.env.NEXT_PUBLIC_BASE_URL}/advice-requests`);
-        setRequests(response.data);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/advice-requests`);
+        
+        // Validate each response item with Zod
+        const validatedRequests = response.data.map((item: unknown) => {
+          try {
+            return adviceRequestSchema.parse(item);
+          } catch (validationError) {
+            console.error('Validation error for request item:', item, validationError);
+            throw new Error('Received invalid advice request data');
+          }
+        });
+        
+        setRequests(validatedRequests);
       } catch (error) {
         setError('Failed to fetch advice requests');
         console.error('Error fetching advice requests:', error);
@@ -81,5 +83,4 @@ const AdviceRequestsTable = () => {
     </div>
   );
 };
-
 export default AdviceRequestsTable;
