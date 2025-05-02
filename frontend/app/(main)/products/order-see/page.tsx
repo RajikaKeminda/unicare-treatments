@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Loader2, Search, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Search, Filter, ChevronDown } from 'lucide-react';
 
 interface Product {
   _id: string;
@@ -51,29 +51,6 @@ export default function AdminOrdersPage() {
     };
     fetchOrders();
   }, []);
-
-  const updateStatus = async (orderId: string, newStatus: Order['status']) => {
-    try {
-      await axios.patch(`${process.env.NEXT_PUBLIC_BASE_URL}/orders/${orderId}/status`, 
-        { status: newStatus },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-      setOrders(orders.map(order => 
-        order._id === orderId ? { ...order, status: newStatus } : order
-      ));
-    } catch (err) {
-      console.error('Status update failed:', err);
-      alert('Failed to update status');
-    }
-  };
-
-  const requestSort = (key: keyof Order) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig?.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
 
   const sortedOrders = [...orders].sort((a, b) => {
     if (!sortConfig) return 0;
