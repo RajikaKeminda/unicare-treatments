@@ -1,296 +1,175 @@
-import React, { useState } from 'react';
+'use client';
 
-// Define the Product interface
-interface Product {
-  id: number;
+import { useState, useEffect } from 'react';
+import axios, { AxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
+
+interface CartItem {
+  _id: string;
   name: string;
-  quantity: number;
   price: number;
+  quantity: number;
 }
 
-// Define the OrderDetails component
-interface OrderDetailsProps {
-  paymentMethod: string;
-  creditCardNumber?: string;
-  expiryDate?: string;
-  cvv?: string;
-  paypalEmail?: string;
-  bankAccount?: string;
-  products: Product[];
-  totalAmount: number;
+interface FormData {
+  name: string;
+  address: string;
+  paymentMethod: 'credit_card' | 'paypal' | 'cash_on_delivery';
 }
 
-const OrderDetails: React.FC<OrderDetailsProps> = ({
-  paymentMethod,
-  creditCardNumber,
-  expiryDate,
-  cvv,
-  paypalEmail,
-  bankAccount,
-  products,
-  totalAmount,
-}) => {
+interface ApiError {
+  message?: string;
+  // Add other possible error response properties here if needed
+}
+
+export default function Payment() {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    address: '',
+    paymentMethod: 'credit_card',
+  });
+  const router = useRouter();
+
+  // Load cart from localStorage
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]') as CartItem[];
+    setCart(savedCart);
+  }, []);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!formData.name.trim() || !formData.address.trim()) {
+      setError('Name and address are required');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const orderPromises = cart.map((item) =>
+        axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/orders`, {
+          productId: item._id,
+          name: formData.name,
+          address: formData.address,
+          quantity: item.quantity,
+          paymentMethod: formData.paymentMethod,
+          totalPrice: item.price * item.quantity,
+          status: 'pending',
+        })
+      );
+
+      await Promise.all(orderPromises);
+      localStorage.removeItem('cart');
+      router.push('/products/order-see');
+    } catch (err) {
+      const error = err as AxiosError<ApiError>;
+      console.error('Order failed:', error);
+      setError(error.response?.data?.message || 'Failed to place order. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
   return (
-    <div className="mt-6 text-left">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">Order Details</h3>
-      <div className="space-y-4">
-        {/* Payment Method Details */}
-        <div>
-          <p className="text-gray-700"><strong>Payment Method:</strong> {paymentMethod}</p>
-          {paymentMethod === 'credit' && (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold mb-6">Checkout</h1>
+
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Your Items</h2>
+          {cart.length === 0 ? (
+            <p className="text-gray-500">Your cart is empty.</p>
+          ) : (
             <>
-              <p className="text-gray-700"><strong>Credit Card Number:</strong> {creditCardNumber}</p>
-              <p className="text-gray-700"><strong>Expiry Date:</strong> {expiryDate}</p>
-              <p className="text-gray-700"><strong>CVV:</strong> {cvv}</p>
+              {cart.map((item) => (
+                <div key={item._id} className="flex justify-between py-4 border-b">
+                  <div>
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-sm text-gray-600">
+                      {item.quantity} × ${item.price.toFixed(2)}
+                    </p>
+                  </div>
+                  <p>${(item.price * item.quantity).toFixed(2)}</p>
+                </div>
+              ))}
+              <div className="flex justify-between mt-4 font-bold">
+                <p>Total:</p>
+                <p>${totalPrice.toFixed(2)}</p>
+              </div>
             </>
           )}
-          {paymentMethod === 'paypal' && (
-            <p className="text-gray-700"><strong>PayPal Email:</strong> {paypalEmail}</p>
-          )}
-          {paymentMethod === 'bank' && (
-            <p className="text-gray-700"><strong>Bank Account Number:</strong> {bankAccount}</p>
-          )}
         </div>
 
-        {/* Products List */}
-        <div>
-          <h4 className="text-lg font-semibold text-gray-800 mb-2">Products</h4>
-          <div className="space-y-2">
-            {products.map((product) => (
-              <div key={product.id} className="flex justify-between">
-                <p className="text-gray-700">{product.name} (x{product.quantity})</p>
-                <p className="text-gray-700">${(product.price * product.quantity).toFixed(2)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {cart.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Shipping & Payment</h2>
+            {error && <p className="text-red-500">{error}</p>}
 
-        {/* Total Amount */}
-        <div className="border-t pt-4">
-          <p className="text-lg font-semibold text-gray-800">
-            <strong>Total Amount:</strong> ${totalAmount.toFixed(2)}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const PaymentComponent = () => {
-  const [paymentMethod, setPaymentMethod] = useState<string>('credit');
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [paymentSuccess, setPaymentSuccess] = useState<boolean>(false);
-  const [showOrderDetails, setShowOrderDetails] = useState<boolean>(false);
-  const [creditCardNumber, setCreditCardNumber] = useState<string>('');
-  const [expiryDate, setExpiryDate] = useState<string>('');
-  const [cvv, setCvv] = useState<string>('');
-  const [paypalEmail, setPaypalEmail] = useState<string>('');
-  const [bankAccount, setBankAccount] = useState<string>('');
-
-  // Mock order details
-  const [products] = useState<Product[]>([
-    { id: 1, name: 'Product A', quantity: 2, price: 25.0 },
-    { id: 2, name: 'Product B', quantity: 1, price: 50.0 },
-    { id: 3, name: 'Product C', quantity: 3, price: 10.0 },
-  ]);
-
-  const totalAmount = products.reduce((total, product) => total + product.price * product.quantity, 0);
-
-  // Handle payment method selection
-  const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPaymentMethod(e.target.value);
-  };
-
-  // Handle payment form submission
-  const handlePaymentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsProcessing(true);
-
-    // Simulate payment processing delay
-    setTimeout(() => {
-      setIsProcessing(false);
-      setPaymentSuccess(true);
-    }, 2000);
-  };
-
-  // Toggle order details visibility
-  const toggleOrderDetails = () => {
-    setShowOrderDetails(!showOrderDetails);
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-      <div className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-xl">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-6 text-center">Payment</h2>
-        
-        {paymentSuccess ? (
-          <div className="text-center">
-            <p className="text-green-500 font-semibold">Your payment was successful! 🎉</p>
-            <button
-              onClick={toggleOrderDetails}
-              className="mt-4 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
-            >
-              {showOrderDetails ? 'Hide Order Details' : 'View Order Details'}
-            </button>
-            {showOrderDetails && (
-              <OrderDetails
-                paymentMethod={paymentMethod}
-                creditCardNumber={creditCardNumber}
-                expiryDate={expiryDate}
-                cvv={cvv}
-                paypalEmail={paypalEmail}
-                bankAccount={bankAccount}
-                products={products}
-                totalAmount={totalAmount}
+            <div>
+              <label className="block mb-1">Full Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className="w-full p-2 border rounded"
+                required
               />
-            )}
-          </div>
-        ) : (
-          <form onSubmit={handlePaymentSubmit} className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <input
-                  type="radio"
-                  id="credit"
-                  name="paymentMethod"
-                  value="credit"
-                  checked={paymentMethod === 'credit'}
-                  onChange={handlePaymentMethodChange}
-                  className="text-blue-600"
-                />
-                <label htmlFor="credit" className="text-lg font-medium text-gray-700">Credit Card</label>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <input
-                  type="radio"
-                  id="paypal"
-                  name="paymentMethod"
-                  value="paypal"
-                  checked={paymentMethod === 'paypal'}
-                  onChange={handlePaymentMethodChange}
-                  className="text-blue-600"
-                />
-                <label htmlFor="paypal" className="text-lg font-medium text-gray-700">PayPal</label>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <input
-                  type="radio"
-                  id="bank"
-                  name="paymentMethod"
-                  value="bank"
-                  checked={paymentMethod === 'bank'}
-                  onChange={handlePaymentMethodChange}
-                  className="text-blue-600"
-                />
-                <label htmlFor="bank" className="text-lg font-medium text-gray-700">Bank Transfer</label>
-              </div>
             </div>
 
-            {/* Credit Card Details */}
-            {paymentMethod === 'credit' && (
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="creditCardNumber" className="block text-sm font-medium text-gray-700">
-                    Credit Card Number
-                  </label>
-                  <input
-                    type="text"
-                    id="creditCardNumber"
-                    placeholder="Enter your credit card number"
-                    className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    required
-                    value={creditCardNumber}
-                    onChange={(e) => setCreditCardNumber(e.target.value)}
-                  />
-                </div>
+            <div>
+              <label className="block mb-1">Shipping Address</label>
+              <textarea
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                className="w-full p-2 border rounded"
+                rows={3}
+                required
+              />
+            </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700">
-                      Expiry Date
-                    </label>
-                    <input
-                      type="text"
-                      id="expiryDate"
-                      placeholder="MM/YY"
-                      className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      required
-                      value={expiryDate}
-                      onChange={(e) => setExpiryDate(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="cvv" className="block text-sm font-medium text-gray-700">
-                      CVV
-                    </label>
-                    <input
-                      type="text"
-                      id="cvv"
-                      placeholder="CVV"
-                      className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      required
-                      value={cvv}
-                      onChange={(e) => setCvv(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* PayPal Details */}
-            {paymentMethod === 'paypal' && (
-              <div>
-                <label htmlFor="paypalEmail" className="block text-sm font-medium text-gray-700">
-                  PayPal Email
-                </label>
-                <input
-                  type="email"
-                  id="paypalEmail"
-                  placeholder="Enter your PayPal email"
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  required
-                  value={paypalEmail}
-                  onChange={(e) => setPaypalEmail(e.target.value)}
-                />
-              </div>
-            )}
-
-            {/* Bank Transfer Details */}
-            {paymentMethod === 'bank' && (
-              <div>
-                <label htmlFor="bankAccount" className="block text-sm font-medium text-gray-700">
-                  Bank Account Number
-                </label>
-                <input
-                  type="text"
-                  id="bankAccount"
-                  placeholder="Enter your bank account number"
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  required
-                  value={bankAccount}
-                  onChange={(e) => setBankAccount(e.target.value)}
-                />
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <div className="mt-6 text-center">
-              <button
-                type="submit"
-                disabled={isProcessing}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition duration-200"
+            <div>
+              <label className="block mb-1">Payment Method</label>
+              <select
+                name="paymentMethod"
+                value={formData.paymentMethod}
+                onChange={handleInputChange}
+                className="w-full p-2 border rounded"
               >
-                {isProcessing ? 'Processing...' : 'Submit Payment'}
-              </button>
+                <option value="credit_card">Credit Card</option>
+                <option value="paypal">PayPal</option>
+                <option value="cash_on_delivery">Cash on Delivery</option>
+              </select>
             </div>
-          </form>
+
+            <button
+              onClick={handlePlaceOrder}
+              disabled={loading}
+              className={`w-full py-3 mt-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {loading ? 'Placing Orders...' : 'Place Order'}
+            </button>
+          </div>
         )}
       </div>
     </div>
   );
-};
-
-export default PaymentComponent;
+}
