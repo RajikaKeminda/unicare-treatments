@@ -149,9 +149,9 @@ const HeaderAndProducts = () => {
               <span className="sr-only">View Orders</span>
             </Link>
 
-            <Link href={"/login"} className='px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700 hidden sm:block'>
-              Login
-            </Link>
+            <div className='px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700 hidden sm:block'>
+              Ayurveda products
+            </div>
           </div>
         </div>
       </header>
