@@ -7,7 +7,6 @@ import {
   deleteProduct,
   getProducts,
   updateProduct,
-  getProductById
 } from "../controllers/productContoller.ts";
 
 // Import inventory controller functions
@@ -19,7 +18,7 @@ import {
   updateQuantity,
 } from "../controllers/inventoryController.ts";
 
-// Import treatment controller
+// Import treatment controller functions
 import {
   addTreatment,
   deleteTreatment,
@@ -27,9 +26,13 @@ import {
   getPatientTreatment,
   updateTreatment,
   getPatientTreatments,
+  addTreatmentMapping,
+  getAllTreatmentMappings,
+  getSuggestion,
 } from "../controllers/treatmentController.ts";
 
-//product-inquiry-pulindu
+
+// Product-inquiry-pulindu
 import {
   submitAdviceRequest,
   getAllAdviceRequests,
@@ -40,6 +43,7 @@ import {
   getAllReports,
   removeReport,
 } from "../controllers/reportController.ts";
+
 import userRoute from "./userRoute.ts";
 import channelingRoute from "./channelingRoute.ts";
 import appointmentRoute from "./appointmentRoute.ts";
@@ -59,28 +63,33 @@ router.get("/products", getProducts); // Route to get all products
 router.delete("/products/:id", deleteProduct);
 // Update product route
 router.put("/products/:id", updateProduct);
-// get specific product by id
-router.get('/products/:id', getProductById);
+
+// --------------------------------------------------------
+// Routes for handling treatments
+router.get("/treatments/patient/:email", getPatientTreatments);  // Get all treatments for a patient by email
+router.post("/treatments", addTreatment); // Add a new treatment
+router.get("/treatments", getAllPatients);  // Get all patients
+router.get("/treatments/:id", getPatientTreatment);  // Get treatment for a specific patient
+router.put("/treatments/:id", updateTreatment);  // Update treatment by ID
+router.delete("/treatments/:id", deleteTreatment);  // Delete treatment by ID
+
+// --------------------------------------------------------
+// Routes for handling treatment mappings
+router.post("/treatment-mappings", addTreatmentMapping);  // Add a new treatment mapping
+router.get("/treatment-mappings", getAllTreatmentMappings);  // Get all treatment mappings
+router.get('/suggestion/:diagnosis', getSuggestion); // Get treatment suggestion based on diagnosis
 
 
 // --------------------------------------------------------
-// api/treatments
-router.get("/treatments/patient/:email", getPatientTreatments);
-router.post("/treatments", addTreatment);
-router.get("/treatments", getAllPatients);
-router.get("/treatments/:id", getPatientTreatment);
-router.put("/treatments/:id", updateTreatment);
-router.delete("/treatments/:id", deleteTreatment);
+// Routes for handling inventory
+router.get("/inventory", getInventory);  // Get all inventory items
+router.post("/inventory", addItem);  // Add an item to the inventory
+router.put("/inventory/:id", updateQuantity);  // Update the quantity of an inventory item
+router.delete("/inventory/:id", deleteItem);  // Delete an inventory item
+router.put("/inventory-item/:id", updateItem);  // Update an inventory item
 
 // --------------------------------------------------------
-// api/inventory/
-router.get("/inventory", getInventory); // Get all inventory items
-router.post("/inventory", addItem); // Add an item to the inventory
-router.put("/inventory/:id", updateQuantity); // Update the quantity of an inventory item
-router.delete("/inventory/:id", deleteItem); // Delete an inventory item
-router.put("/inventory-item/:id", updateItem); // Update this line
-
-// --------------------------------------------------------
+// Other routes
 router.use("/appointments", appointmentRoute);
 router.use("/users", userRoute);
 router.use("/channeling", channelingRoute);
@@ -96,22 +105,8 @@ router.use("/blog", blogRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/media", mediaRoutes);
 router.post("/submit-advice-request", submitAdviceRequest);
-//fetch inquiries
+
 // Fetch all advice requests
 router.get("/advice-requests", getAllAdviceRequests);
-
-//order
-import { createOrder, getOrders, getOrderById, updateOrderStatus } from '../controllers/orderProductcontroller.ts';
-router.post('/orders', createOrder);
-
-// Get all orders
-router.get('/', getOrders);
-
-// Get single order by ID
-router.get('/:id', getOrderById);
-
-//update order status
-router.patch('/orders/:id/status', updateOrderStatus);
-
 
 export default router;

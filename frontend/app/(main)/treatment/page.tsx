@@ -6,15 +6,15 @@ import Image from 'next/image';
 
 interface Treatment {
   _id: string;
+  patientID: string;
   patientName: string;
   treatment: string;
   diagnosis: string;
-  status: string;
+  medicines: string;
   startDate: string;
   endDate: string;
-  medicines: string;
-  yogaExercises: string;
   notes: string;
+  status: string;
 }
 
 interface AvailableTreatment {
@@ -277,46 +277,111 @@ export default function TreatmentUpdates() {
   // Show personal treatments if user is logged in
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-screen-lg mx-auto px-4">
-        <div className="text-center space-y-8 p-8">
-          <h2 className="text-2xl text-gray-800 dark:text-white">
+      <div className="max-w-screen-xl mx-auto px-4">
+        <div className="text-center space-y-6 py-8">
+          <h2 className="text-2xl font-medium text-gray-800 dark:text-white">
             Welcome, {patientName}!
           </h2>
-          <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-2">
             Your Treatment History
           </h1>
         </div>
         
-        <div className="mt-4 p-6 bg-[#e7eaee] border border-gray-300 dark:bg-gray-700 dark:border-gray-600 rounded-lg w-full max-w-3xl mx-auto shadow-lg">
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
-            Current Treatments
-          </h2>
+        <div className="mt-4 p-8 bg-[#e7eaee] border border-gray-300 dark:bg-gray-700 dark:border-gray-600 rounded-xl w-full mx-auto shadow-lg">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
+              Current Treatments
+            </h2>
+            <div className="text-sm text-gray-600 dark:text-gray-300">
+              Total: {treatments.length}
+            </div>
+          </div>
+
           {treatments.length === 0 ? (
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              You have no treatments yet.
-            </p>
+            <div className="text-center py-12">
+              <p className="text-lg text-gray-600 dark:text-gray-300">
+                You have no treatments yet.
+              </p>
+            </div>
           ) : (
-            <div className="space-y-4 mt-4">
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
               {treatments.map(t => (
-                <div key={t._id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-                  <div className="flex flex-col md:flex-row md:justify-between">
-                    <div>
-                      <div className="font-bold text-lg">{t.treatment}</div>
-                      <div className="text-gray-600 dark:text-gray-300">Diagnosis: {t.diagnosis}</div>
-                      <div className="text-gray-600 dark:text-gray-300">Status: {t.status}</div>
+                <div 
+                  key={t._id} 
+                  className={`bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden
+                    ${t.status === 'ongoing' ? 'border-l-4 border-green-500' : 'border-l-4 border-blue-500'}`}
+                >
+                  <div className="p-5">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-1">
+                          {t.treatment}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Patient ID: {t.patientID}
+                        </p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium
+                        ${t.status === 'ongoing' 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                          : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'}`}
+                      >
+                        {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
+                      </span>
                     </div>
-                    <div className="text-gray-500 text-sm mt-2 md:mt-0">
-                      {t.startDate && (
-                        <span>
-                          {new Date(t.startDate).toLocaleDateString()} - {t.endDate ? new Date(t.endDate).toLocaleDateString() : 'Ongoing'}
-                        </span>
+
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Diagnosis</h4>
+                        <p className="mt-1 text-gray-600 dark:text-gray-400">{t.diagnosis}</p>
+                      </div>
+
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Medicines/Oils</h4>
+                        <div className="mt-1 bg-gray-50 dark:bg-gray-700 rounded p-3">
+                          {t.medicines.split('\n').map((medicine, idx) => (
+                            <p key={idx} className="text-gray-600 dark:text-gray-400 mb-1">
+                              {medicine}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Start Date</h4>
+                          <p className="mt-1 text-gray-600 dark:text-gray-400">
+                            {new Date(t.startDate).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">End Date</h4>
+                          <p className="mt-1 text-gray-600 dark:text-gray-400">
+                            {t.endDate ? new Date(t.endDate).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            }) : 'Ongoing'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {t.notes && (
+                        <div className="border-t pt-4 mt-4">
+                          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Notes</h4>
+                          <div className="mt-1 text-gray-600 dark:text-gray-400 space-y-1">
+                            {t.notes.split('\n').map((note, index) => (
+                              <div key={index}>{note}</div>
+                            ))}
+                          </div>
+                        </div>
                       )}
+
                     </div>
-                  </div>
-                  <div className="mt-2 text-gray-700 dark:text-gray-200">
-                    <div>Medicines: {t.medicines}</div>
-                    <div>Yoga/Exercises: {t.yogaExercises}</div>
-                    <div>Notes: {t.notes}</div>
                   </div>
                 </div>
               ))}
@@ -326,4 +391,5 @@ export default function TreatmentUpdates() {
       </div>
     </div>
   );
+
 }
