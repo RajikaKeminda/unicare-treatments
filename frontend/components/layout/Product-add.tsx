@@ -3,6 +3,7 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 import { FaBoxOpen, FaTag, FaDollarSign, FaFileAlt, FaCogs, FaCube, FaStar, FaImage } from "react-icons/fa"; // Import the icons
+import { uploadToS3 } from "@/helpers/s3/s3";
 
 interface ProductFormData {
   name: string;
@@ -22,6 +23,7 @@ const AdminProductForm = () => {
     stock: "",
     ratings: 0,
   });
+  const [file, setFile] = useState<File | null>(null);
 
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -49,7 +51,12 @@ const AdminProductForm = () => {
     }
 
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/product/add`, formData, {
+      let s3Key = null;
+      if (file) {
+        const r = await uploadToS3(file);
+        s3Key = r;
+      }
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/product/add`, { ...formData, s3Key }, {
         headers: {
           "Content-Type": "application/json", 
         },
@@ -224,6 +231,12 @@ const AdminProductForm = () => {
             type="file"
             id="image"
             name="image"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setFile(file);
+              }
+            }}
             className="w-full p-2 border border-gray-300 rounded-md"
           />
         </div>
