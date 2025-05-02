@@ -14,8 +14,11 @@ import { BiSolidDashboard } from "react-icons/bi";
 import { FaBoxOpen } from "react-icons/fa";
 import { MdAdd } from "react-icons/md";
 import { IoIosList } from "react-icons/io";
-import { MdOutlineContactSupport } from "react-icons/md";
+//import { MdOutlineContactSupport } from "react-icons/md";
 import { NavMenu } from "@/types/common";
+import { FaCommentDots } from "react-icons/fa";
+
+
 
 export const adminNavMenu: NavMenu[] = [
   {
@@ -47,9 +50,10 @@ export const adminNavMenu: NavMenu[] = [
     icon: IoMdPhotos,
   },
   {
-    title: "Inquiries",
-    url: "/dashboard/inquiry-management",
-    icon: MdOutlineContactSupport,
+    title: "Feedback",
+    url: "/dashboard/product-inquiry",
+    icon: FaCommentDots,
+
   },
   {
     title: "Products",
