@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Loader2, Search, ChevronUp, ChevronDown } from 'lucide-react';
+import { Loader2, Search, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Product {
   _id: string;
@@ -52,22 +52,20 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, []);
 
-// In your admin page component, modify the status change handler:
-const updateStatus = async (orderId: string, newStatus: Order['status']) => {
-  try {
-    await axios.patch(`${process.env.NEXT_PUBLIC_BASE_URL}/orders/${orderId}/status`, 
-      { status: newStatus },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-    // Update local state
-    setOrders(orders.map(order => 
-      order._id === orderId ? { ...order, status: newStatus } : order
-    ));
-  } catch (err) {
-    console.error('Status update failed:', err);
-    alert('Failed to update status');
-  }
-};
+  const updateStatus = async (orderId: string, newStatus: Order['status']) => {
+    try {
+      await axios.patch(`${process.env.NEXT_PUBLIC_BASE_URL}/orders/${orderId}/status`, 
+        { status: newStatus },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      setOrders(orders.map(order => 
+        order._id === orderId ? { ...order, status: newStatus } : order
+      ));
+    } catch (err) {
+      console.error('Status update failed:', err);
+      alert('Failed to update status');
+    }
+  };
 
   const requestSort = (key: keyof Order) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -116,87 +114,78 @@ const updateStatus = async (orderId: string, newStatus: Order['status']) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Order Management</h1>
-
-      {/* Search and Status Filters */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-        <div className="relative w-full md:w-1/2">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by customer, address, or product..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Order Management</h1>
+          <p className="text-gray-600">{filteredOrders.length} orders found</p>
         </div>
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as 'all' | Order['status'])}
-          className="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-        >
-          <option value="all">All Statuses</option>
-          {statusOptions.map(status => (
-            <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
-          ))}
-        </select>
+        
+        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <input
+              type="text"
+              placeholder="Search orders..."
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <Filter className="h-4 w-4 text-gray-400" />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | Order['status'])}
+              className="pl-10 pr-8 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+            >
+              <option value="all">All Statuses</option>
+              {statusOptions.map(status => (
+                <option key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {[{ label: 'Date', key: 'createdAt' }, { label: 'Product', key: 'productId' }, { label: 'Total', key: 'totalPrice' }, { label: 'Status', key: 'status' }].map(col => (
-                <th
-                  key={col.key}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
-                  onClick={() => requestSort(col.key as keyof Order)}
-                >
-                  <div className="flex items-center">
-                    {col.label}
-                    {sortConfig?.key === col.key && (
-                      sortConfig.direction === 'asc' ? <ChevronUp className="ml-1" /> : <ChevronDown className="ml-1" />
+      {filteredOrders.length === 0 ? (
+        <div className="bg-white rounded-xl shadow p-8 text-center">
+          <p className="text-gray-500">No orders match your search criteria</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {filteredOrders.map((order) => (
+            <div key={order._id} className="bg-white rounded-xl shadow overflow-hidden">
+              <div className="p-5">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    {order.productId?.image && (
+                      <img
+                        src={order.productId.image}
+                        alt={order.productId.name || 'Product image'}
+                        className="w-16 h-16 object-cover rounded-lg"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/placeholder-product.png';
+                        }}
+                      />
                     )}
-                  </div>
-                </th>
-              ))}
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
-                <tr key={order._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {order.productId?.image && (
-                        <img
-                          src={order.productId.image}
-                          alt={order.productId.name || 'Product image'}
-                          className="w-10 h-10 object-cover rounded mr-3"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/placeholder-product.png';
-                          }}
-                        />
-                      )}
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {order.productId?.name || 'Deleted Product'}
-                        </p>
-                        <p className="text-sm text-gray-500">Qty: {order.quantity}</p>
-                      </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        {order.productId?.name || 'Deleted Product'}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Ordered on {new Date(order.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ${order.totalPrice.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  </div>
+                  
+                  <div className="flex flex-col md:items-end">
+                    <span className="font-bold text-lg">${order.totalPrice.toFixed(2)}</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                       order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
@@ -205,32 +194,39 @@ const updateStatus = async (orderId: string, newStatus: Order['status']) => {
                     }`}>
                       {order.status}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">{order.address}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <select
-                      value={order.status}
-                      onChange={(e) => updateStatus(order._id, e.target.value as Order['status'])}
-                      className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                    >
-                      {statusOptions.map(status => (
-                        <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
-                      ))}
-                    </select>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
-                  No orders found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Customer</h4>
+                    <p className="text-gray-900">{order.name}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Shipping Address</h4>
+                    <p className="text-gray-900">{order.address}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Order Status</h4>
+                    <div className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md bg-gray-50">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                            order.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                            'bg-green-100 text-green-800'
+                        }`}>
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                        </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
