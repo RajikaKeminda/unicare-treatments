@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import axios from "axios";
+import { BACKEND_URL } from "@/utils/common";
 
 interface Supplier {
   _id: string;
@@ -39,7 +40,7 @@ const SupplierPage = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this supplier?")) {
       try {
-        await axios.delete(`/api/suppliers/${id}`);
+        await axios.delete(`${BACKEND_URL}/suppliers/${id}`);
         fetchSuppliers();
       } catch (err) {
         console.error('Error deleting supplier:', err);
@@ -52,7 +53,7 @@ const SupplierPage = () => {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8 w-full">
       <div className="max-w-7xl w-full mx-auto">
         {/* Header Section */}
         <div className="text-center mb-8">

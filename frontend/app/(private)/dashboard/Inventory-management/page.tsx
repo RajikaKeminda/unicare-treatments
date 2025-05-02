@@ -12,8 +12,8 @@ const InventoryManagementPage = () => {
   };
 
   return (
-    <div>
-      <div className="min-h-screen bg-white dark:bg-gray-900 p-6 mt-8">
+    <div className="w-full">
+      <div className="min-h-screen bg-white dark:bg-gray-900 p-6 mt-8 w-full">
         {/* Heading Section */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 flex items-center justify-center space-x-2">

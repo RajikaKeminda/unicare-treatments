@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import { use } from "react";
+import { BACKEND_URL } from "@/utils/common";
 
 interface Supplier {
   _id: string;
@@ -25,7 +26,7 @@ const EditSupplierPage = ({ params }: { params: Promise<{ id: string }> }) => {
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
-        const response = await axios.get(`/api/suppliers/${id}`);
+        const response = await axios.get(`${BACKEND_URL}/suppliers/${id}`);
         if (response.data && response.data.data) {
           setFormData(response.data.data);
         } else {
@@ -56,7 +57,7 @@ const EditSupplierPage = ({ params }: { params: Promise<{ id: string }> }) => {
     setError("");
 
     try {
-      const response = await axios.put(`/api/suppliers/${id}`, formData);
+      const response = await axios.put(`${BACKEND_URL}/suppliers/${id}`, formData);
       if (response.data.success) {
         router.push("/dashboard/Inventory-management/supplier");
       } else {
@@ -91,7 +92,7 @@ const EditSupplierPage = ({ params }: { params: Promise<{ id: string }> }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center w-full">
       <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
           <div className="p-6 sm:p-8">
