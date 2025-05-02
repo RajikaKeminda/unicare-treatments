@@ -2,7 +2,7 @@
 
 import { productSchema } from "@/schemas/product-add-schema";
 
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { FaBoxOpen, FaTag, FaDollarSign, FaFileAlt, FaCogs, FaCube, FaStar, FaImage } from "react-icons/fa";
 import { uploadToS3 } from "@/helpers/s3/s3";
