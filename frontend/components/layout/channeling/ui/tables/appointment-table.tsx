@@ -128,7 +128,6 @@ export function DataTable<TData, TValue>({
         .getColumn("channelingDate")
         ?.setFilterValue(format(new Date(`${date}`), "yyyy-MM-dd"));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
   return (

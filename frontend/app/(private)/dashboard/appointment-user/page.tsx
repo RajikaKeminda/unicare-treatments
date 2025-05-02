@@ -29,7 +29,6 @@ export default function Page(props: {
     if (input !== "") {
       handleSubmit();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input]);
 
   useEffect(() => {

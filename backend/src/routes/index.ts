@@ -52,6 +52,9 @@ import categoryRoutes from "./categoryRoutes.js";
 import commentRoutes from "./commentRoutes.ts";
 import mediaRoutes from "./mediaRoutes.ts";
 
+import inventoryActivityLogs from './inventory/activity-logs.ts';
+import supplierRoutes from "./supplierRoutes.ts";
+
 // Middleware to parse JSON request bodies
 router.use(express.json());
 
@@ -87,6 +90,9 @@ router.post("/inventory", addItem);  // Add an item to the inventory
 router.put("/inventory/:id", updateQuantity);  // Update the quantity of an inventory item
 router.delete("/inventory/:id", deleteItem);  // Delete an inventory item
 router.put("/inventory-item/:id", updateItem);  // Update an inventory item
+router.use('/inventory/activity-logs', inventoryActivityLogs);
+
+router.use("/suppliers", supplierRoutes);
 
 // --------------------------------------------------------
 // Other routes
