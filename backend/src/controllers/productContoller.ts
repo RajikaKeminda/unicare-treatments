@@ -86,3 +86,21 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ message: 'Error updating product', error });
   }
 };
+
+export const getProductById = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+
+  try {
+    const product = await Product.findById(id);
+    if (!product) {
+      res.status(404).json({ message: 'Product not found' });
+      return;
+    }
+    res.status(200).json({
+      message: 'Product retrieved successfully',
+      product,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving product', error });
+  }
+};

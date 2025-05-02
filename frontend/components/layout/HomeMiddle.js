@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { GrSearch } from "react-icons/gr";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { FaShoppingCart } from "react-icons/fa";
+import { FiPackage } from "react-icons/fi";
 import Link from 'next/link';
 import axios from 'axios';
 
@@ -113,6 +114,12 @@ const HeaderAndProducts = () => {
               </div>
             </Link>
 
+              {/* Add this new Orders button */}
+              <Link href="/products/order-see" passHref className="text-2xl relative">
+              <span><FiPackage /></span>
+              <span className="sr-only">View Orders</span>
+            </Link>
+
             <Link href={"/login"} className='px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700 hidden sm:block'>
               Login
             </Link>
@@ -151,9 +158,13 @@ const HeaderAndProducts = () => {
                     >
                       Add to Cart ${product.price}
                     </button>
-                    <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-900 transform hover:scale-105 transition-all">
-                      More Info
-                    </button>
+                    
+                      <Link href={`/products/${product._id}`} passHref>
+                        <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-900 transform hover:scale-105 transition-all">
+                          More Info
+                        </button>
+                      </Link>
+                    
                   </div>
                 </div>
               ))

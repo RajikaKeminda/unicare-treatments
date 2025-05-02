@@ -7,6 +7,7 @@ import {
   deleteProduct,
   getProducts,
   updateProduct,
+  getProductById
 } from "../controllers/productContoller.ts";
 
 // Import inventory controller functions
@@ -58,6 +59,9 @@ router.get("/products", getProducts); // Route to get all products
 router.delete("/products/:id", deleteProduct);
 // Update product route
 router.put("/products/:id", updateProduct);
+// get specific product by id
+router.get('/products/:id', getProductById);
+
 
 // --------------------------------------------------------
 // api/treatments
@@ -95,5 +99,19 @@ router.post("/submit-advice-request", submitAdviceRequest);
 //fetch inquiries
 // Fetch all advice requests
 router.get("/advice-requests", getAllAdviceRequests);
+
+//order
+import { createOrder, getOrders, getOrderById, updateOrderStatus } from '../controllers/orderProductcontroller.ts';
+router.post('/orders', createOrder);
+
+// Get all orders
+router.get('/', getOrders);
+
+// Get single order by ID
+router.get('/:id', getOrderById);
+
+//update order status
+router.patch('/orders/:id/status', updateOrderStatus);
+
 
 export default router;
