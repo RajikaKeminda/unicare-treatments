@@ -109,4 +109,18 @@ router.post("/submit-advice-request", submitAdviceRequest);
 // Fetch all advice requests
 router.get("/advice-requests", getAllAdviceRequests);
 
+//order handling
+//order
+import { createOrder, getOrders, getOrderById, updateOrderStatus } from '../controllers/orderProductcontroller.ts';
+router.post('/orders', createOrder);
+
+// Get all orders
+router.get('/', getOrders);
+
+// Get single order by ID
+router.get('/:id', getOrderById);
+
+//update order status
+router.patch('/orders/:id/status', updateOrderStatus);
+
 export default router;
