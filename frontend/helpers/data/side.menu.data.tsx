@@ -39,6 +39,11 @@ export const adminNavMenu: NavMenu[] = [
         title: "Create Blog",
         url: "/dashboard/blog/create-blog",
       },
+      {
+        icon: BsGrid,
+        title: "Categories",
+        url: "/dashboard/blog-category",
+      },
     ],
   },
   {
