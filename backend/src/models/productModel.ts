@@ -7,6 +7,7 @@ const productSchema = new mongoose.Schema({
   category: { type: String, required: true },
   stock: { type: Number, required: true },
   ratings: { type: Number, required: true, min: 0, max: 5 },
+  s3Key: { type: String, required: false },
 }, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);

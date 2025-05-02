@@ -1,4 +1,4 @@
-import { IUser } from "../util/user-schema.ts";
+import { IUser } from "../validation/user-schema.ts";
 import { Schema, model } from "mongoose";
 
 const userSchema = new Schema<IUser>(
@@ -33,8 +33,8 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["doctor", "admin", "supplier", "patient"],
-      default: "patient",
+      enum: ["doctor", "admin", "supplier", "user"],
+      default: "user",
     },
     reports: {
       type: [
@@ -42,6 +42,31 @@ const userSchema = new Schema<IUser>(
           type: String,
         },
       ],
+    },
+    firstName: {
+      type: String,
+    },
+    lastName: {
+      type: String,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    phoneNumber: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
+    maritalState: {
+      type: String,
+      enum: ["single", "married", "divorced", "widowed"],
+      default: "single",
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+      default: "other",
     },
   },
   {

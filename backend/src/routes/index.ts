@@ -18,7 +18,7 @@ import {
   updateQuantity,
 } from "../controllers/inventoryController.ts";
 
-// Import treatment controller
+// Import treatment controller functions
 import {
   addTreatment,
   deleteTreatment,
@@ -26,32 +26,32 @@ import {
   getPatientTreatment,
   updateTreatment,
   getPatientTreatments,
+  addTreatmentMapping,
+  getAllTreatmentMappings,
+  getSuggestion,
 } from "../controllers/treatmentController.ts";
 
-//product-inquiry-pulindu
+
+// Product-inquiry-pulindu
 import {
   submitAdviceRequest,
   getAllAdviceRequests,
 } from "../controllers/product-inquiry.ts";
 
 import {
-  checkUniqueUserName,
-  signInUser,
-  signUpUser,
-  verifyUser,
-} from "../controllers/userController.ts";
+  createReport,
+  getAllReports,
+  removeReport,
+} from "../controllers/reportController.ts";
+
+import userRoute from "./userRoute.ts";
+import channelingRoute from "./channelingRoute.ts";
 import appointmentRoute from "./appointmentRoute.ts";
 import blogRoutes from "./blogRoutes.ts";
 import categoryRoutes from "./categoryRoutes.js";
 import commentRoutes from "./commentRoutes.ts";
 import mediaRoutes from "./mediaRoutes.ts";
 import supplierRoutes from "./supplierRoutes.ts";
-
-import {
-  createReport,
-  getAllReports,
-  removeReport,
-} from "../controllers/reportController.ts";
 
 import inventoryActivityLogs from './inventory/activity-logs';
 
@@ -68,28 +68,34 @@ router.delete("/products/:id", deleteProduct);
 router.put("/products/:id", updateProduct);
 
 // --------------------------------------------------------
-// api/treatments
-router.get("/treatments/patient/:email", getPatientTreatments);
-router.post("/treatments", addTreatment);
-router.get("/treatments", getAllPatients);
-router.get("/treatments/:id", getPatientTreatment);
-router.put("/treatments/:id", updateTreatment);
-router.delete("/treatments/:id", deleteTreatment);
+// Routes for handling treatments
+router.get("/treatments/patient/:email", getPatientTreatments);  // Get all treatments for a patient by email
+router.post("/treatments", addTreatment); // Add a new treatment
+router.get("/treatments", getAllPatients);  // Get all patients
+router.get("/treatments/:id", getPatientTreatment);  // Get treatment for a specific patient
+router.put("/treatments/:id", updateTreatment);  // Update treatment by ID
+router.delete("/treatments/:id", deleteTreatment);  // Delete treatment by ID
 
 // --------------------------------------------------------
-// api/inventory/
-router.get("/inventory", getInventory as RequestHandler); // Get all inventory items
-router.post("/inventory", addItem as RequestHandler); // Add an item to the inventory
-router.put("/inventory/:id", updateQuantity as RequestHandler); // Update the quantity of an inventory item
-router.delete("/inventory/:id", deleteItem as RequestHandler); // Delete an inventory item
-router.put("/inventory-item/:id", updateItem as RequestHandler); // Update this line
+// Routes for handling treatment mappings
+router.post("/treatment-mappings", addTreatmentMapping);  // Add a new treatment mapping
+router.get("/treatment-mappings", getAllTreatmentMappings);  // Get all treatment mappings
+router.get('/suggestion/:diagnosis', getSuggestion); // Get treatment suggestion based on diagnosis
+
 
 // --------------------------------------------------------
+// Routes for handling inventory
+router.get("/inventory", getInventory as RequestHandler);  // Get all inventory items
+router.post("/inventory", addItem as RequestHandler);  // Add an item to the inventory
+router.put("/inventory/:id", updateQuantity as RequestHandler);  // Update the quantity of an inventory item
+router.delete("/inventory/:id", deleteItem as RequestHandler);  // Delete an inventory item
+router.put("/inventory-item/:id", updateItem as RequestHandler);  // Update an inventory item
+
+// --------------------------------------------------------
+// Other routes
 router.use("/appointments", appointmentRoute);
-router.get("/user/check-username-unique/:username", checkUniqueUserName);
-router.post("/user/sign-up", signUpUser);
-router.post("/user/verify-code", verifyUser);
-router.post("/user/sign-in", signInUser);
+router.use("/users", userRoute);
+router.use("/channeling", channelingRoute);
 router
   .route("/reports/:patientId")
   .post(createReport)
@@ -103,7 +109,7 @@ router.use("/categories", categoryRoutes);
 router.use("/media", mediaRoutes);
 router.use("/suppliers", supplierRoutes);
 router.post("/submit-advice-request", submitAdviceRequest);
-//fetch inquiries
+
 // Fetch all advice requests
 router.get("/advice-requests", getAllAdviceRequests);
 

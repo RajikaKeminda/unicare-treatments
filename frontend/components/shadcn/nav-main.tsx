@@ -16,26 +16,12 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/shadcn/ui/sidebar";
-import { IconType } from "react-icons/lib";
 import { cn } from "@/libs/utils";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { NavMenu } from "@/types/common";
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url?: string;
-    icon?: IconType;
-    isActive?: boolean;
-    items?: {
-      icon?: IconType;
-      title: string;
-      url: string;
-    }[];
-  }[];
-}) {
+export function NavMain({ items }: { items: NavMenu[] }) {
   const router = useRouter();
   const pathname = usePathname();
   return (
@@ -57,7 +43,13 @@ export function NavMain({
                   }
                 >
                   {item.icon && <item.icon />}
-                  <span>{item.title}</span>
+                  <span
+                    className={cn(
+                      pathname === item?.url && "underline underline-offset-4"
+                    )}
+                  >
+                    {item.title}
+                  </span>
                   {item.items && item.items.length > 0 && (
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   )}
@@ -81,7 +73,14 @@ export function NavMain({
                           }
                         >
                           {subItem?.icon && <subItem.icon />}
-                          <span>{subItem.title}</span>
+                          <span
+                            className={cn(
+                              pathname === subItem?.url &&
+                                "underline underline-offset-4"
+                            )}
+                          >
+                            {subItem.title}
+                          </span>
                         </span>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>

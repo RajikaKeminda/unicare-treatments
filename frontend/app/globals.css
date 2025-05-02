@@ -87,13 +87,70 @@ body {
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .ribbon {
+    --f: 20px;
+    position: absolute;
+    top: 0;
+    padding: 0.1em 1.8em;
+    font-weight: 900;
+    border-bottom: var(--f) solid #0007;
+    -webkit-clip-path: polygon(
+      100% calc(100% - var(--f)),
+      100% 100%,
+      calc(100% - var(--f)) calc(100% - var(--f)),
+      var(--f) calc(100% - var(--f)),
+      0 100%,
+      0 calc(100% - var(--f)),
+      999px calc(100% - var(--f) - 999px),
+      calc(100% - 999px) calc(100% - var(--f) - 999px)
+    );
+    clip-path: polygon(
+      100% calc(100% - var(--f)),
+      100% 100%,
+      calc(100% - var(--f)) calc(100% - var(--f)),
+      var(--f) calc(100% - var(--f)),
+      0 100%,
+      0 calc(100% - var(--f)),
+      999px calc(100% - var(--f) - 999px),
+      calc(100% - 999px) calc(100% - var(--f) - 999px)
+    );
+    right: 0;
+    transform: translate(calc((1 - cos(45deg)) * 100%), -100%) rotate(45deg);
+    transform-origin: 0% 100%;
+    -webkit-transform: translate(calc((1 - cos(45deg)) * 100%), -100%)
+      rotate(45deg);
+    -ms-transform: translate(calc((1 - cos(45deg)) * 100%), -100%) rotate(45deg);
+    transform: translate(calc((1 - cos(45deg)) * 100%), -100%) rotate(45deg);
+    -webkit-transform-origin: 0% 100%;
+    -ms-transform-origin: 0% 100%;
+    transform-origin: 0% 100%;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    border: 2px solid #364153;
+    -webkit-text-fill-color: white;
+    -webkit-box-shadow: 0 0 0px 1000px #364153 inset;
+    box-shadow: 0 0 0px 1000px #364153 inset;
+    transition: background-color 5000s ease-in-out 0s;
+    color: white;
+    caret-color: white;
   }
 }
