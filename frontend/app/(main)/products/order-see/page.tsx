@@ -31,7 +31,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | Order['status']>('all');
-  const [sortConfig, setSortConfig] = useState<{ key: keyof Order; direction: 'asc' | 'desc' } | null>(null);
+  const [sortConfig] = useState<{ key: keyof Order; direction: 'asc' | 'desc' } | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
