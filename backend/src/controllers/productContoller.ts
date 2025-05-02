@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import Product from '../models/productModel.ts';
 import { promises } from 'dns';
-
+import mediaService from '../services/mediaService.ts';
 export const createProduct = async (req: Request, res: Response) => {
-  const { name, description, price, category, stock, ratings } = req.body;
+  const { name, description, price, category, stock, ratings, s3Key } = req.body;
 
   try {
     // Create a new product and save it to the database
@@ -14,6 +14,10 @@ export const createProduct = async (req: Request, res: Response) => {
       stock,
       ratings,
     };
+
+    if (s3Key) {
+      productData.s3Key = s3Key;
+    }
 
     // Add description to the product data only if it's not an empty string
     if (description && description.trim() !== '') {
@@ -36,6 +40,12 @@ export const createProduct = async (req: Request, res: Response) => {
 export const getProducts = async (req: Request, res: Response) => {
   try {
     const products = await Product.find(); // Fetch products from DB
+    for (const product of products) {
+      if (product?.s3Key) {
+        const url = await mediaService.generateViewUrl(Buffer.from(product.s3Key).toString('base64'));
+        product.s3Key = url;
+      }
+    }
     res.status(200).json({
       message: 'Products retrieved successfully',
       products,
@@ -92,6 +102,11 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 
   try {
     const product = await Product.findById(id);
+
+    if (product?.s3Key) {
+      const url = await mediaService.generateViewUrl(Buffer.from(product.s3Key).toString('base64'));
+      product.s3Key = url;
+    }
     if (!product) {
       res.status(404).json({ message: 'Product not found' });
       return;

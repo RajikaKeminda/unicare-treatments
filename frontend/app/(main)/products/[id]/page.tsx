@@ -19,6 +19,7 @@ interface Product {
   rating?: number;
   reviewCount?: number;
   originalPrice?: number;
+  s3Key?: string;
 }
 
 const ProductDetails = () => {
@@ -80,7 +81,7 @@ const ProductDetails = () => {
         {/* Product Image */}
         <div className="w-full md:w-1/2 bg-gray-50 rounded-lg p-8 flex items-center justify-center">
           <Image
-            src={product.image || "/product.jpg"}
+            src={product?.s3Key || "/product.jpg"}
             alt={product.name}
             width={500}
             height={500}

@@ -141,7 +141,7 @@ const HeaderAndProducts = () => {
               filteredProducts.map((product) => (
                 <div key={product._id} className="bg-gray-300 rounded-lg text-center p-4 hover:bg-white hover:shadow-md transition-all">
                   <Image
-                    src="/product.jpg"
+                    src={product?.s3Key || "/product.jpg"}
                     alt={product.name}
                     width={200}
                     height={160}
