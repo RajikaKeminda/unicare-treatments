@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import ReportModal from './components/ReportModal';
-import { generateGeneralReport } from './services/reportService';
 import InventoryManager from '../Inventory';
+import { generateGeneralReport } from './services/reportService';
 //import "@/app/admin/app/Inventory/Inventory-see/";  // Adjust the path accordingly
 
 export default function InventoryPage() {

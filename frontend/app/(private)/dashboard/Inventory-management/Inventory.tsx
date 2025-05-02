@@ -10,8 +10,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { generateGeneralReport } from "./inventory-see/services/reportService";
-import ReportModal from "./inventory-see/components/ReportModal";
+import { generateGeneralReport } from "./Inventory-see/services/reportService";
+import ReportModal from "./Inventory-see/components/ReportModal";
 
 // Register Chart.js components
 ChartJS.register(
