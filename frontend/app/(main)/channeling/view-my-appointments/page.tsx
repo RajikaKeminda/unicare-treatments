@@ -30,7 +30,6 @@ export default function ViewAppointment() {
     if (user?.id) {
       getData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   return (
