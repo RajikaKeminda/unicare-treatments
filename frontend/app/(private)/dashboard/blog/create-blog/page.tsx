@@ -10,11 +10,25 @@ import { IoMdArrowDropdown } from 'react-icons/io';
 import TiptapEditor from '../components/TiptapEditor';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// Validation schema
+const blogSchema = z.object({
+    title: z.string()
+        .min(1, 'Title is required')
+        .max(100, 'Title must be less than 100 characters'),
+    content: z.string()
+        .min(1, 'Content is required'),
+    category: z.string()
+        .min(1, 'Category is required'),
+    thumbnail: z.string().optional(),
+});
+
+type BlogFormData = z.infer<typeof blogSchema>;
 
 export default function CreateBlog() {
-    const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
     const [thumbnail, setThumbnail] = useState<string | null>(null);
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -22,6 +36,19 @@ export default function CreateBlog() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState<string[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+
+    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<BlogFormData>({
+        resolver: zodResolver(blogSchema),
+        defaultValues: {
+            title: '',
+            content: '',
+            category: '',
+        }
+    });
+
+    const title = watch('title');
+    const content = watch('content');
+    const selectedCategory = watch('category');
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -84,11 +111,11 @@ export default function CreateBlog() {
             });
             toast.success('Blog post created successfully!');
             // Reset form or redirect
-            setTitle('');
-            setContent('');
+            setValue('title', '');
+            setValue('content', '');
+            setValue('category', '');
             setThumbnail(null);
             setThumbnailFile(null);
-            setSelectedCategory('');
         } catch (error) {
             console.error('Error creating blog post:', error);
             toast.error('Failed to create blog post');
@@ -96,8 +123,8 @@ export default function CreateBlog() {
         }
     };
 
-    const handleSubmit = async () => {
-        if (!title || !content || !selectedCategory) {
+    const handleFormSubmit = async (data: BlogFormData) => {
+        if (!data.title || !data.content || !data.category) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -154,148 +181,169 @@ export default function CreateBlog() {
                 </button>
             </div>
 
-            {/* Category Selection */}
-            <div className="mb-6 relative">
-                <button
-                    className="flex items-center gap-2 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 w-56"
-                    onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                    disabled={isLoadingCategories}
-                >
-                    <HiUserGroup className="text-gray-500" />
-                    <span className="flex-1 text-left">
-                        {isLoadingCategories ? 'Loading categories...' : selectedCategory || 'Select Category'}
-                    </span>
-                    <IoMdArrowDropdown className="text-gray-500" />
-                </button>
-
-                {showCategoryDropdown && (
-                    <div className="absolute top-full left-0 mt-1 w-48 bg-white border rounded-lg shadow-lg z-10">
-                        {categories.map((category) => (
-                            <button
-                                key={category}
-                                className="w-full px-4 py-2 text-left hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
-                                onClick={() => {
-                                    setSelectedCategory(category);
-                                    setShowCategoryDropdown(false);
-                                }}
-                            >
-                                {category}
-                            </button>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Thumbnail Upload */}
-            <div className="mb-6">
-                {thumbnail ? (
-                    <div className="relative h-48 w-full rounded-lg overflow-hidden group">
-                        <Image
-                            src={thumbnail}
-                            alt="Thumbnail"
-                            fill
-                            className="object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200">
-                            <button
-                                onClick={() => setThumbnail(null)}
-                                className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                            >
-                                ×
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <div
-                        {...getRootProps()}
-                        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
-                                ? 'border-purple-500 bg-purple-50'
-                                : 'hover:bg-gray-50 border-gray-300'
-                            }`}
+            <form onSubmit={handleSubmit(handleFormSubmit)}>
+                {/* Category Selection */}
+                <div className="mb-6 relative">
+                    <button
+                        type="button"
+                        className="flex items-center gap-2 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 w-56"
+                        onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                        disabled={isLoadingCategories}
                     >
-                        <input {...getInputProps()} />
-                        <div className="space-y-2">
-                            <FiImage className={`mx-auto text-3xl ${isDragActive ? 'text-purple-500' : 'text-gray-400'}`} />
-                            <p className={`${isDragActive ? 'text-purple-500' : 'text-gray-500'}`}>
-                                {isDragActive
-                                    ? "Drop your image here..."
-                                    : "Drag & drop your thumbnail, or click to select"}
-                            </p>
-                            <p className="text-sm text-gray-400">
-                                Supports: JPG, PNG, GIF (Max 5MB)
-                            </p>
+                        <HiUserGroup className="text-gray-500" />
+                        <span className="flex-1 text-left">
+                            {isLoadingCategories ? 'Loading categories...' : selectedCategory || 'Select Category'}
+                        </span>
+                        <IoMdArrowDropdown className="text-gray-500" />
+                    </button>
+
+                    {showCategoryDropdown && (
+                        <div className="absolute top-full left-0 mt-1 w-48 bg-white border rounded-lg shadow-lg z-10">
+                            {categories.map((category) => (
+                                <button
+                                    key={category}
+                                    type="button"
+                                    className="w-full px-4 py-2 text-left hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+                                    onClick={() => {
+                                        setValue('category', category);
+                                        setShowCategoryDropdown(false);
+                                    }}
+                                >
+                                    {category}
+                                </button>
+                            ))}
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                    {errors.category && (
+                        <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>
+                    )}
+                </div>
 
-            {/* Title Input */}
-            <input
-                type="text"
-                placeholder="Post Title*"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full text-xl font-medium placeholder-gray-500 mb-6 p-2 focus:outline-none rounded-md"
-                maxLength={250}
-            />
-
-            {/* Content Editor */}
-            <div className="min-h-[200px] mb-6">
-                <div className="border rounded-lg">
-                    <div className="flex border-b p-2 gap-2">
-                        <button
-                            className={`p-2 rounded transition-colors ${!isPreview ? 'bg-gray-100' : 'hover:bg-gray-100'}`}
-                            onClick={() => setIsPreview(false)}
-                        >
-                            Write
-                        </button>
-                        <button
-                            className={`p-2 rounded transition-colors ${isPreview ? 'bg-gray-100' : 'hover:bg-gray-100'}`}
-                            onClick={() => setIsPreview(true)}
-                        >
-                            Preview
-                        </button>
-                        <div className="ml-auto">
-                            <span className="text-gray-400">Saved</span>
+                {/* Thumbnail Upload */}
+                <div className="mb-6">
+                    {thumbnail ? (
+                        <div className="relative h-48 w-full rounded-lg overflow-hidden group">
+                            <Image
+                                src={thumbnail}
+                                alt="Thumbnail"
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setThumbnail(null);
+                                        setThumbnailFile(null);
+                                        setValue('thumbnail', '');
+                                    }}
+                                    className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                >
+                                    ×
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div
+                            {...getRootProps()}
+                            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
+                                    ? 'border-purple-500 bg-purple-50'
+                                    : 'hover:bg-gray-50 border-gray-300'
+                                }`}
+                        >
+                            <input {...getInputProps()} />
+                            <div className="space-y-2">
+                                <FiImage className={`mx-auto text-3xl ${isDragActive ? 'text-purple-500' : 'text-gray-400'}`} />
+                                <p className={`${isDragActive ? 'text-purple-500' : 'text-gray-500'}`}>
+                                    {isDragActive
+                                        ? "Drop your image here..."
+                                        : "Drag & drop your thumbnail, or click to select"}
+                                </p>
+                                <p className="text-sm text-gray-400">
+                                    Supports: JPG, PNG, GIF (Max 5MB)
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
-                    <div className="min-h-[300px]">
-                        {isPreview ? (
-                            <div
-                                className="prose max-w-none p-4 min-h-[200px] prose-img:rounded-lg prose-a:text-blue-600"
-                                dangerouslySetInnerHTML={{ __html: content }}
-                            />
-                        ) : (
-                            <TiptapEditor
-                                content={content}
-                                onChange={setContent}
-                            />
+                {/* Title Input */}
+                <div className="mb-6">
+                    <input
+                        type="text"
+                        placeholder="Post Title*"
+                        {...register('title')}
+                        className="w-full text-xl font-medium placeholder-gray-500 p-2 focus:outline-none rounded-md"
+                        maxLength={250}
+                    />
+                    {errors.title && (
+                        <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+                    )}
+                </div>
+
+                {/* Content Editor */}
+                <div className="min-h-[200px] mb-6">
+                    <div className="border rounded-lg">
+                        <div className="flex border-b p-2 gap-2">
+                            <button
+                                type="button"
+                                className={`p-2 rounded transition-colors ${!isPreview ? 'bg-gray-100' : 'hover:bg-gray-100'}`}
+                                onClick={() => setIsPreview(false)}
+                            >
+                                Write
+                            </button>
+                            <button
+                                type="button"
+                                className={`p-2 rounded transition-colors ${isPreview ? 'bg-gray-100' : 'hover:bg-gray-100'}`}
+                                onClick={() => setIsPreview(true)}
+                            >
+                                Preview
+                            </button>
+                            <div className="ml-auto">
+                                <span className="text-gray-400">Saved</span>
+                            </div>
+                        </div>
+
+                        <div className="min-h-[300px]">
+                            {isPreview ? (
+                                <div
+                                    className="prose max-w-none p-4 min-h-[200px] prose-img:rounded-lg prose-a:text-blue-600"
+                                    dangerouslySetInnerHTML={{ __html: content }}
+                                />
+                            ) : (
+                                <TiptapEditor
+                                    content={content}
+                                    onChange={(newContent) => setValue('content', newContent)}
+                                />
+                            )}
+                        </div>
+                        {errors.content && (
+                            <p className="text-red-500 text-sm mt-1 px-4">{errors.content.message}</p>
                         )}
-                    </div>
 
-                    <div className="border-t p-3 flex items-center justify-between">
-                        <div className="flex gap-2">
-                            <button className="p-2 hover:bg-gray-100 rounded-lg">
-                                <FiImage className="text-gray-500" />
-                            </button>
-                            <button className="p-2 hover:bg-gray-100 rounded-lg">
-                                <FiLink className="text-gray-500" />
-                            </button>
-                            <button className="p-2 hover:bg-gray-100 rounded-lg">
-                                <BsEmojiSmile className="text-gray-500" />
+                        <div className="border-t p-3 flex items-center justify-between">
+                            <div className="flex gap-2">
+                                <button type="button" className="p-2 hover:bg-gray-100 rounded-lg">
+                                    <FiImage className="text-gray-500" />
+                                </button>
+                                <button type="button" className="p-2 hover:bg-gray-100 rounded-lg">
+                                    <FiLink className="text-gray-500" />
+                                </button>
+                                <button type="button" className="p-2 hover:bg-gray-100 rounded-lg">
+                                    <BsEmojiSmile className="text-gray-500" />
+                                </button>
+                            </div>
+                            <button 
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isSubmitting ? 'Posting...' : 'Post'}
                             </button>
                         </div>
-                        <button 
-                            onClick={handleSubmit}
-                            disabled={isSubmitting}
-                            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isSubmitting ? 'Posting...' : 'Post'}
-                        </button>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }

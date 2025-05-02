@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import axios, { AxiosResponse } from 'axios'
 import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiX, FiCheck } from 'react-icons/fi'
+import { z } from 'zod'
 
 interface Category {
   _id: string
@@ -18,6 +19,14 @@ interface ApiResponse {
   message?: string
   error?: string
 }
+
+// Add this before the CategoryPage component
+const categorySchema = z.object({
+  name: z.string().min(1, 'Category name is required').trim(),
+  description: z.string().trim().optional()
+})
+
+type CategoryFormData = z.infer<typeof categorySchema>
 
 export default function CategoryPage() {
   const [categories, setCategories] = useState<Category[]>([])
@@ -96,20 +105,23 @@ export default function CategoryPage() {
   }
 
   const handleSubmit = async () => {
-    // Validate input
-    if (!categoryName.trim()) {
-      setValidationError('Category name is required')
-      return
-    }
-
     try {
       setIsSubmitting(true)
       setValidationError(null)
 
-      const data = {
-        name: categoryName.trim(),
-        description: categoryDescription.trim() || undefined
+      const formData: CategoryFormData = {
+        name: categoryName,
+        description: categoryDescription || undefined
       }
+
+      const validationResult = categorySchema.safeParse(formData)
+      
+      if (!validationResult.success) {
+        setValidationError(validationResult.error.errors[0].message)
+        return
+      }
+
+      const data = validationResult.data
 
       let response: AxiosResponse<ApiResponse>
 
