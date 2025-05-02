@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { FiSearch, FiPlus, FiTrash2, FiEdit2, FiEye, FiFilter, FiCheck } from 'react-icons/fi'
+import { FiSearch, FiPlus, FiTrash2, FiEdit2, FiEye, FiFilter, FiCheck, FiDownload } from 'react-icons/fi'
 import { format } from 'date-fns'
 import axios from 'axios'
 import Image from 'next/image'
@@ -150,18 +150,57 @@ export default function PostsPage() {
     }
   }
 
+  const handleDownloadReport = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/blog/report`, {
+        responseType: 'blob'
+      });
+      
+      // Create a blob from the PDF data
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      
+      // Create a URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `blog-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      
+      // Append link to body, click it, and remove it
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading report:', error);
+      alert('Failed to download report');
+    }
+  };
+
   return (
     <div className="max-w-7xl w-2/3 mx-auto p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Blog Posts</h1>
-        <button
-          onClick={() => router.push('/dashboard/blog/create-blog')}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-        >
-          <FiPlus className="w-4 h-4" />
-          New Post
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={handleDownloadReport}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <FiDownload className="w-4 h-4" />
+            Download Report
+          </button>
+          <button
+            onClick={() => router.push('/dashboard/blog/create-blog')}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            <FiPlus className="w-4 h-4" />
+            New Post
+          </button>
+        </div>
       </div>
 
       {/* Search and Filter Bar */}

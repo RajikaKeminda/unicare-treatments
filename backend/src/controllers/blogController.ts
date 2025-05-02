@@ -142,6 +142,24 @@ class BlogController {
       });
     }
   }
+
+  async generateReport(req: Request, res: Response): Promise<void> {
+    try {
+      const pdfBuffer = await blogService.generateReport();
+      
+      // Set response headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=blog-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      // Send the PDF buffer
+      res.send(pdfBuffer);
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default new BlogController();
