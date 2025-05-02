@@ -70,7 +70,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    res.status(200).json({ message: 'Order status updated', order: updatedOrder });
+    res.status(200).json(updatedOrder);
   } catch (err) {
     console.error('Error updating order status:', err);
     res.status(500).json({ message: 'Failed to update order status' });

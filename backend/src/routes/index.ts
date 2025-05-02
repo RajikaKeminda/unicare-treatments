@@ -116,7 +116,7 @@ router.get('/', getOrders);
 router.get('/:id', getOrderById);
 
 //update order status
-router.get('/orders/:id/status', updateOrderStatus);
+router.patch('/orders/:id/status', updateOrderStatus);
 
 
 export default router;

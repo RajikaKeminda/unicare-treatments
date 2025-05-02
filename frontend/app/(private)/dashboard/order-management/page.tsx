@@ -52,14 +52,22 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, []);
 
-  const updateStatus = async (orderId: string, newStatus: Order['status']) => {
-    try {
-      await axios.patch(`${process.env.NEXT_PUBLIC_BASE_URL}/orders/${orderId}`, { status: newStatus });
-      setOrders(orders.map(order => order._id === orderId ? { ...order, status: newStatus } : order));
-    } catch (error) {
-      console.error('Failed to update status:', error);
-    }
-  };
+// In your admin page component, modify the status change handler:
+const updateStatus = async (orderId: string, newStatus: Order['status']) => {
+  try {
+    await axios.patch(`${process.env.NEXT_PUBLIC_BASE_URL}/orders/${orderId}/status`, 
+      { status: newStatus },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    // Update local state
+    setOrders(orders.map(order => 
+      order._id === orderId ? { ...order, status: newStatus } : order
+    ));
+  } catch (err) {
+    console.error('Status update failed:', err);
+    alert('Failed to update status');
+  }
+};
 
   const requestSort = (key: keyof Order) => {
     let direction: 'asc' | 'desc' = 'asc';
