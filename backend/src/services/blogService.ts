@@ -5,6 +5,7 @@ import Post from '../models/postModel.js';
 import contentSimilarityService from './contentSimilarityService.ts';
 import Product from '../models/productModel.ts';
 import mediaService from './mediaService.ts';
+import PDFDocument from 'pdfkit';
 
 // Validation schemas
 const createPostSchema = z.object({
@@ -273,6 +274,78 @@ class BlogService {
       return data;
     } catch (error) {
       throw new Error('Failed to get post recommendations');
+    }
+  }
+
+  async generateReport() {
+    try {
+      // Get all posts
+      const posts = await Post.find({})
+        .populate('author', 'name email')
+        .populate('comments');
+
+      // Calculate insights
+      const totalPosts = posts.length;
+      const totalComments = posts.reduce((acc, post) => acc + (post.comments?.length || 0), 0);
+      const totalViews = posts.reduce((acc, post) => acc + (post.views || 0), 0);
+      const totalLikes = posts.reduce((acc, post) => acc + (post.likes?.length || 0), 0);
+      
+      // Get category distribution
+      const categoryDistribution = posts.reduce((acc, post) => {
+        acc[post.category] = (acc[post.category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Get top posts by views
+      const topPostsByViews = [...posts]
+        .sort((a, b) => (b.views || 0) - (a.views || 0))
+        .slice(0, 5);
+
+      // Create PDF document
+      const doc = new PDFDocument();
+      const chunks: Buffer[] = [];
+
+      // Collect PDF chunks
+      doc.on('data', (chunk) => chunks.push(chunk));
+
+      // Add content to PDF
+      doc.fontSize(25).text('Blog Analytics Report', { align: 'center' });
+      doc.moveDown();
+
+      // Overview section
+      doc.fontSize(16).text('Overview');
+      doc.fontSize(12).text(`Total Posts: ${totalPosts}`);
+      doc.text(`Total Comments: ${totalComments}`);
+      doc.text(`Total Views: ${totalViews}`);
+      doc.text(`Total Likes: ${totalLikes}`);
+      doc.moveDown();
+
+      // Category distribution
+      doc.fontSize(16).text('Category Distribution');
+      Object.entries(categoryDistribution).forEach(([category, count]) => {
+        doc.fontSize(12).text(`${category}: ${count} posts`);
+      });
+      doc.moveDown();
+
+      // Top posts
+      doc.fontSize(16).text('Top Posts by Views');
+      topPostsByViews.forEach((post, index) => {
+        doc.fontSize(12).text(`${index + 1}. ${post.title}`);
+        doc.fontSize(10).text(`Views: ${post.views || 0} | Comments: ${post.comments?.length || 0} | Likes: ${post.likes?.length || 0}`);
+        doc.moveDown(0.5);
+      });
+
+      // Finalize PDF
+      doc.end();
+
+      // Return PDF buffer
+      return new Promise<Buffer>((resolve) => {
+        doc.on('end', () => {
+          resolve(Buffer.concat(chunks));
+        });
+      });
+    } catch (error) {
+      throw new Error('Failed to generate report');
     }
   }
 }

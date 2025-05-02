@@ -7,9 +7,11 @@ const router = express.Router();
 
 // Public routes
 router.get('/', blogController.getAllPosts);
+router.get('/report', blogController.generateReport);
 router.get('/:id', blogController.getPostById);
 router.get('/:id/similar', blogController.getSimilarPosts);
 router.get('/:id/recommendations', blogController.getPostRecommendations);
+
 
 // Protected routes (require authentication)
 router.post('/', authenticateToken, blogController.createPost);
