@@ -10,32 +10,49 @@ import Link from 'next/link';
 import axios from 'axios';
 
 const HeaderAndProducts = () => {
-  const [filter, setFilter] = useState('');           // State for the filter input
-  const [products, setProducts] = useState([]);       // State to store fetched products
-  const [loading, setLoading] = useState(true);       // Loading state
-  const [error, setError] = useState(null);           // Error state
-  const [cartCount, setCartCount] = useState(0);      // Cart item count
+  const [filter, setFilter] = useState('');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
+  const [groupedProducts, setGroupedProducts] = useState({});
+  const [activeCategory, setActiveCategory] = useState('All');
 
   // Fetch products on component mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/products`);  // Use axios for better handling
-        console.log('API Response:', response);  // Log full response to inspect it
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/products`);
+        console.log('API Response:', response);
         
-        // Check if the data is an array or nested within an object
+        let productsData = [];
         if (Array.isArray(response.data)) {
-          setProducts(response.data);  // Set products to the fetched data
+          productsData = response.data;
         } else if (response.data && response.data.products) {
-          setProducts(response.data.products);  // If products are nested inside a 'products' key
+          productsData = response.data.products;
         } else {
           throw new Error('Data is not in expected array format');
         }
+
+        setProducts(productsData);
+        
+        // Group products by category
+        const grouped = productsData.reduce((acc, product) => {
+          const category = product.category || 'Uncategorized';
+          if (!acc[category]) {
+            acc[category] = [];
+          }
+          acc[category].push(product);
+          return acc;
+        }, {});
+
+        setGroupedProducts(grouped);
+        
       } catch (error) {
         setError('Failed to fetch products');
         console.error('Failed to fetch products:', error);
       } finally {
-        setLoading(false);  // Set loading to false once fetch is complete (whether successful or not)
+        setLoading(false);
       }
     };
 
@@ -46,31 +63,46 @@ const HeaderAndProducts = () => {
     setCartCount(savedCart.length);
   }, []);
 
-  // Filter products based on search input
-  const filteredProducts = filter 
-    ? Array.isArray(products) ? products.filter((product) =>
+  // Filter products based on search input and active category
+  const getFilteredProducts = () => {
+    let productsToFilter = [];
+    
+    if (activeCategory === 'All') {
+      productsToFilter = products;
+    } else {
+      productsToFilter = groupedProducts[activeCategory] || [];
+    }
+    
+    if (filter) {
+      return productsToFilter.filter(product =>
         product.name.toLowerCase().includes(filter.toLowerCase())
-      ) : [] // Ensure that products is an array before filtering
-    : products;
+      );
+    }
+    
+    return productsToFilter;
+  };
+
+  const filteredProducts = getFilteredProducts();
 
   const addToCart = (product) => {
     const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // Check if the product is already in the cart
     const productExists = savedCart.some(item => item._id === product._id);
     
     if (!productExists) {
       savedCart.push({ ...product, quantity: 1 });
       localStorage.setItem('cart', JSON.stringify(savedCart));
-      setCartCount(savedCart.length); // Update cart count in header
+      setCartCount(savedCart.length);
     } else {
-      alert('This product is already in your cart!'); // Optionally alert the user
+      alert('This product is already in your cart!');
     }
   };
 
+  // Get all available categories
+  const categories = ['All', ...Object.keys(groupedProducts)];
+
   return (
     <div>
-      {/* Header Section */}
+      {/* Header Section - kept exactly the same */}
       <header className="bg-gray-800 text-white p-4 shadow-md">
         <div className="container mx-auto flex flex-wrap items-center justify-between px-4 md:flex-nowrap">
           <div className="flex-shrink-0 md:ml-0 w-full md:w-auto flex justify-center md:justify-start">
@@ -85,15 +117,13 @@ const HeaderAndProducts = () => {
 
           {/* Search Bar */}
           <div className="flex items-center w-full max-w-sm border rounded-full focus-within:shadow-md mt-3 md:mt-0">
-
-          <input
-                type="text"
-                placeholder="Search product here..."
-                value={filter || ''}  // Ensure that 'filter' is always a string
-                onChange={(e) => setFilter(e.target.value)}
-                className="w-full h-10 outline-none rounded-l-full pl-3 text-black"
-          />
-
+            <input
+              type="text"
+              placeholder="Search product here..."
+              value={filter || ''}
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-full h-10 outline-none rounded-l-full pl-3 text-black"
+            />
             <div className="text-lg min-w-[50px] h-10 bg-red-600 flex items-center justify-center rounded-r-full text-white">
               <GrSearch />
             </div>
@@ -114,8 +144,7 @@ const HeaderAndProducts = () => {
               </div>
             </Link>
 
-              {/* Add this new Orders button */}
-              <Link href="/products/order-see" passHref className="text-2xl relative">
+            <Link href="/products/order-see" passHref className="text-2xl relative">
               <span><FiPackage /></span>
               <span className="sr-only">View Orders</span>
             </Link>
@@ -127,6 +156,27 @@ const HeaderAndProducts = () => {
         </div>
       </header>
 
+      {/* Category Filter - Added below the header */}
+      <div className="p-4 bg-gray-100 sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto overflow-x-auto">
+          <div className="flex space-x-2 pb-2">
+            {categories.map(category => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`px-4 py-2 rounded-full whitespace-nowrap ${
+                  activeCategory === category 
+                    ? 'bg-red-600 text-white' 
+                    : 'bg-white text-gray-800 hover:bg-gray-200'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Loading, Error, and Product Display */}
       <section className="relative p-4">
         {loading ? (
@@ -134,42 +184,51 @@ const HeaderAndProducts = () => {
         ) : error ? (
           <div className="text-center text-xl text-red-600">{error}</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {filteredProducts.length === 0 ? (
-              <div className="text-center text-xl text-gray-500">No products found</div>
-            ) : (
-              filteredProducts.map((product) => (
-                <div key={product._id} className="bg-gray-300 rounded-lg text-center p-4 hover:bg-white hover:shadow-md transition-all">
-                  <Image
-                    src={product?.s3Key || "/product.jpg"}
-                    alt={product.name}
-                    width={200}
-                    height={160}
-                    className="w-full h-40 object-contain rounded-md"
-                  />
-                  <h4 className="text-lg font-bold mt-2">{product.name}</h4>
-                  <p className="text-gray-500 text-sm mt-1">{product.description}</p>
-                  <p className="text-yellow-500 text-sm mt-1">{product.ratings} ★ ({product.reviews} reviews)</p>
-                  <p className="text-red-500 text-sm mt-1">{product.offer}</p>
-                  <div className="mt-3 flex justify-center space-x-2">
-                    <button 
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-900 transform hover:scale-105 transition-all"
-                      onClick={() => addToCart(product)} // Add to cart
-                    >
-                      Add to Cart ${product.price}
-                    </button>
-                    
+          <>
+            {/* Show category heading if not showing all products */}
+            {activeCategory !== 'All' && (
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">
+                {activeCategory} ({filteredProducts.length} products)
+              </h2>
+            )}
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {filteredProducts.length === 0 ? (
+                <div className="text-center text-xl text-gray-500 col-span-full">
+                  {filter ? 'No products match your search' : 'No products found in this category'}
+                </div>
+              ) : (
+                filteredProducts.map((product) => (
+                  <div key={product._id} className="bg-gray-300 rounded-lg text-center p-4 hover:bg-white hover:shadow-md transition-all">
+                    <Image
+                      src={product?.s3Key || "/product.jpg"}
+                      alt={product.name}
+                      width={200}
+                      height={160}
+                      className="w-full h-40 object-contain rounded-md"
+                    />
+                    <h4 className="text-lg font-bold mt-2">{product.name}</h4>
+                    <p className="text-gray-500 text-sm mt-1">{product.description}</p>
+                    <p className="text-yellow-500 text-sm mt-1">{product.ratings} ★ ({product.reviews} reviews)</p>
+                    <p className="text-red-500 text-sm mt-1">{product.offer}</p>
+                    <div className="mt-3 flex justify-center space-x-2">
+                      <button 
+                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-900 transform hover:scale-105 transition-all"
+                        onClick={() => addToCart(product)}
+                      >
+                        Add to Cart ${product.price}
+                      </button>
                       <Link href={`/products/${product._id}`} passHref>
                         <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-900 transform hover:scale-105 transition-all">
                           More Info
                         </button>
                       </Link>
-                    
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
+                ))
+              )}
+            </div>
+          </>
         )}
       </section>
     </div>
