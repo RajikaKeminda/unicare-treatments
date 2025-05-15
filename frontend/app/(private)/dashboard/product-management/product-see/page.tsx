@@ -106,87 +106,91 @@ const InstrumentTable: React.FC = () => {
       product.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const generatePDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("Available Products Report", 20, 20);
+ const generatePDF = () => {
+  const doc = new jsPDF();
 
-    // Move this to generatePDF to ensure it's client-side only
-    const currentDate = new Date().toLocaleDateString();
+  // Title
+  doc.setFontSize(18);
+  doc.text("Available Products Report", 105, 20, { align: "center" });
 
-    doc.setFontSize(12);
-    doc.text(`Date: ${currentDate}`, 20, 30);
+  // Date
+  const currentDate = new Date().toLocaleDateString();
+  doc.setFontSize(12);
+  doc.text(`Date: ${currentDate}`, 20, 30);
 
-    let yPosition = 40;
-    const rowHeight = 10;
-    const columnWidths = [40, 60, 30, 40];
+  let yPosition = 40;
+  const columnWidths = [40, 60, 30, 40];
+  const pageHeight = doc.internal.pageSize.height;
 
+  // Draw header row
+  const drawTableHeaders = () => {
     doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
+    doc.setFillColor(230, 230, 230);
 
+    // Header rectangles
+    doc.rect(20, yPosition, columnWidths[0], 10, 'F');
+    doc.rect(20 + columnWidths[0], yPosition, columnWidths[1], 10, 'F');
+    doc.rect(20 + columnWidths[0] + columnWidths[1], yPosition, columnWidths[2], 10, 'F');
+    doc.rect(20 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, columnWidths[3], 10, 'F');
+
+    // Header texts
+    doc.text("Name", 25, yPosition + 6);
+
+    const descX = 20 + columnWidths[0] + (columnWidths[1] - doc.getTextWidth("Description")) / 2;
+    doc.text("Description", descX, yPosition + 6);
+
+    const priceX = 20 + columnWidths[0] + columnWidths[1] + (columnWidths[2] - doc.getTextWidth("Price")) / 2;
+    doc.text("Price", priceX, yPosition + 6);
+
+    const categoryHeaderX =
+      20 + columnWidths[0] + columnWidths[1] + columnWidths[2] +
+      (columnWidths[3] - doc.getTextWidth("Category")) / 2;
+    doc.text("Category", categoryHeaderX, yPosition + 6);
+
+    yPosition += 10;
+  };
+
+  drawTableHeaders();
+
+  filteredProducts.forEach((product) => {
+    const descLines = doc.splitTextToSize(product.description, columnWidths[1] - 4);
+    const linesCount = descLines.length;
+    const rowHeight = linesCount * 5;
+
+    // Page break
+    if (yPosition + rowHeight > pageHeight - 20) {
+      doc.addPage();
+      yPosition = 20;
+      drawTableHeaders();
+    }
+
+    // Draw data rectangles
     doc.rect(20, yPosition, columnWidths[0], rowHeight);
     doc.rect(20 + columnWidths[0], yPosition, columnWidths[1], rowHeight);
-    doc.rect(
-      20 + columnWidths[0] + columnWidths[1],
-      yPosition,
-      columnWidths[2],
-      rowHeight
-    );
-    doc.rect(
-      20 + columnWidths[0] + columnWidths[1] + columnWidths[2],
-      yPosition,
-      columnWidths[3],
-      rowHeight
-    );
-    doc.text("Name", 25, yPosition + 6);
-    const descriptionX =
-      20 +
-      columnWidths[0] +
-      (columnWidths[1] - doc.getTextWidth("Description")) / 2;
-    doc.text("Description", descriptionX, yPosition + 6);
-    const priceX =
-      20 +
-      columnWidths[0] +
-      columnWidths[1] +
-      (columnWidths[2] - doc.getTextWidth("Price")) / 2;
-    doc.text("Price", priceX, yPosition + 6);
-    doc.text("Category", 160, yPosition + 6);
+    doc.rect(20 + columnWidths[0] + columnWidths[1], yPosition, columnWidths[2], rowHeight);
+    doc.rect(20 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, columnWidths[3], rowHeight);
+
+    // Data: Name
+    doc.text(product.name, 25, yPosition + 6);
+
+    // Data: Description
+    doc.text(descLines, 20 + columnWidths[0] + 2, yPosition + 5);
+
+    // Data: Price (centered)
+    const price = `${product.price.toFixed(2)}`;
+    const priceX = 20 + columnWidths[0] + columnWidths[1] + (columnWidths[2] - doc.getTextWidth(price)) / 2;
+    doc.text(price, priceX, yPosition + 6);
+
+    // Data: Category (centered)
+    const categoryX = 20 + columnWidths[0] + columnWidths[1] + columnWidths[2] +
+      (columnWidths[3] - doc.getTextWidth(product.category)) / 2;
+    doc.text(product.category, categoryX, yPosition + 6);
 
     yPosition += rowHeight;
+  });
 
-    filteredProducts.forEach((product) => {
-      doc.rect(20, yPosition, columnWidths[0], rowHeight);
-      doc.rect(20 + columnWidths[0], yPosition, columnWidths[1], rowHeight);
-      doc.rect(
-        20 + columnWidths[0] + columnWidths[1],
-        yPosition,
-        columnWidths[2],
-        rowHeight
-      );
-      doc.rect(
-        20 + columnWidths[0] + columnWidths[1] + columnWidths[2],
-        yPosition,
-        columnWidths[3],
-        rowHeight
-      );
-      doc.text(product.name, 25, yPosition + 6);
-      const descriptionXData =
-        20 +
-        columnWidths[0] +
-        (columnWidths[1] - doc.getTextWidth(product.description)) / 2;
-      doc.text(product.description, descriptionXData, yPosition + 6);
-      const priceXData =
-        20 +
-        columnWidths[0] +
-        columnWidths[1] +
-        (columnWidths[2] - doc.getTextWidth(`${product.price.toFixed(2)}`)) / 2;
-      doc.text(`${product.price.toFixed(2)}`, priceXData, yPosition + 6);
-      doc.text(product.category, 160, yPosition + 6);
-      yPosition += rowHeight;
-    });
-
-    doc.save("products-report.pdf");
-  };
+  doc.save("products-report.pdf");
+};
 
   if (loading) return <div className="text-center p-5 text-xl">Loading...</div>;
 
